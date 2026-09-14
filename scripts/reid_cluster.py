@@ -65,6 +65,15 @@ def can_merge(a, b):
     if ta and tb and ta[0][1] >= 2 and tb[0][1] >= 2 and ta[0][0] != tb[0][0]: return False
     return True
 
+def weak_conflict(a, b):
+    """Склейка по одной внешности запрещена, если хоть один полноценный голос
+    (вес ≥ 1, то есть не «10 по умолчанию») говорит за другой номер. Красный
+    с «7» на спине, прочитанный один раз как «1», по внешности приклеился к
+    №11; на клипе так было у 26 треков из 47 склеенных только по внешности."""
+    ta = [n for n, w in a["votes"].most_common(1) if w >= 1]
+    tb = [n for n, w in b["votes"].most_common(1) if w >= 1]
+    return bool(ta and tb and ta[0] != tb[0])
+
 merged = 0
 while True:
     best = None
@@ -75,7 +84,7 @@ while True:
             d = dist(a, b)
             na, nb = sure(a["votes"]), sure(b["votes"])
             same_num = na is not None and na == nb
-            if (same_num or d < THR) and (best is None or d < best[0]) and can_merge(a, b):
+            if (same_num or (d < THR and not weak_conflict(a, b))) and (best is None or d < best[0]) and can_merge(a, b):
                 best = (d, ids[i], ids[j])
     if best is None: break
     d, i, j = best; a, b = clusters[i], clusters.pop(j)
