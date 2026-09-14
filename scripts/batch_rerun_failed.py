@@ -30,6 +30,23 @@ for rerun in range(MAX_RERUNS + 1):
     M = json.load(open(MATCHES)); s = json.load(open(STATE))
     slugs = [v["slug"] for v in M["videos"] if "parts" not in v]
     left = [k for k in slugs if s["videos"].get(k, {}).get("status") != "done"]
+    # обрезанные: разобрано меньше 95 % длительности на YouTube (передача оборвалась,
+    # а проверка по заголовку mp4 это пропустила) — пересчитать, старые результаты отложить
+    dur = {v["slug"]: v["duration"] for v in M["videos"] if "parts" not in v}
+    for k in slugs:
+        pp = os.path.join(OUT, k, "pos.json")
+        if s["videos"].get(k, {}).get("status") != "done" or not os.path.isfile(pp): continue
+        try:
+            pos = json.load(open(pp)); m_, s_ = dur[k].split(":"); yt = int(m_) * 60 + int(s_)
+            got = len(pos["frames"]) / pos["fps"]
+        except Exception:
+            continue
+        if got < 0.95 * yt:
+            bad = os.path.join(OUT, k + "_truncated_%d" % int(time.time()))
+            os.rename(os.path.join(OUT, k), bad)
+            s["videos"][k]["status"] = "failed"
+            s["videos"][k].setdefault("log", []).append("разобрано %.0f с из %d с — видео было обрезано, результаты в %s" % (got, yt, os.path.basename(bad)))
+            left.append(k); log("обрезано: %s (%.0f из %d с), результаты отложены в %s" % (k, got, yt, os.path.basename(bad)))
     d = done_count()
     log("batch_run.py завершён; готово %d, не готово %d: %s" % (d, len(left), left))
     if not left: log("всё готово, сторож выходит"); break

@@ -9,9 +9,21 @@ mkdir -p out; rm -f "out/$NAME.DONE" "out/$NAME.FAILED"
 V="out/$NAME.mp4"
 log() { echo "[$(date +%H:%M:%S)] $*"; }
 
-# оборванный прошлым запуском файл (нет заголовка mp4) удаляем и качаем заново
-if [ -s "$V" ] && ! python -c "import cv2,sys;c=cv2.VideoCapture(sys.argv[1]);n=c.get(7);c.set(1,max(0,n-60));ok,_=c.read();sys.exit(0 if ok and n>1000 else 1)" "$V"; then
-  log "файл $V неполный, удаляю"; rm -f "$V"
+# Целостность mp4 проверяем по последнему видеопакету, а не по заголовку: у обрезанной
+# передачи «АТС Карго vs РУОР» (1,08 ГБ из ~1,5) заголовок обещал 45,3 мин, OpenCV
+# «читал конец», а данных было на 34 мин — разбор молча взял 75 % игры.
+video_ok() {
+  local f="$1" d last
+  [ -s "$f" ] || return 1
+  d=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$f" 2>/dev/null) || return 1
+  [ -n "$d" ] || return 1
+  last=$(ffprobe -v error -select_streams v:0 -read_intervals "$(python3 -c "print(max(0,float('$d')-60))")%" \
+         -show_entries packet=pts_time -of csv=p=0 "$f" 2>/dev/null | grep -E '^[0-9.]+$' | tail -1)
+  [ -n "$last" ] || return 1
+  python3 -c "import sys; sys.exit(0 if float('$last') >= float('$d') - 10 else 1)"
+}
+if [ -s "$V" ] && ! video_ok "$V"; then
+  log "файл $V неполный (последний пакет раньше конца по заголовку), удаляю"; rm -f "$V"
 fi
 if [ ! -s "$V" ] || [ -e "$V.part" ]; then
   log "скачивание $YT"
@@ -28,13 +40,9 @@ if [ ! -s "$V" ] || [ -e "$V.part" ]; then
   done
   [ $ok = 1 ] || { log "!!! видео не скачалось"; touch "out/$NAME.FAILED"; exit 1; }
 fi
-python - "$V" <<'PY' || { touch "out/$NAME.FAILED"; exit 1; }
-import cv2, sys
-c = cv2.VideoCapture(sys.argv[1]); n = c.get(7); f = c.get(5) or 1
-c.set(1, max(0, n - 60)); ok, _ = c.read()
-print("видео: %d кадров, %.1f к/с, %.1f мин, конец читается: %s" % (n, f, n / f / 60, ok))
-sys.exit(0 if ok and n > 1000 else 1)
-PY
+# текст содержит «видео не скачалось»: по нему batch_run.py просит соседнюю машину передать видео
+video_ok "$V" || { log "!!! видео не скачалось целиком (последний пакет раньше конца)"; rm -f "$V"; touch "out/$NAME.FAILED"; exit 1; }
+log "видео: $(ffprobe -v error -show_entries format=duration:stream=avg_frame_rate -select_streams v:0 -of csv=p=0 "$V" | tr '\n' ' ') (длительность, к/с), целое"
 
 # шаг по кадрам под частоту видео: цель — 15 кадров в секунду. Для части игр YouTube
 # отдаёт только 1080p30 (Tennisi vs Boo-Terek), и шаг 4 давал 7,5 к/с вместо 15.
