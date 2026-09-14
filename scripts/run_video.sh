@@ -36,6 +36,11 @@ print("видео: %d кадров, %.1f к/с, %.1f мин, конец чита
 sys.exit(0 if ok and n > 1000 else 1)
 PY
 
+# шаг по кадрам под частоту видео: цель — 15 кадров в секунду. Для части игр YouTube
+# отдаёт только 1080p30 (Tennisi vs Boo-Terek), и шаг 4 давал 7,5 к/с вместо 15.
+FPS=$(python -c "import cv2,sys;print(cv2.VideoCapture(sys.argv[1]).get(5))" "$V")
+STEP=$(python -c "import sys;f=float(sys.argv[1] or 0);print(max(1,round(f/15)) if f>0 else int(sys.argv[2]))" "$FPS" "$STEP")
+log "частота видео $FPS к/с, шаг $STEP"
 log "разбор"
 [ -s "out/$NAME.run.log" ] && mv "out/$NAME.run.log" "out/$NAME.run.log.prev.$(date +%H%M%S)"
 ./run_gpu_match.sh "$V" "$NAME" "$STEP" > "out/$NAME.run.log" 2>&1
