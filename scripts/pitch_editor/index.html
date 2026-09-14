@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<title>Разметка поля — ручная правка</title>
+<style>
+  :root{--bg:#16181d;--panel:#1f232b;--fg:#e8e8e8;--mut:#9aa0a8;--acc:#ffd54a;--line:#2e333d}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--fg);font:13px/1.45 -apple-system,system-ui,sans-serif;display:flex;height:100vh;overflow:hidden}
+  #main{flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:8px}
+  canvas#view{cursor:crosshair;max-width:100%;border-radius:4px}
+  aside{width:340px;background:var(--panel);border-left:1px solid var(--line);padding:12px;overflow-y:auto}
+  h1{font-size:15px;margin:0 0 8px} h2{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin:14px 0 6px}
+  button{background:#2b313b;color:var(--fg);border:1px solid #3a414d;border-radius:5px;padding:5px 9px;cursor:pointer;font:inherit}
+  button:hover{background:#353c48} button.pri{background:#2f6b3a;border-color:#3d8a4b} button.warn{background:#6b2f2f;border-color:#8a3d3d}
+  button.on{background:#4a3f12;border-color:var(--acc);color:var(--acc)}
+  .row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:4px 0}
+  input[type=range]{flex:1} input[type=number]{width:80px;background:#12151a;color:var(--fg);border:1px solid #3a414d;border-radius:4px;padding:3px}
+  .val{min-width:44px;text-align:right;color:var(--acc);font-variant-numeric:tabular-nums}
+  #status,#postStats{background:#12151a;border-radius:6px;padding:8px;font-variant-numeric:tabular-nums;white-space:pre-line}
+  .sugg button{padding:3px 6px;font-size:12px} .saved{color:#8fe39a}
+  canvas#loupe{width:100%;border:1px solid var(--line);border-radius:4px;background:#000}
+  .hint{color:var(--mut);font-size:12px;margin:6px 0} label{display:flex;gap:6px;align-items:center}
+</style></head>
+<body>
+<div id="main"><canvas id="view"></canvas></div>
+<aside>
+  <h1>Разметка поля — правка на глаз</h1>
+  <div id="status">загрузка…</div>
+
+  <h2>Режим</h2>
+  <div class="row"><button id="mMarks" class="on">Точки разметки</button><button id="mPosts">Столбы ограждения</button></div>
+  <p class="hint" id="modeHint"></p>
+
+  <h2>Кадр</h2>
+  <div class="row"><button id="prev">◀</button><input type="number" id="tIn" step="0.5" min="0"> с <button id="go">Открыть</button><button id="next">▶</button></div>
+  <div class="row"><input type="range" id="tSlider" min="0" max="300" step="0.5"></div>
+  <div class="row sugg" id="sugg"></div>
+  <div class="row" id="savedList"></div>
+
+  <h2>Лупа</h2>
+  <canvas id="loupe" width="300" height="220"></canvas>
+
+  <h2>Разметка этого кадра</h2>
+  <div class="row"><button class="pri" id="save">Сохранить кадр</button><button id="reset">Сбросить к авто</button><button class="warn" id="del">Удалить сохранённое</button></div>
+
+  <h2>Показывать</h2>
+  <div class="row"><label><input type="checkbox" id="shLines" checked>линии</label><label><input type="checkbox" id="shGoals" checked>ворота</label><label><input type="checkbox" id="shFence" checked>столбы</label><label><input type="checkbox" id="shHandles" checked>точки</label></div>
+
+  <h2>Ворота</h2>
+  <div class="row">за линией <input type="range" id="goalOffset" min="0" max="2" step="0.05"><span class="val" id="goalOffsetV"></span> м</div>
+  <div class="row">глубина рамы <input type="range" id="goalDepth" min="0.3" max="2" step="0.05"><span class="val" id="goalDepthV"></span> м</div>
+
+  <h2>Столбы</h2>
+  <div class="row">высота <input type="range" id="fenceHeight" min="1" max="10" step="0.1"><span class="val" id="fenceHeightV"></span> м</div>
+  <div id="postStats">столбов не отмечено</div>
+  <div class="row"><button class="warn" id="clearPosts">Убрать все столбы</button></div>
+  <p class="hint">Столбы общие для всех кадров и сохраняются сами. Отмечайте основание — точку, где столб уходит в землю; место на поле в метрах считается по разметке текущего кадра, поэтому сначала выправьте разметку.</p>
+</aside>
+
+<script>
+// ---------- линейная алгебра ----------
+const inv3 = m => { const [a,b,c,d,e,f,g,h,i]=m, A=e*i-f*h, B=-(d*i-f*g), C=d*h-e*g, D=-(b*i-c*h), E=a*i-c*g, F=-(a*h-b*g), G=b*f-c*e, Hh=-(a*f-c*d), I=a*e-b*d, det=a*A+b*B+c*C;
+  return [A/det,D/det,G/det,B/det,E/det,Hh/det,C/det,F/det,I/det]; };
+const norm9 = m => m.map(x => x / m[8]);
+function applyH(H,x,y){ const w=H[6]*x+H[7]*y+H[8]; return [(H[0]*x+H[1]*y+H[2])/w,(H[3]*x+H[4]*y+H[5])/w,w]; }
+function solve(A,b){ const n=b.length; A=A.map((r,i)=>[...r,b[i]]);
+  for(let c=0;c<n;c++){ let p=c; for(let r=c+1;r<n;r++) if(Math.abs(A[r][c])>Math.abs(A[p][c])) p=r; [A[c],A[p]]=[A[p],A[c]];
+    if(Math.abs(A[c][c])<1e-12) return null; for(let r=0;r<n;r++){ if(r===c) continue; const k=A[r][c]/A[c][c]; for(let j=c;j<=n;j++) A[r][j]-=k*A[c][j]; } }
+  return A.map((r,i)=>r[n]/r[i]); }
+function normT(pts){ const n=pts.length, mx=pts.reduce((s,p)=>s+p[0],0)/n, my=pts.reduce((s,p)=>s+p[1],0)/n;
+  const d=pts.reduce((s,p)=>s+Math.hypot(p[0]-mx,p[1]-my),0)/n||1, s=Math.SQRT2/d; return [s,0,-s*mx,0,s,-s*my,0,0,1]; }
+function mul3(a,b){ const r=new Array(9).fill(0); for(let i=0;i<3;i++)for(let j=0;j<3;j++)for(let k=0;k<3;k++) r[i*3+j]+=a[i*3+k]*b[k*3+j]; return r; }
+function fitH(src,dst,wts){ if(src.length<4) return null;
+  const Ts=normT(src), Td=normT(dst), S=src.map(p=>applyH(Ts,p[0],p[1])), D=dst.map(p=>applyH(Td,p[0],p[1]));
+  const M=Array.from({length:8},()=>new Array(8).fill(0)), v=new Array(8).fill(0);
+  for(let k=0;k<S.length;k++){ const [x,y]=S[k],[u,w]=D[k], wt=wts?wts[k]:1, rows=[[x,y,1,0,0,0,-u*x,-u*y],[0,0,0,x,y,1,-w*x,-w*y]], rhs=[u,w];
+    for(let r=0;r<2;r++) for(let i=0;i<8;i++){ v[i]+=wt*rows[r][i]*rhs[r]; for(let j=0;j<8;j++) M[i][j]+=wt*rows[r][i]*rows[r][j]; } }
+  const h=solve(M,v); return h?norm9(mul3(mul3(inv3(Td),[...h,1]),Ts)):null; }
+
+// ---------- состояние ----------
+const $=id=>document.getElementById(id);
+const view=$('view'), loupe=$('loupe'), lctx=loupe.getContext('2d');
+let ctx=view.getContext('2d'), scale=1;
+let meta, frame, img=new Image(), IW=1920, IH=1080;
+let Hp2i, Hload, Hauto, handles=[], sel=-1, drag=null, mouse=null, mode='marks', selPost=-1;
+const P={goalOffset:0, goalDepth:1.0, fenceHeight:4, posts:[]};
+const SLIDERS=['goalOffset','goalDepth','fenceHeight'];
+
+// ---------- камера из преобразования (для ворот и столбов) ----------
+function camera(Hpi){
+  const cx=IW/2, cy=IH/2, h=Hpi, col=j=>[h[j]-cx*h[6+j], h[3+j]-cy*h[6+j], h[6+j]];
+  const [u1,v1,w1]=col(0),[u2,v2,w2]=col(1),[u3,v3,w3]=col(2), c=[];
+  for(const f2 of [-(u1*u2+v1*v2)/(w1*w2), (u1*u1+v1*v1-u2*u2-v2*v2)/(w2*w2-w1*w1)]) if(isFinite(f2)&&f2>0){ const f=Math.sqrt(f2); if(f>0.3*IW&&f<6*IW) c.push(f); }
+  const f=c.length?c.reduce((a,b)=>a+b)/c.length:IW, nr=v=>Math.hypot(...v);
+  const a1=[u1/f,v1/f,w1], a2=[u2/f,v2/f,w2], a3=[u3/f,v3/f,w3], lam=2/(nr(a1)+nr(a2));
+  let r1=a1.map(x=>x*lam), r2=a2.map(x=>x*lam), t=a3.map(x=>x*lam);
+  if(t[2]<0){ r1=r1.map(x=>-x); r2=r2.map(x=>-x); t=t.map(x=>-x); }
+  let r3=[r1[1]*r2[2]-r1[2]*r2[1], r1[2]*r2[0]-r1[0]*r2[2], r1[0]*r2[1]-r1[1]*r2[0]];
+  const proj=(X,Y,Z,R)=>{ const p=[0,1,2].map(i=>X*r1[i]+Y*r2[i]+Z*R[i]+t[i]); return p[2]<=1e-6?null:[f*p[0]/p[2]+cx, f*p[1]/p[2]+cy]; };
+  const W=meta.plan.width, L=meta.plan.length, a=proj(W/2,L/2,0,r3), b=proj(W/2,L/2,1,r3);
+  if(a&&b&&b[1]>a[1]) r3=r3.map(x=>-x);
+  return {f, proj:(X,Y,Z)=>proj(X,Y,Z,r3)}; }
+
+// ---------- точки разметки ----------
+function geom(){ const pp=meta.pitch, W=meta.plan.width, L=meta.plan.length, BW=pp.penalty_area.width, BD=pp.penalty_area.depth, HALF=pp.half_length;
+  return {W,L,BD,HALF,x0:W/2-BW/2,x1:W/2+BW/2,GW:pp.goal.width,GH:pp.goal.height}; }
+function planHandles(){ const {W,L,BD,HALF,x0,x1}=geom();
+  return [["угол",0,0],["угол",W,0],["угол",W,L],["угол",0,L],["средняя",0,HALF],["средняя",W,HALF],["центр",W/2,HALF],
+    ["штрафная",x0,0],["штрафная",x0,BD],["штрафная",x1,BD],["штрафная",x1,0],["штрафная",x0,L],["штрафная",x0,L-BD],["штрафная",x1,L-BD],["штрафная",x1,L]]; }
+const key=(x,y)=>x.toFixed(3)+','+y.toFixed(3);
+function visibleImg(u,v,w,ref){ return w*ref>0 && u>-40 && u<IW+40 && v>-40 && v<IH+40; }
+function rebuildHandles(){ const {W,L}=geom(), ref=applyH(Hp2i,W/2,L/2)[2];
+  handles=planHandles().map(([name,x,y])=>{ const [u,v,w]=applyH(Hp2i,x,y); return {name,plan:[x,y],img:[u,v],pinned:false,visible:visibleImg(u,v,w,ref)}; }); }
+function followH(){ const {W,L}=geom(), ref=applyH(Hp2i,W/2,L/2)[2];
+  handles.forEach(h=>{ if(h.pinned) return; const [u,v,w]=applyH(Hp2i,h.plan[0],h.plan[1]); h.img=[u,v]; h.visible=visibleImg(u,v,w,ref); }); }
+// Каждая точка двигается сама по себе. При первом касании кадра все видимые
+// точки закрепляются там, где стоят, — поэтому соседние больше не уезжают
+// вслед за перетаскиваемой. Общее преобразование подгоняется по всем
+// закреплённым точкам и нужно только для ворот, столбов и дальних точек.
+function freezeVisible(){ if(handles.some(h=>h.pinned)) return; handles.forEach(h=>{ if(h.visible) h.pinned=true; }); }
+// Подгонка по одним закреплённым точкам неустойчива: если они все у ближних
+// ворот, сдвиг одной на десяток пикселей разворачивает дальнюю половину поля и
+// ворота разлетаются. Поэтому к вашим точкам добавляется сетка по всему полю,
+// спроецированная исходной разметкой, с маленьким весом: где вы точек не
+// ставили, разметка остаётся как была, а где поставили — идёт по вашим.
+function refit(){ const pin=handles.filter(h=>h.pinned); if(!pin.length){ Hp2i=Hload.slice(); followH(); return; }
+  const {W,L}=geom(), ref=applyH(Hload,W/2,L/2)[2], src=[], dst=[], wts=[];
+  pin.forEach(h=>{ src.push(h.plan); dst.push(h.img); wts.push(1); });
+  for(let i=0;i<=4;i++) for(let j=0;j<=8;j++){ const x=W*i/4, y=L*j/8, [u,v,w]=applyH(Hload,x,y);
+    if(w*ref>0 && Math.abs(u)<3*IW && Math.abs(v)<3*IH){ src.push([x,y]); dst.push([u,v]); wts.push(pin.length>=4?0.01:0.05); } }
+  const H=fitH(src,dst,wts); if(H) Hp2i=H; followH(); }
+function hImg(x,y){ const h=handles.find(q=>key(q.plan[0],q.plan[1])===key(x,y)); return h?h.img:applyH(Hp2i,x,y).slice(0,2); }
+
+// ---------- рисование ----------
+function strokePlanH(pts,color,width){ const {W,L}=geom(), ref=applyH(Hp2i,W/2,L/2)[2];
+  ctx.strokeStyle=color; ctx.lineWidth=width/scale; ctx.beginPath(); let pen=false;
+  for(let k=0;k<pts.length-1;k++) for(let s=0;s<=24;s++){ const x=pts[k][0]+(pts[k+1][0]-pts[k][0])*s/24, y=pts[k][1]+(pts[k+1][1]-pts[k][1])*s/24, [u,v,w]=applyH(Hp2i,x,y);
+    if(w*ref>0&&Math.abs(u)<4*IW&&Math.abs(v)<4*IH){ pen?ctx.lineTo(u,v):ctx.moveTo(u,v); pen=true; } else pen=false; }
+  ctx.stroke(); }
+// линии разметки идут прямо через точки: где вы поставили точку, там и линия
+// Отрезок между двумя закреплёнными точками рисуется прямо через них. Если хоть
+// один конец не закреплён, отрезок идёт через общую разметку с отсечением:
+// дальний угол поля может оказаться позади камеры, и без отсечения линия
+// выворачивается на другую сторону кадра и торчит вверх.
+function strokeByHandles(pts,color,width){
+  const pinnedAt=(x,y)=>handles.find(q=>q.pinned&&key(q.plan[0],q.plan[1])===key(x,y));
+  for(let k=0;k<pts.length-1;k++){ const a=pts[k], b=pts[k+1], ha=pinnedAt(...a), hb=pinnedAt(...b);
+    if(ha&&hb){ ctx.strokeStyle=color; ctx.lineWidth=width/scale; ctx.beginPath(); ctx.moveTo(...ha.img); ctx.lineTo(...hb.img); ctx.stroke(); }
+    else strokePlanH([a,b],color,width); } }
+function seg3(cam,a,b,color,width){ const pa=cam.proj(...a), pb=cam.proj(...b); if(!pa||!pb) return;
+  ctx.strokeStyle=color; ctx.lineWidth=width/scale; ctx.beginPath(); ctx.moveTo(...pa); ctx.lineTo(...pb); ctx.stroke(); }
+
+function drawScene(c,sc,ox,oy){
+  ctx=c; scale=sc; ctx.setTransform(sc,0,0,sc,-ox*sc,-oy*sc); ctx.drawImage(img,0,0);
+  const {W,L,BD,HALF,x0,x1,GW,GH}=geom(), cam=camera(Hp2i);
+  if($('shLines').checked){
+    strokeByHandles([[0,0],[W,0]],'#ffd54a',2.5); strokeByHandles([[W,0],[W,HALF],[W,L]],'#ffd54a',2.5);
+    strokeByHandles([[W,L],[0,L]],'#ffd54a',2.5); strokeByHandles([[0,L],[0,HALF],[0,0]],'#ffd54a',2.5);
+    strokeByHandles([[0,HALF],[W,HALF]],'#ffd54a',2.5);
+    strokeByHandles([[x0,0],[x0,BD],[x1,BD],[x1,0]],'#ff4fd8',2.5); strokeByHandles([[x0,L],[x0,L-BD],[x1,L-BD],[x1,L]],'#ff4fd8',2.5);
+    const circ=[]; for(let k=0;k<=48;k++){ const a=k/48*2*Math.PI; circ.push([W/2+3*Math.cos(a),HALF+3*Math.sin(a)]); } strokePlanH(circ,'#ffd54a',2); }
+  if($('shGoals').checked){ const gx0=W/2-GW/2, gx1=W/2+GW/2;
+    for(const [yl,sg] of [[0,-1],[L,1]]){ const y=yl+sg*P.goalOffset, yb=y+sg*P.goalDepth, c='#46d9ff';
+      seg3(cam,[gx0,y,0],[gx0,y,GH],c,3); seg3(cam,[gx1,y,0],[gx1,y,GH],c,3); seg3(cam,[gx0,y,GH],[gx1,y,GH],c,3);
+      seg3(cam,[gx0,y,0],[gx0,yb,0],c,1.5); seg3(cam,[gx1,y,0],[gx1,yb,0],c,1.5); seg3(cam,[gx0,yb,0],[gx1,yb,0],c,1.5);
+      seg3(cam,[gx0,y,GH],[gx0,yb,0],c,1.5); seg3(cam,[gx1,y,GH],[gx1,yb,0],c,1.5); } }
+  if($('shFence').checked) P.posts.forEach((p,k)=>{ const c=k===selPost?'#ffffff':'#ff9a3c';
+    seg3(cam,[p[0],p[1],0],[p[0],p[1],P.fenceHeight],c,k===selPost?4:2.5);
+    const b=cam.proj(p[0],p[1],0); if(b){ ctx.lineWidth=2/scale; ctx.strokeStyle=c; ctx.beginPath(); ctx.arc(b[0],b[1],6/scale,0,2*Math.PI); ctx.stroke(); } });
+  if($('shHandles').checked && mode==='marks') handles.forEach((h,k)=>{ if(!h.visible) return;
+    ctx.lineWidth=2/scale; ctx.beginPath(); ctx.arc(h.img[0],h.img[1],(k===sel?11:8)/scale,0,2*Math.PI);
+    if(h.pinned){ ctx.fillStyle='rgba(255,79,216,.45)'; ctx.fill(); ctx.strokeStyle='#ff4fd8'; } else ctx.strokeStyle=k===sel?'#fff':'#ffd54a';
+    ctx.stroke(); ctx.beginPath(); ctx.moveTo(h.img[0]-4/scale,h.img[1]); ctx.lineTo(h.img[0]+4/scale,h.img[1]); ctx.moveTo(h.img[0],h.img[1]-4/scale); ctx.lineTo(h.img[0],h.img[1]+4/scale); ctx.stroke(); });
+  return cam; }
+
+function render(){ if(!frame||!img.complete) return;
+  const vs=Math.min(($('main').clientWidth-16)/IW, ($('main').clientHeight-16)/IH);
+  view.width=Math.round(IW*vs); view.height=Math.round(IH*vs);
+  const cam=drawScene(view.getContext('2d'),vs,0,0); drawLoupe(); status(cam); postStats(); }
+function drawLoupe(){ lctx.setTransform(1,0,0,1,0,0); lctx.fillStyle='#000'; lctx.fillRect(0,0,loupe.width,loupe.height); if(!mouse||!img.complete) return;
+  const Z=3, keep=[ctx,scale]; drawScene(lctx,Z,mouse[0]-loupe.width/Z/2,mouse[1]-loupe.height/Z/2); [ctx,scale]=keep;
+  lctx.setTransform(1,0,0,1,0,0); lctx.strokeStyle='rgba(255,255,255,.85)'; lctx.lineWidth=1; lctx.beginPath();
+  lctx.moveTo(loupe.width/2,0); lctx.lineTo(loupe.width/2,loupe.height); lctx.moveTo(0,loupe.height/2); lctx.lineTo(loupe.width,loupe.height/2); lctx.stroke(); }
+function status(cam){ const pin=handles.filter(h=>h.pinned), s=sel>=0?handles[sel]:null, saved=meta.saved.includes(frame.i);
+  let rms=''; if(pin.length>=4){ const e=pin.map(h=>{ const q=applyH(Hp2i,h.plan[0],h.plan[1]); return Math.hypot(q[0]-h.img[0],q[1]-h.img[1]); }); rms=`\nрасхождение точек с общей подгонкой: ${Math.sqrt(e.reduce((a,b)=>a+b*b,0)/e.length).toFixed(1)} px`; }
+  $('status').textContent=`кадр ${frame.i}, ${frame.t.toFixed(1)} с  (${saved?'сохранён вручную':'авто: '+frame.src})\nзакреплено точек: ${pin.length}`+rms+(s?`\nвыбрана: ${s.name} (${s.plan[0].toFixed(2)}; ${s.plan[1].toFixed(2)}) м`:'')+(selPost>=0?`\nстолб №${selPost+1}: (${P.posts[selPost][0].toFixed(2)}; ${P.posts[selPost][1].toFixed(2)}) м`:''); }
+
+// шаги между столбами по сторонам: по ним видно, 3,8 м или другое
+function postStats(){ const {W,L}=geom(); if(!P.posts.length){ $('postStats').textContent='столбов не отмечено'; return; }
+  const sides=[['боковая x≈0',[]],['боковая x≈'+W,[]],['лицевая y≈0',[]],['лицевая y≈'+L,[]]];
+  P.posts.forEach(([x,y])=>{ const d=[Math.abs(x),Math.abs(x-W),Math.abs(y),Math.abs(y-L)], k=d.indexOf(Math.min(...d));
+    sides[k][1].push(k<2?y:x); });
+  const lines=[]; for(const [name,arr] of sides){ if(!arr.length) continue; arr.sort((a,b)=>a-b);
+    const gaps=arr.slice(1).map((v,i)=>v-arr[i]); lines.push(`${name}: ${arr.length} шт.`+(gaps.length?`, шаги ${gaps.map(g=>g.toFixed(2)).join(', ')} м`:'')); }
+  $('postStats').textContent=lines.join('\n'); }
+
+// ---------- загрузка ----------
+async function loadFrame(t){ frame=await (await fetch('/api/frame?t='+t)).json();
+  Hload=norm9(inv3(frame.H_img2plan)); Hp2i=Hload.slice(); Hauto=norm9(inv3(frame.auto_H));
+  $('tIn').value=frame.t.toFixed(1); $('tSlider').value=frame.t; rebuildHandles();
+  (frame.points||[]).forEach(p=>{ const h=handles.find(q=>key(q.plan[0],q.plan[1])===key(p.plan[0],p.plan[1])); if(h){ h.img=p.img; h.pinned=true; h.visible=true; } });
+  sel=-1; img=new Image(); img.onload=render; img.src='/api/image?i='+frame.i; savedList(); }
+function savedList(){ const el=$('savedList'); el.innerHTML=meta.saved.length?'<span class="saved">сохранены:</span>':'';
+  meta.saved.forEach(i=>{ const b=document.createElement('button'); b.textContent=(i/meta.fps).toFixed(1); b.onclick=()=>loadFrame(i/meta.fps); el.appendChild(b); }); }
+
+// ---------- мышь и клавиатура ----------
+const toImg=e=>{ const r=view.getBoundingClientRect(); return [(e.clientX-r.left)*IW/r.width,(e.clientY-r.top)*IH/r.height]; };
+const pxTol=()=>14*IW/view.getBoundingClientRect().width;
+function nearestHandle(p){ let b=-1,bd=pxTol(); handles.forEach((h,k)=>{ if(!h.visible) return; const d=Math.hypot(h.img[0]-p[0],h.img[1]-p[1]); if(d<bd){bd=d;b=k;} }); return b; }
+function nearestPost(p){ const cam=camera(Hp2i); let b=-1,bd=pxTol(); P.posts.forEach((q,k)=>{ const s=cam.proj(q[0],q[1],0); if(!s) return; const d=Math.hypot(s[0]-p[0],s[1]-p[1]); if(d<bd){bd=d;b=k;} }); return b; }
+const toPlan=p=>{ const q=applyH(inv3(Hp2i),p[0],p[1]); return [+q[0].toFixed(3),+q[1].toFixed(3)]; };
+view.addEventListener('mousedown',e=>{ const p=toImg(e);
+  if(mode==='marks'){ const k=nearestHandle(p); if(e.button===2){ if(k>=0){ handles[k].pinned=false; refit(); sel=k; render(); } return; }
+    if(k>=0){ freezeVisible(); drag={type:'h',k}; sel=k; } return; }
+  const k=nearestPost(p);
+  if(e.button===2){ if(k>=0){ P.posts.splice(k,1); selPost=-1; saveSettings(); render(); } return; }
+  if(k>=0){ drag={type:'p',k}; selPost=k; } else { P.posts.push(toPlan(p)); selPost=P.posts.length-1; drag={type:'p',k:selPost}; saveSettings(); }
+  render(); });
+view.addEventListener('mousemove',e=>{ mouse=toImg(e);
+  if(drag&&drag.type==='h'){ const h=handles[drag.k]; h.img=mouse; h.pinned=true; refit(); }
+  if(drag&&drag.type==='p'){ P.posts[drag.k]=toPlan(mouse); }
+  render(); });
+window.addEventListener('mouseup',()=>{ if(drag&&drag.type==='p') saveSettings(); drag=null; });
+view.addEventListener('mouseleave',()=>{ mouse=null; render(); });
+view.addEventListener('contextmenu',e=>e.preventDefault());
+window.addEventListener('keydown',e=>{ if(document.activeElement.tagName==='INPUT') return;
+  const s=e.shiftKey?5:1, d={ArrowLeft:[-s,0],ArrowRight:[s,0],ArrowUp:[0,-s],ArrowDown:[0,s]}[e.key]; if(!d) return;
+  if(mode==='marks'&&sel>=0){ e.preventDefault(); freezeVisible(); const h=handles[sel]; h.img=[h.img[0]+d[0],h.img[1]+d[1]]; h.pinned=true; mouse=h.img; refit(); render(); }
+  if(mode==='posts'&&selPost>=0){ e.preventDefault(); const b=camera(Hp2i).proj(P.posts[selPost][0],P.posts[selPost][1],0); if(!b) return;
+    const nb=[b[0]+d[0],b[1]+d[1]]; P.posts[selPost]=toPlan(nb); mouse=nb; saveSettings(); render(); } });
+window.addEventListener('resize',render);
+
+// ---------- управление ----------
+function setMode(m){ mode=m; $('mMarks').classList.toggle('on',m==='marks'); $('mPosts').classList.toggle('on',m==='posts');
+  $('modeHint').textContent = m==='marks'
+    ? 'Тащите жёлтые точки на настоящие пересечения линий. Каждая двигается отдельно, линии идут через ваши точки. Правый клик — открепить точку. Стрелки — сдвиг выбранной на 1 px, с Shift на 5 px.'
+    : 'Клик по основанию настоящего столба — добавить столб. Тащите кружок у основания, чтобы поправить. Правый клик — удалить. Стрелки двигают выбранный столб.';
+  sel=-1; selPost=-1; render(); }
+$('mMarks').onclick=()=>setMode('marks'); $('mPosts').onclick=()=>setMode('posts');
+$('go').onclick=()=>loadFrame(parseFloat($('tIn').value)||0);
+$('tSlider').onchange=()=>loadFrame(parseFloat($('tSlider').value));
+$('prev').onclick=()=>{ const s=meta.suggest.filter(x=>x<frame.t-0.1); loadFrame(s.length?s[s.length-1]:Math.max(0,frame.t-5)); };
+$('next').onclick=()=>{ const s=meta.suggest.filter(x=>x>frame.t+0.1); loadFrame(s.length?s[0]:frame.t+5); };
+$('reset').onclick=()=>{ Hload=Hauto.slice(); Hp2i=Hauto.slice(); rebuildHandles(); render(); };
+$('save').onclick=async()=>{ const pts=handles.filter(h=>h.pinned).map(h=>({plan:h.plan,img:h.img}));
+  await fetch('/api/save',{method:'POST',body:JSON.stringify({i:frame.i,H_img2plan:norm9(inv3(Hp2i)),points:pts})});
+  if(!meta.saved.includes(frame.i)){ meta.saved.push(frame.i); meta.saved.sort((a,b)=>a-b); } savedList(); render(); };
+$('del').onclick=async()=>{ await fetch('/api/delete',{method:'POST',body:JSON.stringify({i:frame.i})}); meta.saved=meta.saved.filter(i=>i!==frame.i); loadFrame(frame.t); };
+$('clearPosts').onclick=()=>{ if(confirm('Убрать все отмеченные столбы?')){ P.posts=[]; selPost=-1; saveSettings(); render(); } };
+['shLines','shGoals','shFence','shHandles'].forEach(id=>$(id).onchange=render);
+let st; const saveSettings=()=>{ clearTimeout(st); st=setTimeout(()=>fetch('/api/settings',{method:'POST',body:JSON.stringify(P)}),300); };
+SLIDERS.forEach(k=>{ const el=$(k), v=$(k+'V'); el.oninput=()=>{ P[k]=parseFloat(el.value); v.textContent=P[k].toFixed(2); render(); saveSettings(); }; });
+
+(async()=>{ meta=await (await fetch('/api/meta')).json();
+  const s=meta.settings||{}; SLIDERS.forEach(k=>{ if(s[k]!==undefined) P[k]=s[k]; }); P.posts=Array.isArray(s.posts)?s.posts:[];
+  SLIDERS.forEach(k=>{ $(k).value=P[k]; $(k+'V').textContent=(+P[k]).toFixed(2); });
+  $('tSlider').max=meta.duration; const sg=$('sugg'); meta.suggest.forEach(t=>{ const b=document.createElement('button'); b.textContent=t; b.onclick=()=>loadFrame(t); sg.appendChild(b); });
+  setMode('marks'); loadFrame(meta.suggest[0]); })();
+</script>
+</body></html>

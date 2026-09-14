@@ -1,0 +1,31 @@
+# секреты: ключ RunPod, строки подключения к арендованным машинам
+.env
+secrets/
+
+# тяжёлое и производное: видео, веса, вырезки, результаты прогонов
+videos/
+weights/
+crops/
+frames/
+results/
+stats/
+data/
+runs/
+out/
+*.tar.gz
+*.mp4
+*.pt
+*.pth
+*.pth.tar
+viewer_*.html
+
+# снимки для исследований, не нужны для работы
+docs/frame_plain.jpg
+docs/sat.jpg
+docs/sat_grid.jpg
+
+# локальное окружение
+.claude/
+.idea/
+.DS_Store
+__pycache__/

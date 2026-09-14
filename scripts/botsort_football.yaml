@@ -1,0 +1,15 @@
+# BoT-SORT tuned for a panning hand-held camera on a small pitch.
+tracker_type: botsort
+track_high_thresh: 0.5   # strict: fewer spurious tracks on spectators
+track_low_thresh: 0.1
+new_track_thresh: 0.6    # measured: 48 tracks vs 58, median life 2.7 s vs 2.2 s
+track_buffer: 60          # players vanish behind each other for a second or two
+match_thresh: 0.8
+fuse_score: True
+# The camera pans, so every player jumps in image space between frames.
+# Global motion compensation removes that jump before association.
+gmc_method: sparseOptFlow
+proximity_thresh: 0.5
+appearance_thresh: 0.8
+with_reid: False        # measured: no gain here, costs 30 % more time
+model: auto
