@@ -32,7 +32,9 @@ for i, f in enumerate(frames):
 
 picks = {}
 for tid, lst in seen.items():
-    if tid in skip or team_of.get(tid, -1) not in (0, 1): continue
+    # Команда по форме появляется только после чтения номеров, поэтому на новом
+    # матче треки ещё без команды: берём все, кроме коротких (< 1,5 с) и зрителей.
+    if tid in skip or len(lst) < 1.5 * fps: continue
     byi = {i: (x, y) for i, x, y in lst}
     cand = []
     for i, x, y in lst:
