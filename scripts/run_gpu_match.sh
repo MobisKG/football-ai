@@ -24,6 +24,10 @@ export YOLO_CONFIG_DIR=/root/.yolo; mkdir -p $YOLO_CONFIG_DIR
 # ходит на сервер при каждом разборе; ночью 14–15.09 поиск игроков трижды падал
 # ровно на загрузке SigLIP в конце прохода и проходил при повторе.
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
+# На машинах RunPod по 96 ядер, а OpenBLAS собран на 64 потока: печатает «precompiled
+# NUM_THREADS exceeded, adding auxiliary array» и изредка роняет процесс без traceback
+# на UMAP/KMeans в конце analyze_match.py (пойман лог Уч тонтос vs Мин Куш, 15.09).
+export OPENBLAS_NUM_THREADS=16 OMP_NUM_THREADS=16 MKL_NUM_THREADS=16 NUMBA_NUM_THREADS=16
 t0=$(date +%s)
 step() { echo ">>> $1  ($(( ($(date +%s) - t0) / 60 )) мин с начала)"; }
 
