@@ -11,7 +11,7 @@ from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 import numpy as np, cv2
 
-ROOT = "/Users/doni/Documents/football"
+ROOT = "/Users/doni/Documents/sport/football"
 VIDEO = os.path.expanduser("~/Downloads/football/clip5_qE8fVwIRQxA.mp4")
 TRACK = ROOT + "/results/pitch_calib/track_clip5.json"
 MAN = ROOT + "/results/pitch_calib/manual"

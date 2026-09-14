@@ -15,7 +15,7 @@ import numpy as np, cv2
 
 video, track_path, sec, out_dir, rough_path = sys.argv[1], sys.argv[2], float(sys.argv[3]), sys.argv[4], sys.argv[5]
 os.makedirs(out_dir, exist_ok=True)
-T = json.load(open(track_path)); PP = json.load(open("/Users/doni/Documents/football/docs/pitch.json"))
+T = json.load(open(track_path)); PP = json.load(open("/Users/doni/Documents/sport/football/docs/pitch.json"))
 W_P, L_P = T["plan"]["width"], T["plan"]["length"]
 BW, BD = PP["penalty_area"]["width"], PP["penalty_area"]["depth"]
 ROUGH_ALL = json.load(open(rough_path))

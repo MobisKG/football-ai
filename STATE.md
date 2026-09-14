@@ -6,7 +6,7 @@
 
 Ничего. Арендованных машин нет. Проверить:
 
-    cd ~/Documents/football && export RUNPOD_KEY=$(grep '^KEY=' .env | cut -d= -f2-)
+    cd ~/Documents/sport/football && export RUNPOD_KEY=$(grep '^KEY=' .env | cut -d= -f2-)
     curl -s -H "Authorization: Bearer $RUNPOD_KEY" https://rest.runpod.io/v1/pods
 
 За 11–12 сентября потрачено около 1,7 доллара.

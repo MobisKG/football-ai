@@ -6,7 +6,7 @@
 # Ручная правка сильнее автоматики: сверка с опорами идёт к ближайшей по
 # содержанию кадра, и чем больше ваших кадров, тем меньше ошибка между ними.
 set -euo pipefail
-cd /Users/doni/Documents/football
+cd /Users/doni/Documents/sport/football
 PY=/private/tmp/claude-501/-Users-doni-Documents-football/7f0d34e7-ac71-4fb5-9950-2123175b3367/scratchpad/venv/bin/python
 VIDEO=~/Downloads/football/clip5_qE8fVwIRQxA.mp4
 ANCH=(--anchor results/pitch_calib/calib_285.0.json)

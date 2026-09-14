@@ -15,7 +15,7 @@ import json, sys, itertools
 import numpy as np, cv2
 
 frame_path, out = sys.argv[1], sys.argv[2]
-P = json.load(open("/Users/doni/Documents/football/docs/pitch.json"))
+P = json.load(open("/Users/doni/Documents/sport/football/docs/pitch.json"))
 W_P, L_P = P["pitches"]["upper"]["width"], P["length"]
 GW, BW, BD = P["goal"]["width"], P["penalty_area"]["width"], P["penalty_area"]["depth"]
 HALF = P["half_length"]

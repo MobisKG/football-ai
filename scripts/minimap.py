@@ -7,7 +7,7 @@ import numpy as np, cv2
 
 video, m_path, px_path, out_dir = sys.argv[1:5]; times = [float(t) for t in sys.argv[5:]]
 os.makedirs(out_dir, exist_ok=True)
-M = json.load(open(m_path)); PXP = json.load(open(px_path)); PP = json.load(open("/Users/doni/Documents/football/docs/pitch.json"))
+M = json.load(open(m_path)); PXP = json.load(open(px_path)); PP = json.load(open("/Users/doni/Documents/sport/football/docs/pitch.json"))
 W_P, L_P = M["plan"]["width"], M["plan"]["length"]; BW, BD, HALF = PP["penalty_area"]["width"], PP["penalty_area"]["depth"], PP["half_length"]
 team = {int(k): v for k, v in M["team_of"].items()}
 num = {int(k): (v or {}).get("number") for k, v in (M.get("numbers") or {}).items()}
