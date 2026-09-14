@@ -142,5 +142,22 @@ if out.get("score_match") is False:
 out["confident"] = bool(out["home_colour"]) and (sb is None or out["home_is_top"] is not None or out.get("scoreboard_rejected", False))
 if out["home_colour"] and sb is not None and out["home_is_top"] is None and not out.get("scoreboard_rejected"):
     out["reason"] += "цвет есть, но строки табло не сопоставлены — без табло голы не загрузить; "
+# --- 4. здравый смысл статистики перед загрузкой ---
+# «Манас Талас vs Iron Mix» ушла на сайт с владением 99 % / 1 % (разделение на команды
+# сломалось) и игровым временем 24 из 40 минут (паузы по отброшенному табло).
+sane = []
+pp = list(stats.get("possession_pct", {}).values())
+if len(pp) == 2 and not (10 <= min(pp) and max(pp) <= 90):
+    sane.append("владение %s вне 10–90 %%" % pp)
+onp = {c: sum(p["time_on_pitch_s"] for p in (t.get("players") or [])) + (t.get("unidentified_time_s") or 0) for c, t in stats.get("teams", {}).items()}
+tot_onp = sum(onp.values()) or 1
+if len(onp) == 2 and min(onp.values()) / tot_onp < 0.20:
+    sane.append("время на поле по командам %s — одна команда почти пустая" % {c: round(v) for c, v in onp.items()})
+dur = stats.get("duration_s") or 0
+if out.get("scoreboard_rejected") and dur and (stats.get("paused_s") or 0) > 0.20 * dur:
+    sane.append("паузы %d с из %d с взяты с отброшенного табло" % (stats.get("paused_s"), dur))
+if sane:
+    out["sanity_failed"] = sane; out["confident"] = False
+    out["reason"] += "не загружать: " + "; ".join(sane) + "; "
 json.dump(out, open(os.path.join(d, "home.json"), "w"), ensure_ascii=False, indent=1)
 print(json.dumps(out, ensure_ascii=False))
