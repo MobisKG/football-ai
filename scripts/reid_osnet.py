@@ -22,19 +22,24 @@ torchreid.utils.load_pretrained_weights(model, W)
 model = model.to(dev).eval()
 tf = T.Compose([T.Resize((256, 128)), T.ToTensor(), T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
 meta = json.load(open(osp.join(crops_dir, "tracks.json")))
-out = {}
+# Снимки идут в модель пачками по 64: по одному GPU простаивал, 16 минут на игру.
+BATCH = 64
+items = [(tid, s) for tid, m in meta.items() for s in m["shots"] if osp.exists(osp.join(crops_dir, s))]
+feats = {}
 with torch.no_grad():
-    for n, (tid, m) in enumerate(meta.items()):
-        vs = []
-        for s in m["shots"]:
-            p = osp.join(crops_dir, s)
-            if not osp.exists(p): continue
-            f = model(tf(Image.open(p).convert("RGB")).unsqueeze(0).to(dev))[0].float().cpu().numpy()
-            vs.append(f / (np.linalg.norm(f) + 1e-6))
-        if vs:
-            v = np.mean(vs, 0); v /= np.linalg.norm(v) + 1e-6
-            out[tid] = {"vec": v.round(5).tolist(), "n": len(vs), "team": m["team"], "frames_seen": m["frames_seen"],
-                        "shots": [x.round(4).tolist() for x in vs]}
-        if (n + 1) % 50 == 0: print(n + 1, "треков", flush=True)
+    for b in range(0, len(items), BATCH):
+        part = items[b:b + BATCH]
+        x = torch.stack([tf(Image.open(osp.join(crops_dir, s)).convert("RGB")) for _, s in part]).to(dev)
+        f = model(x).float().cpu().numpy()
+        for (tid, s), v in zip(part, f):
+            feats[s] = v / (np.linalg.norm(v) + 1e-6)
+        if (b // BATCH) % 20 == 0: print(b + len(part), "снимков", flush=True)
+out = {}
+for tid, m in meta.items():
+    vs = [feats[s] for s in m["shots"] if s in feats]
+    if vs:
+        v = np.mean(vs, 0); v /= np.linalg.norm(v) + 1e-6
+        out[tid] = {"vec": v.round(5).tolist(), "n": len(vs), "team": m["team"], "frames_seen": m["frames_seen"],
+                    "shots": [x.round(4).tolist() for x in vs]}
 json.dump(out, open(out_path, "w"))
 print("готово:", len(out), "треков")

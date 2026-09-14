@@ -50,7 +50,7 @@ step "векторы внешности OSNet"
 # Табло — последним и небольшими пачками: 16 увеличенных вырезок вместе с двумя
 # YOLO заняли 35 ГБ и упали с нехваткой видеопамяти на A40 (48 ГБ).
 step "табло: счёт и голы"
-[ -s "$OUT/scoreboard.json" ] || python scoreboard.py "$VIDEO" "$OUT/scoreboard.json" --step 5 --batch 4 \
+[ -s "$OUT/scoreboard.json" ] || python scoreboard.py "$VIDEO" "$OUT/scoreboard.json" --step 10 --batch 4 \
     > "$OUT/log_scoreboard.txt" 2>&1 || echo "ВНИМАНИЕ: табло не прочитано, см. $OUT/log_scoreboard.txt (остальное готово)"
 
 step "готово"

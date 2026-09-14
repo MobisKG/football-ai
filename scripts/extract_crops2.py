@@ -17,7 +17,9 @@ import json, os, sys
 import cv2
 
 pos_path, video, out_dir = sys.argv[1], sys.argv[2], sys.argv[3]
-PER_TRACK, MIN_H, GAP = 8, 170, 20
+# 5 снимков вместо 8 и треки от 3 с: на gz_real91 состав по номерам не изменился
+# (25 номеров с ≥20 с в обеих проверках), а чтение номеров короче на ~40 %.
+PER_TRACK, MIN_H, GAP, MIN_SEC = 5, 170, 20, 3.0
 
 d = json.load(open(pos_path)); frames = d["frames"]; fps = d["fps"]
 team_of = {int(k): v for k, v in d["team_of"].items()}
@@ -34,7 +36,7 @@ picks = {}
 for tid, lst in seen.items():
     # Команда по форме появляется только после чтения номеров, поэтому на новом
     # матче треки ещё без команды: берём все, кроме коротких (< 1,5 с) и зрителей.
-    if tid in skip or len(lst) < 1.5 * fps: continue
+    if tid in skip or len(lst) < MIN_SEC * fps: continue
     byi = {i: (x, y) for i, x, y in lst}
     cand = []
     for i, x, y in lst:
