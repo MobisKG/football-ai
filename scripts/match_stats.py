@@ -49,6 +49,11 @@ def nearest_team(players, b):
             best = (d, tm)
     return best[1] if best else None
 
+def key_of(t):
+    if t in gk: return ("gk", gk[t])
+    if t in player_of: return ("p", player_of[t])
+    return ("n", team.get(t), nums.get(t)) if nums.get(t) else ("t", t)
+
 # --- игровое время по табло ------------------------------------------------
 def clock_s(c):
     try:
@@ -77,7 +82,8 @@ def nearest_player(players, b):
 owner, cand, cand_n = None, None, 0
 holder, hcand, hcand_n = None, None, 0
 poss = [0.0, 0.0]; changes = 0; seen_ball = 0; game_s = 0.0; no_ball = 0
-touches = defaultdict(int)
+touches = defaultdict(int); passes = defaultdict(int); received = defaultdict(int)
+hold_s = defaultdict(float); last_hold_t = -1e9
 for k, f in enumerate(pos["frames"]):
     t = k / fps
     kb = min(int(k * ball["fps"] / fps), len(ball["frames"]) - 1)
@@ -102,16 +108,20 @@ for k, f in enumerate(pos["frames"]):
     if tid is not None and tid != holder:
         hcand_n = hcand_n + 1 if tid == hcand else 1; hcand = tid
         if hcand_n >= int(0.3 * fps):
+            # Передача: мяч перешёл к партнёру по команде не дольше чем за 3 с.
+            # Приблизительно: в толкучке ближайший к мячу меняется и без паса,
+            # на эталоне клипа 5 так находилась примерно половина передач.
+            if holder is not None and team.get(holder) == team.get(tid) and key_of(holder) != key_of(tid) \
+                    and t - last_hold_t <= 3.0:
+                passes[holder] += 1; received[tid] += 1
             holder = tid; hcand_n = 0; touches[tid] += 1
     elif tid is None:
         hcand_n = 0
+    if holder is not None and tid == holder:
+        hold_s[holder] += 1 / fps; last_hold_t = t
 tot = sum(poss) or 1
 
 # --- игроки -----------------------------------------------------------------
-def key_of(t):
-    if t in gk: return ("gk", gk[t])
-    if t in player_of: return ("p", player_of[t])
-    return ("n", team.get(t), nums.get(t)) if nums.get(t) else ("t", t)
 
 on_time = defaultdict(float)
 for f in pos["frames"]:
@@ -156,6 +166,8 @@ for key, sec in on_time.items():
     if tm not in (0, 1) or sec < 5: continue
     rows[tm].append({"player": label(key), "time_on_pitch_s": round(sec),
                      "touches": sum(n for t_, n in touches.items() if key_of(t_) == key),
+                     "possession_s": round(sum(v for t_, v in hold_s.items() if key_of(t_) == key), 1),
+                     "passes": sum(n for t_, n in passes.items() if key_of(t_) == key),
                      "distance_m": round(dist[key]) if met_path else None,
                      "top_speed_kmh": round(vmax[key] * 3.6, 1) if met_path and vmax[key] else None})
 
@@ -175,9 +187,10 @@ for tm in (0, 1):
     merged = {}
     for r in rows[tm]:
         if r["player"] == "без номера": continue
-        m = merged.setdefault(r["player"], {"player": r["player"], "time_on_pitch_s": 0, "touches": 0,
+        m = merged.setdefault(r["player"], {"player": r["player"], "time_on_pitch_s": 0, "touches": 0, "possession_s": 0, "passes": 0,
                                             "distance_m": 0 if met_path else None, "top_speed_kmh": None})
         m["time_on_pitch_s"] += r["time_on_pitch_s"]; m["touches"] += r["touches"]
+        m["possession_s"] = round(m["possession_s"] + r["possession_s"], 1); m["passes"] += r["passes"]
         if met_path:
             m["distance_m"] += r["distance_m"] or 0
             if r["top_speed_kmh"]: m["top_speed_kmh"] = max(m["top_speed_kmh"] or 0, r["top_speed_kmh"])
@@ -188,7 +201,8 @@ for tm in (0, 1):
     lines.append("%s:" % names.get(tm, tm))
     for r in numbered:
         extra = ("  пробег %4d м  макс. %4.1f км/ч" % (r["distance_m"], r["top_speed_kmh"] or 0)) if met_path else ""
-        lines.append("  %-10s на поле %4d с  касаний %3d%s" % (r["player"], r["time_on_pitch_s"], r["touches"], extra))
+        lines.append("  %-10s на поле %4d с  касаний %3d  у мяча %5.1f с  передач %2d%s" % (
+            r["player"], r["time_on_pitch_s"], r["touches"], r["possession_s"], r["passes"], extra))
     lines.append("  без номера: %d с суммарно" % out["teams"][names.get(tm, str(tm))]["unidentified_time_s"])
     lines.append("")
 json.dump(out, open(out_path, "w"), ensure_ascii=False, indent=1)

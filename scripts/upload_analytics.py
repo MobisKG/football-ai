@@ -39,6 +39,7 @@ def players(colour):
         num = p["player"][1:] if p["player"].startswith("№") else None
         out.append({"number": int(num) if num and num.isdigit() else None,
                     "time_on_pitch_s": p["time_on_pitch_s"], "touches": p.get("touches"),
+                    "possession_s": p.get("possession_s"), "passes": p.get("passes"),
                     "distance_m": p.get("distance_m"), "top_speed_kmh": p.get("top_speed_kmh")})
     return {"colour": colour, "players": out, "unidentified_time_s": t.get("unidentified_time_s", 0)}
 
