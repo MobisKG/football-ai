@@ -23,6 +23,8 @@ export YOLO_CONFIG_DIR=/root/.yolo; mkdir -p $YOLO_CONFIG_DIR
 t0=$(date +%s)
 step() { echo ">>> $1  ($(( ($(date +%s) - t0) / 60 )) мин с начала)"; }
 
+# логи прошлой попытки не затираем: при повторе после падения иначе пропадает причина
+for f in "$OUT"/log_*.txt; do [ -s "$f" ] && mv "$f" "$f.prev.$(date +%H%M%S)"; done
 step "параллельно: игроки и мяч"
 pids=()
 if [ ! -s "$OUT/pos.json" ]; then

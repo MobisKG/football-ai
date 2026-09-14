@@ -37,6 +37,7 @@ sys.exit(0 if ok and n > 1000 else 1)
 PY
 
 log "разбор"
+[ -s "out/$NAME.run.log" ] && mv "out/$NAME.run.log" "out/$NAME.run.log.prev.$(date +%H%M%S)"
 ./run_gpu_match.sh "$V" "$NAME" "$STEP" > "out/$NAME.run.log" 2>&1
 rc=$?
 tail -3 "out/$NAME.run.log"

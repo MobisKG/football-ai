@@ -92,7 +92,25 @@ if len(colours) == 2 and (rh or ra):
     B = score(colours[0], ra, rh) + score(colours[1], rh, ra)      # цвет 1 — хозяева
     out["roster_scores"] = {colours[0] + "=хозяева": round(A), colours[1] + "=хозяева": round(B)}
     hi, lo = max(A, B), min(A, B)
-    if hi >= 120 and hi >= 1.6 * lo:
+    decided = hi >= 120 and hi >= 1.6 * lo
+    if decided and not (rh and ra):
+        # Состав только одной команды: номера 1–20 есть почти в любом составе, и перевес
+        # по совпадениям может выйти случайно. Дополнительно требуем, чтобы у цвета этой
+        # команды доля времени номеров ИЗ её состава была заметно выше, чем у другого цвета.
+        known = rh or ra
+        share = {}
+        for c in colours:
+            tot = sum(secs[c].values()) or 1
+            share[c] = sum(t for n, t in secs[c].items() if n in known) / tot
+        known_col = max(colours, key=lambda c: share[c])
+        other = [c for c in colours if c != known_col][0]
+        out["roster_share"] = {c: round(share[c], 2) for c in colours}
+        # цвет известной команды по совпадениям должен совпасть с цветом по доле, и разрыв ≥ 0,15
+        by_sum = colours[0] if (A > B) == bool(rh) else colours[1]
+        if share[known_col] - share[other] < 0.15 or by_sum != known_col:
+            decided = False
+            out["reason"] += "один состав: доли номеров из состава %s — разрыв мал или противоречит; " % out["roster_share"]
+    if decided:
         out["home_colour"] = colours[0] if A > B else colours[1]
         out["reason"] += "по составам: %s хозяева (%d с против %d с)%s; " % (out["home_colour"], hi, lo, "" if (rh and ra) else ", состав только одной команды")
     else:
