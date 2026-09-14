@@ -74,7 +74,7 @@ class Pod:
         self.ssh("chmod 600 /root/.ssh/batch_key; grep -q batch-pods /root/.ssh/authorized_keys || cat >> /root/.ssh/authorized_keys <<'EOK'\n%s\nEOK" % open(BATCH_KEY + ".pub").read().strip(), raise_dead=False)
     def fetch_from(self, other, slug):
         """скопировать out/<slug>.mp4 с другой машины напрямую"""
-        rc, out = self.ssh("cd /root/fb && rm -f out/%s.mp4 && scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /root/.ssh/batch_key -P %d root@%s:/root/fb/out/%s.mp4 out/ && ls -la out/%s.mp4" % (slug, other.port, other.ip, slug, slug), timeout=1500)
+        rc, out = self.ssh("cd /root/fb && rm -f out/%s.mp4 && scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /root/.ssh/batch_key -P %d root@%s:/root/fb/out/%s.mp4 out/ && ls -la out/%s.mp4" % (slug, other.port, other.ip, slug, slug), timeout=3000)
         return rc == 0
     def create(self):
         tried = []
@@ -223,7 +223,7 @@ def relay_video(donor, pod, v):
     """донор качает видео с YouTube (параллельно своей работе), получатель забирает его по scp"""
     slug, yt = v["slug"], v["yt"]
     try:
-        rc, out = donor.ssh("cd /root/fb && ([ -s out/%s.mp4 ] || yt-dlp -q --no-warnings -f 299/137/'bv[height<=1080][ext=mp4]+ba[ext=m4a]/b[height<=1080]' --no-part --merge-output-format mp4 -o out/%s.mp4 'https://www.youtube.com/watch?v=%s') && ls -la out/%s.mp4" % (slug, slug, yt, slug), timeout=1500)
+        rc, out = donor.ssh("cd /root/fb && ([ -s out/%s.mp4 ] || yt-dlp -q --no-warnings -f 299/137/'bv[height<=1080][ext=mp4]+ba[ext=m4a]/b[height<=1080]' --no-part --merge-output-format mp4 -o out/%s.mp4 'https://www.youtube.com/watch?v=%s') && ls -la out/%s.mp4" % (slug, slug, yt, slug), timeout=3000)
         if rc != 0: log(donor.tag, "донор не смог скачать", slug, out[-150:]); return False
         ok = pod.fetch_from(donor, slug)
         donor.ssh("rm -f /root/fb/out/%s.mp4" % slug, raise_dead=False)
