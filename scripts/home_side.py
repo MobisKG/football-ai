@@ -82,17 +82,30 @@ for c in colours:
     for p in stats["teams"].get(c, {}).get("players", []):
         n = p["player"][1:]
         if n.isdigit(): secs[c][int(n)] = secs[c].get(int(n), 0) + p["time_on_pitch_s"]
-rh = set((rosters.get(v.get("home_guid")) or {}).get("numbers") or []) - {0}
-ra = set((rosters.get(v.get("away_guid")) or {}).get("numbers") or []) - {0}
+# «10» и «1» не считаем: Qwen отвечает «10», не видя цифр, а «1» читает с табло и
+# обрывков 7/11/14 (см. apply_numbers.py). На Талас 91 vs 361 синие получили один «№10»
+# на 570 с, и это чуть не решило, кто хозяева.
+UNRELIABLE = {0, 1, 10}
+rh = set((rosters.get(v.get("home_guid")) or {}).get("numbers") or []) - UNRELIABLE
+ra = set((rosters.get(v.get("away_guid")) or {}).get("numbers") or []) - UNRELIABLE
+used = {}                     # (цвет, состав) -> различающие номера, давшие вклад
 def score(col, ros, other):
     own = ros - other if (ros and other) else ros
-    return sum(s for n, s in secs[col].items() if n in own)
+    hit = {n: s for n, s in secs[col].items() if n in own}
+    used[(col, id(ros))] = set(hit)
+    return sum(hit.values())
 if len(colours) == 2 and (rh or ra):
     A = score(colours[0], rh, ra) + score(colours[1], ra, rh)      # цвет 0 — хозяева
     B = score(colours[0], ra, rh) + score(colours[1], rh, ra)      # цвет 1 — хозяева
     out["roster_scores"] = {colours[0] + "=хозяева": round(A), colours[1] + "=хозяева": round(B)}
     hi, lo = max(A, B), min(A, B)
-    decided = hi >= 120 and hi >= 1.6 * lo
+    # сколько разных номеров подтверждают победивший вариант: один игрок — не доказательство
+    win = [(colours[0], rh), (colours[1], ra)] if A >= B else [(colours[0], ra), (colours[1], rh)]
+    support = set().union(*[{(c, n) for n in used.get((c, id(r)), set())} for c, r in win])
+    out["support_numbers"] = sorted("%s №%d" % cn for cn in support)
+    decided = hi >= 120 and hi >= 1.6 * lo and len(support) >= 2
+    if hi >= 120 and hi >= 1.6 * lo and len(support) < 2:
+        out["reason"] += "перевес держится на одном номере %s — мало; " % out["support_numbers"]
     if decided and not (rh and ra):
         # Состав только одной команды: номера 1–20 есть почти в любом составе, и перевес
         # по совпадениям может выйти случайно. Дополнительно требуем, чтобы у цвета этой
@@ -101,6 +114,7 @@ if len(colours) == 2 and (rh or ra):
         share = {}
         for c in colours:
             tot = sum(secs[c].values()) or 1
+            tot = sum(t for n, t in secs[c].items() if n not in UNRELIABLE) or 1
             share[c] = sum(t for n, t in secs[c].items() if n in known) / tot
         known_col = max(colours, key=lambda c: share[c])
         other = [c for c in colours if c != known_col][0]
