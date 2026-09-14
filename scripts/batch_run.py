@@ -67,7 +67,8 @@ class Pod:
         self.yt_ok = False; PODS[tag] = self
     def start_log_saver(self):
         """log_saver.sh копирует непустые логи в *.last: повтор попытки обнуляет логи, причина падения остаётся"""
-        self.ssh("chmod +x /root/fb/log_saver.sh; pgrep -f '[l]og_saver.sh' >/dev/null || (nohup /root/fb/log_saver.sh >/dev/null 2>&1 &); true", raise_dead=False)
+        # проверка по полной строке процесса: pgrep -f нашёл бы саму эту команду (в ней есть путь к скрипту) и не запустил бы сохранение
+        self.ssh('[ "$(ps -eo args | grep -c "^/bin/bash /root/fb/log_saver[.]sh")" = 0 ] && (nohup /bin/bash /root/fb/log_saver.sh >/dev/null 2>&1 &); true', raise_dead=False)
     def install_batch_key(self):
         self.scp(BATCH_KEY, self.remote("/root/.ssh/batch_key"))
         self.ssh("chmod 600 /root/.ssh/batch_key; grep -q batch-pods /root/.ssh/authorized_keys || cat >> /root/.ssh/authorized_keys <<'EOK'\n%s\nEOK" % open(BATCH_KEY + ".pub").read().strip(), raise_dead=False)
