@@ -402,34 +402,58 @@ def merge_parts(m):
         st["home"] = home; st["status"] = "done"; upload(m, home); save_state()
 
 def write_report(videos):
+    M_ = json.load(open(MATCHES))
+    cand = {c["match_guid"]: c for c in M_.get("candidates_for_untitled", [])}
+    def jhome(d):
+        try: return json.load(open(os.path.join(d, "home.json")))
+        except Exception: return {}
+    def judge(v, h):
+        g = h.get("match_guid") or v.get("match_guid")
+        src = v if v.get("home_goals") is not None else cand.get(g, {})
+        if src.get("home_goals") is None: return "—"
+        return "%s %s : %s %s" % (src.get("home") or h.get("home"), src["home_goals"], src["away_goals"], src.get("away") or h.get("away"))
+    def board(d, h):
+        p_ = os.path.join(d, "scoreboard.json")
+        if os.path.exists(p_) and h.get("score_match") is True:
+            b = json.load(open(p_)); return "%s : %s (%s) — совпало, голы загружены" % (b["final_score"][0], b["final_score"][1], " — ".join(b.get("teams") or []))
+        for q in (p_, os.path.join(d, "scoreboard_bad.json")):
+            if os.path.exists(q):
+                try:
+                    b = json.load(open(q))
+                    if all(b.get("teams") or [None]) and b.get("final_score"):
+                        return "%s : %s (%s) — не использовано" % (b["final_score"][0], b["final_score"][1], " — ".join(b["teams"]))
+                except Exception: pass
+        return "не прочитано"
     L = ["# Отчёт пакетного прогона %s" % datetime.now().strftime("%d.%m.%Y %H:%M"), "",
-         "Аренда всего: **%.2f $** (%d машин)." % (state.get("spent_usd", 0), len(state["pods"])), "",
-         "| Видео | Матч | Статус | Счёт табло | Счёт судьи | Владение | Игроков с №  | Машина, мин | Загрузка |", "|---|---|---|---|---|---|---|---|---|"]
+         "Аренда всего: **%.2f $** (машин: %d)." % (state.get("spent_usd", 0), len(state["pods"])), "",
+         "Что проверить руками: `MORNING_CHECKS.md`. Почему нет скоростей и пробега: `SPEEDS_NOTE.md`.", "",
+         "Счёт табло — как на экране (верхняя строка — нижняя). Счёт судьи — хозяева : гости с сайта.", "",
+         "| Видео | Матч | Статус | Табло | Счёт судьи | Владение | Игроков с № | Машина, мин | Загрузка |", "|---|---|---|---|---|---|---|---|---|"]
     for v in videos:
-        st = vst(v["slug"]); d = os.path.join(OUT, v["slug"])
-        sb = tb = poss = nums = "—"
+        st = vst(v["slug"]); d = os.path.join(OUT, v["slug"]); h = jhome(d)
+        poss = nums = "—"
         try:
-            s = json.load(open(os.path.join(d, "stats.json")))
-            poss = ", ".join("%s %d%%" % kv for kv in s["possession_pct"].items())
-            nums = " / ".join(str(len(t["players"])) for t in s["teams"].values())
+            s_ = json.load(open(os.path.join(d, "stats.json")))
+            poss = ", ".join("%s %d%%" % kv for kv in s_["possession_pct"].items())
+            nums = " / ".join(str(len(t["players"])) for t in s_["teams"].values())
         except Exception: pass
-        try:
-            b = json.load(open(os.path.join(d, "scoreboard.json"))); sb = "%s : %s" % tuple(b["final_score"]) + " (%s)" % " — ".join(b.get("teams") or [])
-        except Exception:
-            if os.path.exists(os.path.join(d, "scoreboard_bad.json")): sb = "табло не прочитано"
-        except Exception: pass
-        if v.get("home_goals") is not None: tb = "%s : %s" % (v["home_goals"], v["away_goals"])
-        L.append("| %s | %s | %s | %s | %s | %s | %s | %s | %s |" % (v["yt"], v["title"], st["status"] + ((" — " + st["error"]) if st.get("error") else ""), sb, tb, poss, nums, st.get("gpu_min", 0), st.get("upload", "—")))
-    pend = [v for v in videos if vst(v["slug"]).get("status") == "done" and not str(vst(v["slug"]).get("upload", "")).startswith("загружено") and not vst(v["slug"]).get("upload", "").startswith("часть")]
+        title = v["title"] + ((" → %s vs %s" % (h.get("home"), h.get("away"))) if not v.get("match_guid") and h.get("match_guid") else "")
+        L.append("| %s | %s | %s | %s | %s | %s | %s | %s | %s |" % (v["yt"], title, st["status"] + ((" — " + st["error"]) if st.get("error") else ""),
+                 board(d, h) if os.path.isdir(d) else "—", judge(v, h), poss, nums, st.get("gpu_min", 0), st.get("upload", "—")))
+    pend = [v for v in videos if vst(v["slug"]).get("status") == "done" and not str(vst(v["slug"]).get("upload", "")).startswith(("загружено", "часть"))]
     if pend:
-        L += ["", "## Не загружено — решить утром", "", "Снимки формы: `<slug>_kits.tar.gz` в папке прогона. Команда загрузки (подставить цвет хозяев и, если хозяева в верхней строке табло, `--home-is-top`):", ""]
+        L += ["", "## Не загружено — решить утром", "",
+              "Снимки формы: `<slug>_kits.tar.gz` в папке прогона. Подставить цвет хозяев. "
+              "Табло и `--home-is-top` в команде есть **только** там, где итог табло совпал со счётом судьи; иначе голы не грузить.", ""]
         for v in pend:
-            h = vst(v["slug"]).get("home") or {}
-            L.append("- **%s** (%s vs %s): %s" % (v["slug"], v.get("home"), v.get("away"), h.get("reason", vst(v["slug"]).get("upload"))))
-            L.append("  `cd %s && %s %s stats.json --match-guid %s --home-colour <цвет> [--home-is-top] --scoreboard scoreboard.json --video-url https://www.youtube.com/watch?v=%s`" % (
-                os.path.join(OUT, v["slug"]), PY, os.path.join(HERE, "upload_analytics.py"), h.get("match_guid") or v.get("match_guid") or "<guid>", v["yt"]))
+            d = os.path.join(OUT, v["slug"]); h = jhome(d)
+            use_sb = h.get("score_match") is True and os.path.exists(os.path.join(d, "scoreboard.json"))
+            extra = (" --scoreboard scoreboard.json" + (" --home-is-top" if h.get("home_is_top") else "")) if use_sb else ""
+            L.append("- **%s** (%s vs %s): %s" % (v["slug"], h.get("home") or v.get("home"), h.get("away") or v.get("away"), h.get("reason", vst(v["slug"]).get("upload"))))
+            L.append("  `cd %s && %s %s stats.json --match-guid %s --home-colour <цвет>%s --video-url 'https://www.youtube.com/watch?v=%s'`" % (
+                d, PY, os.path.join(HERE, "upload_analytics.py"), h.get("match_guid") or v.get("match_guid") or "<guid>", extra, v["yt"]))
     L += ["", "## Машины", ""] + ["- %s %s: %.2f $/ч, %.2f $" % (p["tag"], p.get("gpu"), p.get("cost", 0), p.get("spent", 0)) for p in state["pods"]]
-    L += ["", "## Ошибки по видео", ""] + ["- %s: %s" % (v["slug"], "; ".join(vst(v["slug"])["log"])) for v in videos if vst(v["slug"])["log"]]
+    L += ["", "## Ошибки по видео", ""] + ["- %s: %s" % (v["slug"], "; ".join(x.replace("\n", " ") for x in vst(v["slug"])["log"])) for v in videos if vst(v["slug"])["log"]]
     open(os.path.join(OUT, "REPORT.md"), "w").write("\n".join(L) + "\n")
 
 def main():
