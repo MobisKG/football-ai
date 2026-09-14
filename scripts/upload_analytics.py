@@ -4,8 +4,8 @@
 формат бэкенда: стороны «home»/«away» вместо цветов формы.
 
 Токен — пользователя лиги этого матча. Берётся из переменной окружения
-SPORTX_TOKEN или строки SPORTX_TOKEN=... в football/.env; в репозиторий не
-попадает (.env в .gitignore).
+SPORTX_TOKEN или строки SPORTX_TOKEN=... в football/.env либо в общем
+~/Documents/sport/.env; в репозиторий не попадает.
 
     python upload_analytics.py stats.json --match-guid <guid> --home-colour красные \
         [--scoreboard scoreboard.json] [--home-is-top] [--video-url URL] \
@@ -64,9 +64,11 @@ if dry:
 
 token = os.environ.get("SPORTX_TOKEN")
 if not token:
-    env = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")
-    for line in open(env) if os.path.exists(env) else []:
-        if line.startswith("SPORTX_TOKEN="): token = line.split("=", 1)[1].strip()
+    here = os.path.dirname(os.path.abspath(__file__))
+    # football/.env или общий ~/Documents/sport/.env (он вне репозиториев)
+    for env in (os.path.join(here, "..", ".env"), os.path.join(here, "..", "..", ".env")):
+        for line in open(env) if os.path.exists(env) else []:
+            if line.startswith("SPORTX_TOKEN=") and not token: token = line.split("=", 1)[1].strip()
 if not token:
     sys.exit("нет SPORTX_TOKEN (переменная окружения или строка в football/.env)")
 req = urllib.request.Request(base + "/v1/match/analytics", data=json.dumps(body).encode(), method="POST",
