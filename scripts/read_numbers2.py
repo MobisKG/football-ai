@@ -48,7 +48,7 @@ def parse(ans):
 BATCH = int(sys.argv[sys.argv.index("--batch") + 1]) if "--batch" in sys.argv else 16
 proc.tokenizer.padding_side = "left"
 def ask_many(imgs):
-    msgs = [{"role": "user", "content": [{"type": "image", "image": im}, {"type": "text", "text": PROMPT}]}]
+    msgs = [{"role": "user", "content": [{"type": "image", "image": imgs[0]}, {"type": "text", "text": PROMPT}]}]
     text = proc.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True)
     inputs = proc(text=[text] * len(imgs), images=imgs, padding=True, return_tensors="pt").to(model.device)
     with torch.no_grad():

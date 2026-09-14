@@ -64,7 +64,10 @@ for k, r in new.items():
     if entry["number"]: got += 1
     w = kit.split()[0] if kit else ""
     old = team.get(t, -1)
-    if w.startswith(BLUE): team[t] = 0
+    # --keep-teams: команды уже назначены team_from_kit.py по цветам этой игры;
+    # зашитые «синие/красные» тут только испортят («белый и синий» ушло бы в красные)
+    if "--keep-teams" in sys.argv: pass
+    elif w.startswith(BLUE): team[t] = 0
     elif w.startswith(RED): team[t] = 1
     if team.get(t, -1) != old: changed += 1
     nums[t] = entry

@@ -1,0 +1,362 @@
+{
+ "match": "Gz United vs Real 91 (14.09.2026)",
+ "duration_s": 2573,
+ "game_time_s": 2191,
+ "paused_s": 275,
+ "ball_visible_pct": 44,
+ "possession_pct": {
+  "синие": 65,
+  "красные": 35
+ },
+ "possession_changes": 184,
+ "teams": {
+  "синие": {
+   "players": [
+    {
+     "player": "№6",
+     "time_on_pitch_s": 1029,
+     "touches": 50,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№8",
+     "time_on_pitch_s": 459,
+     "touches": 24,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№2",
+     "time_on_pitch_s": 433,
+     "touches": 4,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№5",
+     "time_on_pitch_s": 425,
+     "touches": 9,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№9",
+     "time_on_pitch_s": 374,
+     "touches": 10,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№11",
+     "time_on_pitch_s": 295,
+     "touches": 2,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№30",
+     "time_on_pitch_s": 286,
+     "touches": 8,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№17",
+     "time_on_pitch_s": 275,
+     "touches": 6,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№80",
+     "time_on_pitch_s": 225,
+     "touches": 4,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№4",
+     "time_on_pitch_s": 178,
+     "touches": 2,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№10",
+     "time_on_pitch_s": 163,
+     "touches": 1,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№21",
+     "time_on_pitch_s": 161,
+     "touches": 2,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№19",
+     "time_on_pitch_s": 124,
+     "touches": 3,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№83",
+     "time_on_pitch_s": 98,
+     "touches": 6,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№7",
+     "time_on_pitch_s": 53,
+     "touches": 1,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№91",
+     "time_on_pitch_s": 26,
+     "touches": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№14",
+     "time_on_pitch_s": 20,
+     "touches": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№29",
+     "time_on_pitch_s": 20,
+     "touches": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№3",
+     "time_on_pitch_s": 19,
+     "touches": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    }
+   ],
+   "unidentified_time_s": 2891
+  },
+  "красные": {
+   "players": [
+    {
+     "player": "№7",
+     "time_on_pitch_s": 405,
+     "touches": 7,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№12",
+     "time_on_pitch_s": 386,
+     "touches": 17,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№19",
+     "time_on_pitch_s": 353,
+     "touches": 10,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№2",
+     "time_on_pitch_s": 326,
+     "touches": 8,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№23",
+     "time_on_pitch_s": 238,
+     "touches": 6,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№18",
+     "time_on_pitch_s": 158,
+     "touches": 1,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№6",
+     "time_on_pitch_s": 133,
+     "touches": 5,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№13",
+     "time_on_pitch_s": 120,
+     "touches": 4,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№11",
+     "time_on_pitch_s": 119,
+     "touches": 3,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№17",
+     "time_on_pitch_s": 98,
+     "touches": 2,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№5",
+     "time_on_pitch_s": 90,
+     "touches": 4,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№9",
+     "time_on_pitch_s": 90,
+     "touches": 1,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№30",
+     "time_on_pitch_s": 76,
+     "touches": 1,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№24",
+     "time_on_pitch_s": 66,
+     "touches": 1,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№21",
+     "time_on_pitch_s": 53,
+     "touches": 3,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№29",
+     "time_on_pitch_s": 52,
+     "touches": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№4",
+     "time_on_pitch_s": 14,
+     "touches": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    }
+   ],
+   "unidentified_time_s": 3120
+  }
+ },
+ "teams_by_colour": {
+  "синие": "Реал 91",
+  "красные": "Gz United"
+ },
+ "scoreboard": {
+  "teams": [
+   "GZ UNITED",
+   "PEAL 91"
+  ],
+  "final_score": [
+   3,
+   4
+  ],
+  "goals": [
+   {
+    "team": 2,
+    "video_t": 100.0,
+    "half": 1,
+    "clock": "01:44",
+    "score_after": [
+     0,
+     1
+    ]
+   },
+   {
+    "team": 1,
+    "video_t": 715.0,
+    "half": 1,
+    "clock": "11:59",
+    "score_after": [
+     1,
+     1
+    ]
+   },
+   {
+    "team": 2,
+    "video_t": 1770.0,
+    "half": 2,
+    "clock": "24:53",
+    "score_after": [
+     1,
+     2
+    ]
+   },
+   {
+    "team": 2,
+    "video_t": 2010.0,
+    "half": 2,
+    "clock": "28:53",
+    "score_after": [
+     1,
+     3
+    ]
+   },
+   {
+    "team": 2,
+    "video_t": 2110.0,
+    "half": 2,
+    "clock": "30:33",
+    "score_after": [
+     1,
+     4
+    ]
+   },
+   {
+    "team": 1,
+    "video_t": 2380.0,
+    "half": 2,
+    "clock": "35:03",
+    "score_after": [
+     2,
+     4
+    ]
+   },
+   {
+    "team": 1,
+    "video_t": 2455.0,
+    "half": 2,
+    "clock": "36:18",
+    "score_after": [
+     3,
+     4
+    ]
+   }
+  ]
+ }
+}
