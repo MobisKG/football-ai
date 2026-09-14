@@ -30,6 +30,14 @@ for v in nums.values():
     w = [x for x in words(v.get("kit")) if x not in ("и", "с")]
     if w: first_words[STEM(w[0])] += 1
 top = [w for w, _ in first_words.most_common(2)]
+# Один цвет формы подавляет остальные — модель прочитала обе команды одинаково
+# («Манас Талас vs Iron Mix»: «синий» у 72 % треков, в 8,2 раза чаще второго цвета;
+# у нормальных игр ночи 15.09 не больше 2,8). Тогда деление по форме ломается,
+# и оставляем исходные команды кластеризации analyze_match.py.
+_fw = first_words.most_common(2)
+DOMINANT = len(_fw) == 2 and _fw[0][1] >= 4 * _fw[1][1]
+if DOMINANT:
+    print("один цвет формы подавляет остальные (%s): оставляю команды кластеризации" % dict(first_words.most_common(3)))
 if len(top) < 2: top = (top + ["?", "?"])[:2]
 A_WORDS = (top[0],)          # команда 0
 B_WORDS = (top[1],)          # команда 1
@@ -100,6 +108,8 @@ for tid in old:
     v = nums.get(str(tid))
     kit = (v.get("kit") or "").strip().lower() if v else ""
     t = team_of_kit(kit) if kit in COMMON else -1
+    if DOMINANT:
+        t = old[tid] if old[tid] in (0, 1) else -1
     if v and str(v.get("role", "")).startswith("вратар"):
         t = -1                     # вратарь в своей форме, владение ему не приписываем
     if median_speed(tid) < MIN_SPEED:
@@ -113,6 +123,13 @@ NAMES = {"син": "синие", "сини": "синие", "голу": "голу
          "жёлт": "жёлтые", "желт": "жёлтые", "зелё": "зелёные", "зеле": "зелёные", "оран": "оранжевые", "фиол": "фиолетовые",
          "серы": "серые", "розо": "розовые", "бord": "бордовые", "борд": "бордовые"}
 pos["team_names"] = {"0": NAMES.get(A_WORDS[0], A_WORDS[0]), "1": NAMES.get(B_WORDS[0], B_WORDS[0])}
+if DOMINANT:
+    # названия — по цвету футболок из кластеризации (analyze_match.py), и они должны различаться
+    tn = {str(k): v for k, v in (pos.get("team_names") or {}).items()}
+    if tn.get("0") and tn.get("1") and tn["0"] != tn["1"]:
+        pos["team_names"] = {"0": tn["0"], "1": tn["1"]}
+    else:
+        pos["team_names"] = {"0": "команда A", "1": "команда B"}
 # Номера кладём рядом с позициями: расчёт событий по ним отсеивает переходы
 # «сам себе», когда один игрок разорван на два трека.
 pos["numbers"] = {str(t): {"number": (nums.get(str(t)) or {}).get("number"),
