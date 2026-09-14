@@ -13,13 +13,20 @@ from datetime import datetime
 
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(HERE)
 opt = lambda k, d=None: sys.argv[sys.argv.index(k) + 1] if k in sys.argv else d
-MATCHES = opt("--matches", os.path.join(ROOT, "results/batch_2026-09-14/matches.json"))
+MATCHES = os.path.abspath(opt("--matches", os.path.join(ROOT, "results/batch_2026-09-14/matches.json")))
 OUT = os.path.dirname(os.path.abspath(MATCHES))
 NPODS = int(opt("--pods", 4)); STEP = int(opt("--gpu-step", 4))
 ONLY = set(opt("--only", "").split(",")) - {""}
 PY = opt("--python", "/private/tmp/claude-501/-Users-doni-Documents-football/7f0d34e7-ac71-4fb5-9950-2123175b3367/scratchpad/venv/bin/python")
 if not os.path.exists(PY): PY = sys.executable
-KEY = os.path.expanduser("~/.ssh/id_ed25519_personal")
+KEY = os.path.expanduser(opt("--key", "~/.ssh/id_ed25519_personal"))
+# на машину кладём все наши публичные ключи: с ноутбука и с мак мини можно зайти одним и тем же подом
+import glob as _glob
+PUBKEYS = "\n".join(open(f).read().strip() for f in sorted(_glob.glob(os.path.expanduser("~/.ssh/id_ed25519*.pub"))))
+# общий ключ машин друг для друга: видео, которое YouTube не отдаёт одной машине, ей передаёт другая
+BATCH_KEY = os.path.join(OUT, "batch_key")
+PUBKEYS += "\n" + open(BATCH_KEY + ".pub").read().strip()
+PODS = {}                     # tag -> Pod, чтобы находить машину с работающим YouTube
 RUNPOD_KEY = [l.split("=", 1)[1].strip() for l in open(os.path.join(ROOT, ".env")) if l.startswith("KEY=")][0]
 GPUS = ["NVIDIA A40", "NVIDIA RTX A6000", "NVIDIA GeForce RTX 4090", "NVIDIA L40S", "NVIDIA RTX A5000", "NVIDIA L40"]
 IMAGE = "runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04"
@@ -57,13 +64,21 @@ class PodDead(Exception): pass
 class Pod:
     def __init__(self, tag):
         self.tag = tag; self.id = None; self.ip = None; self.port = None; self.gpu = None; self.cost = 0.0; self.t0 = None; self.ready = False
+        self.yt_ok = False; PODS[tag] = self
+    def install_batch_key(self):
+        self.scp(BATCH_KEY, self.remote("/root/.ssh/batch_key"))
+        self.ssh("chmod 600 /root/.ssh/batch_key; grep -q batch-pods /root/.ssh/authorized_keys || cat >> /root/.ssh/authorized_keys <<'EOK'\n%s\nEOK" % open(BATCH_KEY + ".pub").read().strip(), raise_dead=False)
+    def fetch_from(self, other, slug):
+        """скопировать out/<slug>.mp4 с другой машины напрямую"""
+        rc, out = self.ssh("cd /root/fb && rm -f out/%s.mp4 && scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /root/.ssh/batch_key -P %d root@%s:/root/fb/out/%s.mp4 out/ && ls -la out/%s.mp4" % (slug, other.port, other.ip, slug, slug), timeout=1500)
+        return rc == 0
     def create(self):
         tried = []
         for attempt in range(8):
             gpus = [g for g in GPUS if g not in tried] or GPUS
             body = {"name": "fb-batch-%s" % self.tag, "imageName": IMAGE, "gpuTypeIds": gpus, "gpuCount": 1,
                     "containerDiskInGb": 60, "volumeInGb": 0, "ports": ["22/tcp"], "cloudType": "SECURE",
-                    "env": {"PUBLIC_KEY": open(KEY + ".pub").read().strip()}}
+                    "env": {"PUBLIC_KEY": PUBKEYS}}
             r = rp("POST", "/pods", body)
             if not r.get("id"):
                 log(self.tag, "под не создан:", (r.get("error") or str(r))[:200]); time.sleep(120); continue
@@ -89,11 +104,34 @@ class Pod:
             time.sleep(15)
         return False
     def ssh(self, cmd, timeout=120, raise_dead=True):
-        p = subprocess.run(["ssh", "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null", "-o", "LogLevel=ERROR",
-                            "-o", "ConnectTimeout=30", "-o", "ServerAliveInterval=15", "-o", "ServerAliveCountMax=3", "-o", "BatchMode=yes",
-                            "-i", KEY, "-p", str(self.port), "root@%s" % self.ip, cmd], capture_output=True, text=True, timeout=timeout + 30)
+        # один сброс соединения — не смерть машины: пробуем трижды с паузой
+        for attempt in range(3):
+            p = self._ssh(cmd, timeout)
+            if p.returncode != 255: break
+            time.sleep(10)
         if p.returncode == 255 and raise_dead: raise PodDead(p.stderr.strip()[:200])
         return p.returncode, p.stdout + p.stderr
+    def _ssh(self, cmd, timeout):
+        return subprocess.run(["ssh", "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null", "-o", "LogLevel=ERROR",
+                            "-o", "ConnectTimeout=30", "-o", "ServerAliveInterval=15", "-o", "ServerAliveCountMax=3", "-o", "BatchMode=yes",
+                            "-i", KEY, "-p", str(self.port), "root@%s" % self.ip, cmd], capture_output=True, text=True, timeout=timeout + 30)
+    def attach(self, rec):
+        """переподхват машины, поднятой прошлым запуском скрипта"""
+        self.id, self.gpu, self.cost, self.t0 = rec["id"], rec.get("gpu"), float(rec.get("cost") or 0), rec.get("t0") or time.time()
+        r = rp("GET", "/pods/" + self.id); pm = r.get("portMappings") or {}
+        if not (r.get("publicIp") and pm.get("22")): return False
+        self.ip, self.port = r["publicIp"], int(pm["22"])
+        rc, out = self.ssh("python -c 'import torch;assert torch.cuda.is_available()' && echo ATTACH_OK; grep -q SETUP_OK /root/fb/setup.log 2>/dev/null && echo SETUP_DONE", timeout=60, raise_dead=False)
+        if "ATTACH_OK" not in out: return False
+        log(self.tag, "переподхвачен под", self.id, self.gpu, self.ip, self.port, "(установка готова)" if "SETUP_DONE" in out else "(установку повторю)")
+        # задачи прошлых запусков скрипта продолжали бы работать параллельно новым — убираем все
+        self.ssh("pkill -f '[r]un_video.sh' ; pkill -f '[r]un_gpu_match.sh' ; pkill -f '[a]nalyze_match.py' ; pkill -f '[b]all_yolo.py' ; "
+                 "pkill -f '[e]xtract_crops2.py' ; pkill -f '[r]ead_numbers2.py' ; pkill -f '[r]eid_osnet.py' ; pkill -f '[s]coreboard.py' ; pkill -f '[y]t-dlp' ; "
+                 "sleep 3; rm -f /root/fb/out/*.DONE /root/fb/out/*.FAILED; true", raise_dead=False)
+        if "SETUP_DONE" not in out: self.setup()      # прошлый запуск оборвал установку — повторяем, шаги идемпотентны
+        else: self.scp([os.path.join(HERE, f) for f in os.listdir(HERE) if f.endswith((".py", ".sh", ".yaml"))], self.remote("/root/fb/"))   # свежие скрипты
+        self.install_batch_key()
+        self.ready = True; return True
     def scp(self, src, dst, timeout=1800):
         p = subprocess.run(["scp", "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null", "-o", "LogLevel=ERROR",
                             "-o", "ConnectTimeout=30", "-i", KEY, "-P", str(self.port), "-q", "-r"] + (src if isinstance(src, list) else [src]) + [dst],
@@ -107,7 +145,7 @@ class Pod:
         self.scp(os.path.join(ROOT, "weights/best_7matches.pt"), self.remote("/root/fb/weights/"))
         rc, out = self.ssh("cd /root/fb && chmod +x *.sh && ./pod_setup.sh > setup.log 2>&1; tail -4 setup.log", timeout=1800)
         if "SETUP_OK" not in out: raise RuntimeError("установка не удалась: " + out[-400:])
-        log(self.tag, "установка готова")
+        self.install_batch_key(); log(self.tag, "установка готова")
     def delete(self):
         if not self.id: return
         r = rp("DELETE", "/pods/" + self.id)
@@ -131,12 +169,15 @@ def delete_all_pods():
 # ---------------- одно видео на машине ----------------
 def run_on_pod(pod, v):
     slug, yt = v["slug"], v["yt"]; st = vst(slug)
-    pod.ssh("cd /root/fb && (nohup ./run_video.sh %s %s %d > out/%s.log 2>&1 &) ; sleep 1" % (yt, slug, STEP, slug))
+    # шаблоны в скобках, иначе pkill находит и убивает собственную ssh-сессию (та же ловушка, что в STATE.md)
+    # очистка и запуск — отдельными вызовами: в одной строке pkill находил «out/<имя>.log» из команды запуска и убивал сессию
+    pod.ssh("pkill -f '[r]un_video.sh %s ' ; pkill -f '[r]un_gpu_match.sh out/%s[.]mp4' ; pkill -f '[o]ut/%s[/.]' ; sleep 2; true" % (slug, slug, slug), raise_dead=False)
+    pod.ssh("cd /root/fb && (nohup ./run_video.sh %s %s %d > out/%s.log 2>&1 &) ; sleep 1" % (yt, slug, STEP, slug), raise_dead=True)
     t0 = time.time(); dead = 0; last = ""
     while True:
         time.sleep(60)
         if time.time() - t0 > VIDEO_TIMEOUT:
-            pod.ssh("pkill -f '[r]un_video.sh %s' ; pkill -f '[r]un_gpu_match.sh .*%s' ; pkill -f 'out/%s' " % (slug, slug, slug), raise_dead=False)
+            pod.ssh("pkill -f '[r]un_video.sh %s' ; pkill -f '[r]un_gpu_match.sh .*%s' ; pkill -f '[o]ut/%s' " % (slug, slug, slug), raise_dead=False)
             raise RuntimeError("превышен лимит времени на видео")
         try:
             rc, out = pod.ssh("cd /root/fb && ls out/%s.DONE out/%s.FAILED 2>/dev/null; tail -n 1 out/%s.run.log 2>/dev/null; tail -n 1 out/%s.log" % (slug, slug, slug, slug), timeout=60)
@@ -148,6 +189,7 @@ def run_on_pod(pod, v):
         tail = out.strip().splitlines()
         if tail and tail[-1] != last:
             last = tail[-1]; log(pod.tag, slug, "|", last[-150:])
+            if "разбор" in last or "видео:" in last: pod.yt_ok = True
         if ".DONE" in out: break
         if ".FAILED" in out: raise RuntimeError("шаг на машине упал: " + (tail[-1] if tail else "")[-200:])
     st["gpu_min"] = round(st.get("gpu_min", 0) + (time.time() - t0) / 60)
@@ -159,10 +201,50 @@ def run_on_pod(pod, v):
     os.remove(os.path.join(OUT, slug + ".tar.gz"))
     log(pod.tag, slug, "результаты скачаны, машина %d мин" % ((time.time() - t0) / 60))
 
+def take_video(pod, q):
+    """следующее видео из очереди; если на машине уже лежит скачанный файл какого-то видео — его"""
+    have = set()
+    if pod.ready:
+        try:
+            rc, out = pod.ssh("ls /root/fb/out/ 2>/dev/null | grep '[.]mp4$'", timeout=60, raise_dead=False)
+            have = {l[:-4] for l in out.split() if l.endswith(".mp4")}
+        except Exception: pass
+    with q.mutex:
+        items = list(q.queue)
+        pick = next((v for v in items if v["slug"] in have), None) or (items[0] if items else None)
+        if pick is not None: q.queue.remove(pick)
+    return pick
+
+def relay_video(donor, pod, v):
+    """донор качает видео с YouTube (параллельно своей работе), получатель забирает его по scp"""
+    slug, yt = v["slug"], v["yt"]
+    try:
+        rc, out = donor.ssh("cd /root/fb && ([ -s out/%s.mp4 ] || yt-dlp -q --no-warnings -f 299/137/'bv[height<=1080][ext=mp4]+ba[ext=m4a]/b[height<=1080]' --no-part --merge-output-format mp4 -o out/%s.mp4 'https://www.youtube.com/watch?v=%s') && ls -la out/%s.mp4" % (slug, slug, yt, slug), timeout=1500)
+        if rc != 0: log(donor.tag, "донор не смог скачать", slug, out[-150:]); return False
+        ok = pod.fetch_from(donor, slug)
+        donor.ssh("rm -f /root/fb/out/%s.mp4" % slug, raise_dead=False)
+        return ok
+    except Exception as e:
+        log(donor.tag, "передача видео не удалась:", str(e)[-150:]); return False
+
 # ---------------- маковские шаги ----------------
 def sh(cmd, cwd=None, timeout=1800):
     p = subprocess.run(cmd, shell=True, cwd=cwd, capture_output=True, text=True, timeout=timeout)
     return p.returncode, (p.stdout + p.stderr)
+
+def scoreboard_ok(d):
+    """Табло годится, если прочитаны оба названия и часы видны хотя бы в трети чтений.
+    Иначе (нет плашки на записи, плашка в другом месте) весь матч считался бы паузой:
+    на пробном тайме игровое время вышло 3 секунды."""
+    p = os.path.join(d, "scoreboard.json")
+    if not os.path.exists(p): return False
+    try: b = json.load(open(p))
+    except Exception: return False
+    reads = b.get("reads") or []; vis = sum(1 for r in reads if r.get("visible") and r.get("clock"))
+    ok = all(b.get("teams") or [None, None]) and reads and vis >= 0.3 * len(reads)
+    if not ok and not os.path.exists(os.path.join(d, "scoreboard_bad.json")):
+        os.rename(p, os.path.join(d, "scoreboard_bad.json"))
+    return ok
 
 def mac_steps(v):
     slug = v["slug"]; d = os.path.join(OUT, slug); st = vst(slug)
@@ -183,7 +265,7 @@ def mac_steps(v):
         json.dump(met, open(os.path.join(d, "met_dummy.json"), "w"))
         step("numbers", "%s %s pos_final.json met_dummy.json numbers.json --keep-teams" % (PY, S("apply_numbers.py")), "pos_final.json")
         step("cluster", "%s %s pos_final.json met_dummy.json osnet.json" % (PY, S("reid_cluster.py")), "pos_final.json")
-    sb = "--scoreboard scoreboard.json" if os.path.exists(os.path.join(d, "scoreboard.json")) else ""
+    sb = "--scoreboard scoreboard.json" if scoreboard_ok(d) else ""
     rc, out = run("%s %s pos_final.json ball.json stats.json %s --name \"%s\"" % (PY, S("match_stats.py"), sb, v["title"].replace('"', "")))
     if rc != 0: raise RuntimeError("stats: " + out[-300:])
     open(os.path.join(d, "stats.txt"), "w").write(out)
@@ -225,12 +307,31 @@ def finish_video(v):
     save_state()
 
 # ---------------- рабочий поток на одну машину ----------------
+orphans = queue.Queue()
 def worker(tag, q):
+    try:
+        _worker(tag, q)
+    except Exception:
+        log(tag, "ПОТОК УПАЛ:", traceback.format_exc()[-600:])
+        p = PODS.get(tag)
+        if p and p.id:
+            try: p.delete()
+            except Exception: pass
+def _worker(tag, q):
     pod = Pod(tag); v = None
+    while not orphans.empty():
+        try: rec = orphans.get_nowait()
+        except queue.Empty: break
+        try:
+            if pod.attach(rec): break
+            log(tag, "машина %s из прошлого запуска не отвечает, удаляю" % rec["id"])
+        except Exception as e:
+            log(tag, "переподхват %s не удался: %s — удаляю" % (rec["id"], str(e)[-150:]))
+        pod.id = rec["id"]; pod.t0 = rec.get("t0") or time.time(); pod.cost = float(rec.get("cost") or 0); pod.ready = False; pod.delete()
     while True:
         if v is None:
-            try: v = q.get_nowait()
-            except queue.Empty: break
+            v = take_video(pod, q)
+            if v is None: break
         st = vst(v["slug"])
         if st["status"] in ("done", "mac_failed") or (st["status"] == "gpu_done"):
             if st["status"] == "gpu_done": finish_video(v)
@@ -239,6 +340,7 @@ def worker(tag, q):
             st["status"] = "failed"; save_state(); log(tag, v["slug"], "две попытки не удались, пропускаю"); v = None; continue
         try:
             if not pod.ready:
+                if pod.id: pod.delete()          # недоделанная машина не должна остаться висеть
                 if not pod.create(): log(tag, "не удалось получить машину, поток завершён"); q.put(v); break
                 pod.setup()
             st["attempts"] += 1; st["status"] = "running"; st["pod"] = pod.id; st["gpu"] = pod.gpu; save_state()
@@ -252,6 +354,14 @@ def worker(tag, q):
         except Exception as e:
             log(tag, v["slug"], "ошибка:", str(e)[-300:]); st["log"].append(str(e)[-300:]); st["status"] = "queued"; save_state()
             if isinstance(e, RuntimeError) and "установка" in str(e): pod.delete()
+            if "видео не скачалось" in str(e):
+                st["attempts"] -= 1
+                donor = next((p for p in PODS.values() if p is not pod and p.ready and p.yt_ok), None)
+                if donor and relay_video(donor, pod, v):
+                    log(tag, v["slug"], "видео получено с машины", donor.tag)
+                else:
+                    # YouTube не отдаёт видео с этого адреса и передать неоткуда — берём другую машину
+                    log(tag, "YouTube не отдаёт видео с этого адреса, меняю машину"); pod.delete()
     pod.delete()
 
 def merge_parts(m):
@@ -301,6 +411,8 @@ def write_report(videos):
         except Exception: pass
         try:
             b = json.load(open(os.path.join(d, "scoreboard.json"))); sb = "%s : %s" % tuple(b["final_score"]) + " (%s)" % " — ".join(b.get("teams") or [])
+        except Exception:
+            if os.path.exists(os.path.join(d, "scoreboard_bad.json")): sb = "табло не прочитано"
         except Exception: pass
         if v.get("home_goals") is not None: tb = "%s : %s" % (v["home_goals"], v["away_goals"])
         L.append("| %s | %s | %s | %s | %s | %s | %s | %s | %s |" % (v["yt"], v["title"], st["status"] + ((" — " + st["error"]) if st.get("error") else ""), sb, tb, poss, nums, st.get("gpu_min", 0), st.get("upload", "—")))
@@ -317,11 +429,19 @@ def write_report(videos):
     open(os.path.join(OUT, "REPORT.md"), "w").write("\n".join(L) + "\n")
 
 def main():
+    # второй экземпляр скрипта удалял бы машины первого: замок на папке прогона
+    import fcntl
+    global _lockf; _lockf = open(os.path.join(OUT, ".lock"), "w")
+    try: fcntl.flock(_lockf, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError: sys.exit("уже запущен другой batch_run.py для этой папки")
     M = json.load(open(MATCHES)); videos = [v for v in M["videos"] if "parts" not in v]
     if ONLY: videos = [v for v in videos if v["slug"] in ONLY]
     log("старт: %d видео, %d машин, python %s" % (len(videos), NPODS, PY))
+    for p in state["pods"]:
+        if not p.get("t1"): orphans.put(p)
     q = queue.Queue()
     for v in videos:
+        if vst(v["slug"])["status"] == "running": vst(v["slug"])["status"] = "queued"; vst(v["slug"])["attempts"] = max(0, vst(v["slug"])["attempts"] - 1)
         if vst(v["slug"])["status"] not in ("done", "failed", "mac_failed"): q.put(v)
         elif vst(v["slug"])["status"] == "mac_failed": vst(v["slug"])["status"] = "gpu_done"; q.put(v)
     ths = [threading.Thread(target=worker, args=("m%d" % i, q), daemon=True) for i in range(min(NPODS, max(1, q.qsize())))]

@@ -9,13 +9,22 @@ mkdir -p out; rm -f "out/$NAME.DONE" "out/$NAME.FAILED"
 V="out/$NAME.mp4"
 log() { echo "[$(date +%H:%M:%S)] $*"; }
 
+# оборванный прошлым запуском файл (нет заголовка mp4) удаляем и качаем заново
+if [ -s "$V" ] && ! python -c "import cv2,sys;c=cv2.VideoCapture(sys.argv[1]);n=c.get(7);c.set(1,max(0,n-60));ok,_=c.read();sys.exit(0 if ok and n>1000 else 1)" "$V"; then
+  log "файл $V неполный, удаляю"; rm -f "$V"
+fi
 if [ ! -s "$V" ] || [ -e "$V.part" ]; then
   log "скачивание $YT"
   rm -f "$V" "$V.part"
   ok=0
-  for fmt in "299" "137" "bv[height<=1080][ext=mp4]+ba[ext=m4a]/b[height<=1080]"; do
-    if yt-dlp -q --no-warnings -f "$fmt" --no-part --merge-output-format mp4 -o "$V" "https://www.youtube.com/watch?v=$YT"; then ok=1; break; fi
-    log "формат $fmt не скачался, пробую другой"; rm -f "$V"
+  # YouTube с части адресов RunPod отвечает «Sign in to confirm you're not a bot»:
+  # другие клиенты (android, ios) часто проходят; если нет — машину заменит batch_run.py
+  for client in "" "android" "ios" "mweb"; do
+    for fmt in "299" "137" "bv[height<=1080][ext=mp4]+ba[ext=m4a]/b[height<=1080]"; do
+      ea=""; [ -n "$client" ] && ea="--extractor-args youtube:player_client=$client"
+      if yt-dlp -q --no-warnings $ea -f "$fmt" --no-part --merge-output-format mp4 -o "$V" "https://www.youtube.com/watch?v=$YT" 2> "out/$NAME.dl.err"; then ok=1; break 2; fi
+      log "клиент '${client:-default}', формат $fmt: $(tail -n 1 out/$NAME.dl.err | cut -c1-120)"; rm -f "$V"
+    done
   done
   [ $ok = 1 ] || { log "!!! видео не скачалось"; touch "out/$NAME.FAILED"; exit 1; }
 fi
