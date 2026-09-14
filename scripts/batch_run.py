@@ -65,6 +65,9 @@ class Pod:
     def __init__(self, tag):
         self.tag = tag; self.id = None; self.ip = None; self.port = None; self.gpu = None; self.cost = 0.0; self.t0 = None; self.ready = False
         self.yt_ok = False; PODS[tag] = self
+    def start_log_saver(self):
+        """log_saver.sh копирует непустые логи в *.last: повтор попытки обнуляет логи, причина падения остаётся"""
+        self.ssh("chmod +x /root/fb/log_saver.sh; pgrep -f '[l]og_saver.sh' >/dev/null || (nohup /root/fb/log_saver.sh >/dev/null 2>&1 &); true", raise_dead=False)
     def install_batch_key(self):
         self.scp(BATCH_KEY, self.remote("/root/.ssh/batch_key"))
         self.ssh("chmod 600 /root/.ssh/batch_key; grep -q batch-pods /root/.ssh/authorized_keys || cat >> /root/.ssh/authorized_keys <<'EOK'\n%s\nEOK" % open(BATCH_KEY + ".pub").read().strip(), raise_dead=False)
@@ -130,7 +133,7 @@ class Pod:
                  "sleep 3; rm -f /root/fb/out/*.DONE /root/fb/out/*.FAILED; true", raise_dead=False)
         if "SETUP_DONE" not in out: self.setup()      # прошлый запуск оборвал установку — повторяем, шаги идемпотентны
         else: self.scp([os.path.join(HERE, f) for f in os.listdir(HERE) if f.endswith((".py", ".sh", ".yaml"))], self.remote("/root/fb/"))   # свежие скрипты
-        self.install_batch_key()
+        self.install_batch_key(); self.start_log_saver()
         self.ready = True; return True
     def scp(self, src, dst, timeout=1800):
         p = subprocess.run(["scp", "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null", "-o", "LogLevel=ERROR",
@@ -145,7 +148,7 @@ class Pod:
         self.scp(os.path.join(ROOT, "weights/best_7matches.pt"), self.remote("/root/fb/weights/"))
         rc, out = self.ssh("cd /root/fb && chmod +x *.sh && ./pod_setup.sh > setup.log 2>&1; tail -4 setup.log", timeout=1800)
         if "SETUP_OK" not in out: raise RuntimeError("установка не удалась: " + out[-400:])
-        self.install_batch_key(); log(self.tag, "установка готова")
+        self.install_batch_key(); self.start_log_saver(); log(self.tag, "установка готова")
     def delete(self):
         if not self.id: return
         r = rp("DELETE", "/pods/" + self.id)
