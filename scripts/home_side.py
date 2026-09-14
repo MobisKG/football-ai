@@ -132,8 +132,15 @@ if len(colours) == 2 and (rh or ra):
 else:
     out["reason"] += "нет составов на сайте (%s / %s); " % (len(rh), len(ra))
 
-out["confident"] = bool(out["home_colour"]) and (sb is None or out["home_is_top"] is not None)
-if out["home_colour"] and sb is not None and out["home_is_top"] is None:
+# Табло, чей итоговый счёт не совпал со счётом судьи, не используем: на
+# «Михайловка vs Баш Кара Суу» табло показало 0 : 2 при счёте судьи 5 : 1 в пользу
+# Михайловки. Голы с такого табло на сайт не грузим (home_is_top = None, и batch_run
+# не передаёт --scoreboard), а статистику по цвету — грузим, если цвет надёжен.
+if out.get("score_match") is False:
+    out["scoreboard_rejected"] = True; out["home_is_top"] = None
+    out["reason"] += "табло отброшено: счёт не совпал с судейским, голы не грузим; "
+out["confident"] = bool(out["home_colour"]) and (sb is None or out["home_is_top"] is not None or out.get("scoreboard_rejected", False))
+if out["home_colour"] and sb is not None and out["home_is_top"] is None and not out.get("scoreboard_rejected"):
     out["reason"] += "цвет есть, но строки табло не сопоставлены — без табло голы не загрузить; "
 json.dump(out, open(os.path.join(d, "home.json"), "w"), ensure_ascii=False, indent=1)
 print(json.dumps(out, ensure_ascii=False))
