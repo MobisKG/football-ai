@@ -20,6 +20,10 @@ OUT="out/$NAME"; mkdir -p "$OUT"
 W=weights/best_7matches.pt
 export PYTHONPATH=/root/deep-person-reid:$PYTHONPATH
 export YOLO_CONFIG_DIR=/root/.yolo; mkdir -p $YOLO_CONFIG_DIR
+# Модели HuggingFace (SigLIP, Qwen) скачаны в pod_setup.sh. Без этого from_pretrained
+# ходит на сервер при каждом разборе; ночью 14–15.09 поиск игроков трижды падал
+# ровно на загрузке SigLIP в конце прохода и проходил при повторе.
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
 t0=$(date +%s)
 step() { echo ">>> $1  ($(( ($(date +%s) - t0) / 60 )) мин с начала)"; }
 

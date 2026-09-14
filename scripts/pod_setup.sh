@@ -36,6 +36,8 @@ python - <<'PY'
 from huggingface_hub import snapshot_download
 p = snapshot_download("Qwen/Qwen2.5-VL-7B-Instruct")
 print("qwen:", p)
+# SigLIP классификатора команд (roboflow/sports) — тоже заранее: разбор идёт без сети
+print("siglip:", snapshot_download("google/siglip-base-patch16-224"))
 PY
 
 echo ">>> проверка"
