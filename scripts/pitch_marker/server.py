@@ -64,6 +64,21 @@ def game(q):
     if slug not in GAME_CACHE: GAME_CACHE[slug] = Game(slug)
     return GAME_CACHE[slug]
 
+def degenerate(points):
+    """матрица не определяется: все точки на одной линии плана, или вне самой
+    населённой линии меньше двух точек (5 точек на линии ворот + 1 угол штрафной —
+    решений бесконечно много, разметка рисуется как попало)"""
+    if len(points) < 4: return False
+    d = np.array([p["plan"] for p in points], float); n = len(d)
+    best = 0
+    for i in range(n):
+        for j in range(i + 1, n):
+            a, b = d[i], d[j]; v = b - a; L = np.linalg.norm(v)
+            if L < 1e-6: continue
+            nrm = np.array([-v[1], v[0]]) / L
+            best = max(best, int((np.abs((d - a) @ nrm) < 0.3).sum()))
+    return n - best < 2
+
 def fit(points):
     """однородная матрица кадр->план по точкам; ошибка каждой точки на плане, м"""
     if len(points) < 4 or degenerate(points): return None, []
