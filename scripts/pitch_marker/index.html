@@ -38,8 +38,9 @@ kbd{background:#2b313b;border:1px solid #444;border-radius:4px;padding:0 5px;fon
   <div><div class="mut">Схема поля. Камера — снизу схемы (ближняя боковая линия). Ворота у постройки — сверху.</div>
     <svg id="plan" viewBox="-4 -5 28 54" preserveAspectRatio="xMidYMid meet"></svg></div>
   <div id="err" class="mut">точек: 0 — нужно хотя бы 4, лучше 6 и с обоих концов кадра</div>
-  <div><div class="mut" style="margin-bottom:4px">Кадры (секунда видео). Зелёные — размечены, красные — ошибка &gt; 0,7 м</div><div id="prog"><i></i></div><div id="frames" style="margin-top:6px"></div></div>
-  <div class="mut" style="font-size:12px">Сохраняется само при каждом изменении. Достаточно 8–12 кадров на игру, где видны ворота и штрафная, лучше с обоих концов и в разные моменты игры.</div>
+  <div><div class="mut" style="margin-bottom:4px">Кадры (секунда видео). Зелёные — размечены, красные — ошибка &gt; 0,7 м
+    <label style="margin-left:8px"><input type="checkbox" id="allFrames"> показать все кадры</label></div><div id="prog"><i></i></div><div id="frames" style="margin-top:6px"></div></div>
+  <div class="mut" style="font-size:12px">Сохраняется само. Показаны 12 кадров, равномерно по игре: разметьте те из них, где видны ворота со штрафной (лучше с обоих концов), остальные пропустите — <b>8 кадров на игру достаточно</b>. Все кадры не нужны.</div>
 </div>
 <script>
 const $=id=>document.getElementById(id);
@@ -153,9 +154,14 @@ window.addEventListener('keyup',e=>{ if(e.code==='Space'){ space=false; wrap.sty
 // --- кадры
 function markFrame(){ meta.done[frame.sec]={n:pts.length,err:Math.max(...err,0),skip:false}; framesList(); refreshGames(); }
 async function skipFrame(){ await fetch('/api/save',{method:'POST',body:JSON.stringify({game:G,sec:frame.sec,points:[],skip:true})}); meta.done[frame.sec]={n:0,err:0,skip:true}; framesList(); go(1); }
+function suggested(){ // 12 кадров равномерно по игре + уже размеченные: хватает 8–12 опор, размечать все не нужно
+  const all=meta.secs; if(all.length<=14||$('allFrames').checked) return all;
+  const n=12, pick=new Set(); for(let k=0;k<n;k++) pick.add(all[Math.round((k+0.5)*(all.length-1)/n)]);
+  all.forEach(s=>{ const d=meta.done[s]; if(d&&(d.n>=4||d.skip)) pick.add(s); }); return all.filter(s=>pick.has(s)); }
 function framesList(){ const el=$('frames'); el.innerHTML=''; let done=0;
-  meta.secs.forEach(s=>{ const b=document.createElement('button'); const d=meta.done[s]; b.textContent=fmt(s);
-    if(d&&d.skip) b.className='skip'; else if(d&&d.n>=4){ b.className=d.err>0.7?'bad':'done'; done++; } if(frame&&frame.sec===s) b.classList.add('cur');
+  meta.secs.forEach(s=>{ const d=meta.done[s]; if(d&&d.n>=4&&!d.skip) done++; });
+  suggested().forEach(s=>{ const b=document.createElement('button'); const d=meta.done[s]; b.textContent=fmt(s);
+    if(d&&d.skip) b.className='skip'; else if(d&&d.n>=4){ b.className=d.err>0.7?'bad':'done'; } if(frame&&frame.sec===s) b.classList.add('cur');
     b.onclick=()=>load(s); el.appendChild(b); });
   $('prog').firstElementChild.style.width=Math.min(100,100*done/Math.max(1,Math.min(10,meta.secs.length)))+'%';
   $('pos').textContent=`  размечено кадров: ${done} (цель 8–12)`; }
@@ -164,14 +170,15 @@ async function load(sec){ frame=await (await fetch('/api/frame?game='+G+'&sec='+
   if(pts.length) refit(); 
   H=frame.H_img2plan; err=frame.err||[]; sel=LM.find(l=>!pts.find(q=>q.key===l.key))?.key||null; selPt=-1; hist=[];
   img=new Image(); img.onload=()=>{ fitView(); drawPlan(); status(); framesList(); }; img.src='/api/image?game='+G+'&sec='+sec; }
-function go(d){ const i=meta.secs.indexOf(frame.sec); const j=Math.min(meta.secs.length-1,Math.max(0,i+d)); if(j!==i) load(meta.secs[j]); }
+function go(d){ const L=suggested(); let i=L.indexOf(frame.sec); if(i<0){ i=L.findIndex(s=>s>frame.sec); i=d>0?i-1:i; } const j=Math.min(L.length-1,Math.max(0,i+d)); if(L[j]!==frame.sec) load(L[j]); }
+$('allFrames').onchange=framesList;
 $('prev').onclick=()=>go(-1); $('next').onclick=()=>go(1); $('fit').onclick=fitView; $('showLines').onchange=render; $('skip').onclick=skipFrame;
 $('undo').onclick=()=>{ if(hist.length){ pts=JSON.parse(hist.pop()); selPt=-1; refit(); } };
 $('clear').onclick=()=>{ if(pts.length&&confirm('Убрать все точки этого кадра?')){ pushHist(); pts=[]; selPt=-1; refit(); } };
 let G=null;
 async function openGame(slug){ G=slug; meta=await (await fetch('/api/meta?game='+G)).json(); plan=meta.plan; LM=landmarks();
   $('game').textContent=(meta.field?meta.field+' · ':'')+'поле '+plan.width+'×'+plan.length+' м'; pts=[]; H=null; frame=null;
-  const first=meta.secs.find(s=>!(meta.done[s]&&(meta.done[s].n>=4||meta.done[s].skip)))||meta.secs[0]; load(first); refreshGames(); }
+  const L=suggested(); const first=L.find(s=>!(meta.done[s]&&(meta.done[s].n>=4||meta.done[s].skip)))||L[0]; load(first); refreshGames(); }
 async function refreshGames(){ const games=await (await fetch('/api/games')).json(); const sel=$('gameSel'); sel.innerHTML='';
   games.forEach(g=>{ const o=document.createElement('option'); o.value=g.slug; o.textContent=`${g.marked>=8?'✓ ':g.marked>0?'… ':''}${g.slug} (${g.marked}/${g.frames})`; if(g.slug===G) o.selected=true; sel.appendChild(o); }); }
 $('gameSel').onchange=e=>openGame(e.target.value);
