@@ -1,0 +1,294 @@
+{
+ "match": "Манас Талас vs Iron Mix (исправлено: команды кластеризации, без табло)",
+ "duration_s": 2415,
+ "game_time_s": 2112,
+ "paused_s": 0,
+ "ball_visible_pct": 42,
+ "possession_pct": {
+  "синие": 70,
+  "оранжевые": 30
+ },
+ "possession_changes": 159,
+ "teams": {
+  "синие": {
+   "players": [
+    {
+     "player": "№14",
+     "time_on_pitch_s": 734,
+     "touches": 25,
+     "possession_s": 34.6,
+     "passes": 12,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№9",
+     "time_on_pitch_s": 538,
+     "touches": 17,
+     "possession_s": 24.5,
+     "passes": 7,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№19",
+     "time_on_pitch_s": 393,
+     "touches": 7,
+     "possession_s": 9.5,
+     "passes": 3,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№4",
+     "time_on_pitch_s": 377,
+     "touches": 10,
+     "possession_s": 10.7,
+     "passes": 4,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№8",
+     "time_on_pitch_s": 316,
+     "touches": 10,
+     "possession_s": 16.0,
+     "passes": 3,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№90",
+     "time_on_pitch_s": 309,
+     "touches": 7,
+     "possession_s": 3.9,
+     "passes": 2,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№18",
+     "time_on_pitch_s": 270,
+     "touches": 13,
+     "possession_s": 10.5,
+     "passes": 9,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№7",
+     "time_on_pitch_s": 239,
+     "touches": 7,
+     "possession_s": 2.6,
+     "passes": 1,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№5",
+     "time_on_pitch_s": 200,
+     "touches": 12,
+     "possession_s": 10.5,
+     "passes": 6,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№3",
+     "time_on_pitch_s": 174,
+     "touches": 6,
+     "possession_s": 2.8,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№10",
+     "time_on_pitch_s": 167,
+     "touches": 5,
+     "possession_s": 7.4,
+     "passes": 3,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№11",
+     "time_on_pitch_s": 55,
+     "touches": 0,
+     "possession_s": 0,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№2",
+     "time_on_pitch_s": 18,
+     "touches": 1,
+     "possession_s": 0.1,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    }
+   ],
+   "unidentified_time_s": 2200
+  },
+  "оранжевые": {
+   "players": [
+    {
+     "player": "№2",
+     "time_on_pitch_s": 450,
+     "touches": 8,
+     "possession_s": 7.9,
+     "passes": 4,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№7",
+     "time_on_pitch_s": 276,
+     "touches": 3,
+     "possession_s": 0.5,
+     "passes": 2,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№9",
+     "time_on_pitch_s": 190,
+     "touches": 6,
+     "possession_s": 4.2,
+     "passes": 2,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№10",
+     "time_on_pitch_s": 179,
+     "touches": 6,
+     "possession_s": 4.9,
+     "passes": 3,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№8",
+     "time_on_pitch_s": 159,
+     "touches": 2,
+     "possession_s": 1.5,
+     "passes": 1,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№14",
+     "time_on_pitch_s": 133,
+     "touches": 6,
+     "possession_s": 4.6,
+     "passes": 2,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№5",
+     "time_on_pitch_s": 74,
+     "touches": 1,
+     "possession_s": 0.4,
+     "passes": 1,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№19",
+     "time_on_pitch_s": 69,
+     "touches": 0,
+     "possession_s": 0,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№23",
+     "time_on_pitch_s": 69,
+     "touches": 2,
+     "possession_s": 0.7,
+     "passes": 1,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№90",
+     "time_on_pitch_s": 53,
+     "touches": 2,
+     "possession_s": 0.9,
+     "passes": 1,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№3",
+     "time_on_pitch_s": 27,
+     "touches": 0,
+     "possession_s": 0,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№18",
+     "time_on_pitch_s": 26,
+     "touches": 1,
+     "possession_s": 0.4,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№12",
+     "time_on_pitch_s": 26,
+     "touches": 0,
+     "possession_s": 0,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№11",
+     "time_on_pitch_s": 21,
+     "touches": 1,
+     "possession_s": 0.8,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№15",
+     "time_on_pitch_s": 19,
+     "touches": 0,
+     "possession_s": 0,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№30",
+     "time_on_pitch_s": 19,
+     "touches": 0,
+     "possession_s": 0,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№4",
+     "time_on_pitch_s": 18,
+     "touches": 1,
+     "possession_s": 0.1,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    }
+   ],
+   "unidentified_time_s": 2188
+  }
+ }
+}

@@ -1,0 +1,213 @@
+{
+ "match": "Уч тонтос vs Мин Куш (формы вручную: бирюзовые = Миң-Куш)",
+ "duration_s": 2323,
+ "game_time_s": 2306,
+ "paused_s": 0,
+ "ball_visible_pct": 58,
+ "possession_pct": {
+  "зелёные": 55,
+  "белые": 45
+ },
+ "possession_changes": 118,
+ "teams": {
+  "зелёные": {
+   "players": [
+    {
+     "player": "№7",
+     "time_on_pitch_s": 584,
+     "touches": 24,
+     "possession_s": 32.7,
+     "passes": 7,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№17",
+     "time_on_pitch_s": 309,
+     "touches": 6,
+     "possession_s": 13.7,
+     "passes": 3,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№8",
+     "time_on_pitch_s": 184,
+     "touches": 4,
+     "possession_s": 5.5,
+     "passes": 2,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№50",
+     "time_on_pitch_s": 149,
+     "touches": 3,
+     "possession_s": 3.2,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№14",
+     "time_on_pitch_s": 108,
+     "touches": 4,
+     "possession_s": 6.7,
+     "passes": 1,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№2",
+     "time_on_pitch_s": 91,
+     "touches": 5,
+     "possession_s": 4.0,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№3",
+     "time_on_pitch_s": 77,
+     "touches": 4,
+     "possession_s": 11.6,
+     "passes": 1,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№25",
+     "time_on_pitch_s": 77,
+     "touches": 2,
+     "possession_s": 5.8,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№91",
+     "time_on_pitch_s": 66,
+     "touches": 4,
+     "possession_s": 2.9,
+     "passes": 1,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№5",
+     "time_on_pitch_s": 14,
+     "touches": 0,
+     "possession_s": 0,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№86",
+     "time_on_pitch_s": 13,
+     "touches": 0,
+     "possession_s": 0,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№90",
+     "time_on_pitch_s": 7,
+     "touches": 0,
+     "possession_s": 0,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    }
+   ],
+   "unidentified_time_s": 2073
+  },
+  "белые": {
+   "players": [
+    {
+     "player": "№5",
+     "time_on_pitch_s": 594,
+     "touches": 7,
+     "possession_s": 6.1,
+     "passes": 1,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№9",
+     "time_on_pitch_s": 514,
+     "touches": 16,
+     "possession_s": 30.5,
+     "passes": 2,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№7",
+     "time_on_pitch_s": 381,
+     "touches": 17,
+     "possession_s": 21.9,
+     "passes": 3,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№3",
+     "time_on_pitch_s": 241,
+     "touches": 4,
+     "possession_s": 7.5,
+     "passes": 3,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№22",
+     "time_on_pitch_s": 179,
+     "touches": 6,
+     "possession_s": 8.2,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№26",
+     "time_on_pitch_s": 120,
+     "touches": 4,
+     "possession_s": 9.1,
+     "passes": 1,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№2",
+     "time_on_pitch_s": 99,
+     "touches": 1,
+     "possession_s": 1.5,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№24",
+     "time_on_pitch_s": 82,
+     "touches": 0,
+     "possession_s": 0,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№25",
+     "time_on_pitch_s": 34,
+     "touches": 1,
+     "possession_s": 0.4,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    }
+   ],
+   "unidentified_time_s": 1714
+  }
+ }
+}

@@ -1,0 +1,177 @@
+{
+ "match": "Михайловка vs Баш Кара Суу (без неверного табло)",
+ "duration_s": 2349,
+ "game_time_s": 1898,
+ "paused_s": 0,
+ "ball_visible_pct": 36,
+ "possession_pct": {
+  "синие": 67,
+  "зелёные": 33
+ },
+ "possession_changes": 69,
+ "teams": {
+  "синие": {
+   "players": [
+    {
+     "player": "№8",
+     "time_on_pitch_s": 523,
+     "touches": 15,
+     "possession_s": 17.3,
+     "passes": 2,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№92",
+     "time_on_pitch_s": 385,
+     "touches": 5,
+     "possession_s": 5.0,
+     "passes": 3,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№9",
+     "time_on_pitch_s": 266,
+     "touches": 1,
+     "possession_s": 9.8,
+     "passes": 1,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№10",
+     "time_on_pitch_s": 255,
+     "touches": 5,
+     "possession_s": 6.7,
+     "passes": 1,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№4",
+     "time_on_pitch_s": 218,
+     "touches": 10,
+     "possession_s": 7.5,
+     "passes": 2,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№77",
+     "time_on_pitch_s": 197,
+     "touches": 4,
+     "possession_s": 3.6,
+     "passes": 2,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№7",
+     "time_on_pitch_s": 38,
+     "touches": 1,
+     "possession_s": 0.3,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№16",
+     "time_on_pitch_s": 32,
+     "touches": 1,
+     "possession_s": 1.0,
+     "passes": 1,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№1",
+     "time_on_pitch_s": 27,
+     "touches": 0,
+     "possession_s": 0,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№17",
+     "time_on_pitch_s": 18,
+     "touches": 0,
+     "possession_s": 0,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№2",
+     "time_on_pitch_s": 15,
+     "touches": 0,
+     "possession_s": 0,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    }
+   ],
+   "unidentified_time_s": 2345
+  },
+  "зелёные": {
+   "players": [
+    {
+     "player": "№1",
+     "time_on_pitch_s": 251,
+     "touches": 6,
+     "possession_s": 6.5,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№10",
+     "time_on_pitch_s": 54,
+     "touches": 1,
+     "possession_s": 0.3,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№2",
+     "time_on_pitch_s": 47,
+     "touches": 0,
+     "possession_s": 0,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№7",
+     "time_on_pitch_s": 33,
+     "touches": 2,
+     "possession_s": 1.5,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№5",
+     "time_on_pitch_s": 13,
+     "touches": 1,
+     "possession_s": 7.3,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    },
+    {
+     "player": "№3",
+     "time_on_pitch_s": 11,
+     "touches": 0,
+     "possession_s": 0,
+     "passes": 0,
+     "distance_m": null,
+     "top_speed_kmh": null
+    }
+   ],
+   "unidentified_time_s": 1262
+  }
+ }
+}
