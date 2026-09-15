@@ -57,9 +57,17 @@ def val(label):
     table = {"W": W_P, "L": L_P, "HALF": HALF, "BOXL": W_P / 2 - BW / 2, "BOXR": W_P / 2 + BW / 2, "BD": BD, "LBD": L_P - BD}
     return ax.strip(), float(table.get(v, v))
 
+NO_REFINE = "--no-refine" in sys.argv or spec.get("no_refine")
+def exact(segs):
+    """линия по заданным точкам без поиска белых пикселей (на солнце маска белого захватывает покрытие)"""
+    pts = np.array([p for seg in segs for p in seg], float)
+    if len(pts) == 2:
+        a, b = pts; return (a, (b - a) / np.linalg.norm(b - a)), 0, False
+    vx, vy, x0, y0 = cv2.fitLine(pts.astype(np.float32), cv2.DIST_L2, 0, 0.01, 0.01).ravel()
+    return (np.array([x0, y0]), np.array([vx, vy])), 0, False
 lines = {}
 for k, L in spec.get("lines", {}).items():
-    lines[k], n, fitted = fit(L["segs"])
+    lines[k], n, fitted = exact(L["segs"]) if NO_REFINE else fit(L["segs"])
     print("линия %-10s %-10s белых пикселей %5d %s" % (k, L["label"], n, "" if fitted else "(по отрезку)"))
 corr = []
 for a, A in spec.get("lines", {}).items():

@@ -16,7 +16,9 @@ pos_path, track_path, out_path = sys.argv[1], sys.argv[2], sys.argv[3]
 pos = json.load(open(pos_path)); T = json.load(open(track_path))
 W_P, L_P = T["plan"]["width"], T["plan"]["length"]
 tr = T["frames"]
-assert abs(pos["fps"] - T["fps"]) < 1e-6, "частоты позиций и привязки не совпадают"
+# позиции и привязка считаются на разных машинах и версиях OpenCV: частота может
+# отличаться в последних знаках, а номера кадров при одинаковом шаге совпадают
+assert abs(pos["fps"] - T["fps"]) < 1e-3, "частоты позиций и привязки не совпадают: %s и %s" % (pos["fps"], T["fps"])
 
 def apply(H, pts):
     p = np.c_[np.asarray(pts, float), np.ones(len(pts))]
