@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>Разметка поля</title>
+<style>
+:root{--bg:#14171c;--panel:#1d2128;--fg:#e8eaf0;--mut:#8b93a3;--acc:#ffd54a;--ok:#4cd964;--bad:#ff5a5a;--sel:#4fa3ff}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.35 -apple-system,Segoe UI,Roboto,sans-serif;height:100vh;display:flex;overflow:hidden}
+#left{flex:1;display:flex;flex-direction:column;min-width:0}
+#top{display:flex;gap:8px;align-items:center;padding:6px 10px;background:var(--panel);border-bottom:1px solid #2b313b;flex-wrap:wrap}
+#top b{color:var(--acc)} button{background:#2b313b;color:var(--fg);border:1px solid #3a414d;border-radius:6px;padding:6px 11px;cursor:pointer;font:inherit}
+button:hover{background:#353c48} button.primary{background:#2f6fd1;border-color:#2f6fd1} button.primary:hover{background:#3b7de0}
+#wrap{flex:1;position:relative;overflow:hidden;background:#000;cursor:crosshair}
+canvas#view{position:absolute;left:0;top:0}
+#loupe{position:absolute;width:200px;height:200px;border:2px solid var(--acc);border-radius:50%;pointer-events:none;display:none;background:#000;overflow:hidden;box-shadow:0 4px 18px #000a}
+#loupe canvas{position:absolute;left:0;top:0}
+#hint{position:absolute;left:10px;bottom:10px;background:#000b;padding:6px 10px;border-radius:6px;color:var(--fg);font-size:13px;max-width:70%}
+#right{width:400px;background:var(--panel);border-left:1px solid #2b313b;display:flex;flex-direction:column;padding:10px;gap:10px;overflow:auto}
+#plan{width:100%;background:#0f3b1e;border-radius:8px;user-select:none}
+.lm{cursor:pointer} .lm circle{fill:#fff;stroke:#0f3b1e;stroke-width:0.3} .lm text{fill:#ffd54a;font-weight:700;pointer-events:none;paint-order:stroke;stroke:#0f3b1e;stroke-width:0.35}
+.lm.set circle{fill:var(--ok)} .lm.sel circle{fill:var(--sel);r:1.6} .lm.bad circle{fill:var(--bad)}
+#frames{display:flex;flex-wrap:wrap;gap:4px} #frames button{padding:3px 6px;font-size:12px;border-radius:4px} #frames button.cur{outline:2px solid var(--sel)}
+#frames button.done{background:#1f4d2a;border-color:#2e7a41} #frames button.bad{background:#5a2222;border-color:#a33} #frames button.skip{opacity:.45;text-decoration:line-through}
+.mut{color:var(--mut)} #err{font-size:12px} #err span{display:inline-block;margin:2px 6px 2px 0;padding:1px 6px;border-radius:4px;background:#2b313b} #err span.bad{background:#5a2222}
+kbd{background:#2b313b;border:1px solid #444;border-radius:4px;padding:0 5px;font:12px monospace}
+#prog{height:6px;background:#2b313b;border-radius:3px;overflow:hidden}#prog i{display:block;height:100%;background:var(--ok);width:0}
+</style></head><body>
+<div id="left">
+  <div id="top">
+    <b id="game"></b><span class="mut" id="pos"></span>
+    <button id="prev">◀ пред. <kbd>A</kbd></button><button id="next" class="primary">след. кадр <kbd>D</kbd> / <kbd>Enter</kbd></button>
+    <button id="undo">отменить <kbd>Z</kbd></button><button id="clear">очистить кадр</button><button id="skip">поля не видно <kbd>X</kbd></button>
+    <span class="mut" id="zoomlbl"></span><button id="fit">вписать <kbd>0</kbd></button>
+    <label class="mut"><input type="checkbox" id="showLines" checked> разметка</label>
+  </div>
+  <div id="wrap"><canvas id="view"></canvas><div id="loupe"><canvas></canvas></div>
+    <div id="hint">Нажмите точку на схеме справа (или её номер на клавиатуре), затем кликните это место на кадре. Колесо — масштаб, правая кнопка или <kbd>пробел</kbd>+тянуть — сдвиг. Точку можно перетащить, <kbd>Delete</kbd> убирает выбранную.</div>
+  </div>
+</div>
+<div id="right">
+  <div><div class="mut">Схема поля. Камера — снизу схемы (ближняя боковая линия). Ворота у постройки — сверху.</div>
+    <svg id="plan" viewBox="-4 -5 28 54" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div id="err" class="mut">точек: 0 — нужно хотя бы 4, лучше 6 и с обоих концов кадра</div>
+  <div><div class="mut" style="margin-bottom:4px">Кадры (секунда видео). Зелёные — размечены, красные — ошибка &gt; 0,7 м</div><div id="prog"><i></i></div><div id="frames" style="margin-top:6px"></div></div>
+  <div class="mut" style="font-size:12px">Сохраняется само при каждом изменении. Достаточно 8–12 кадров на игру, где видны ворота и штрафная, лучше с обоих концов и в разные моменты игры.</div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+let meta, plan, frame=null, img=null, pts=[], H=null, err=[], sel=null, selPt=-1, hist=[];
+let scale=1, ox=0, oy=0, drag=null, space=false, mouse=null;
+const view=$('view'), ctx=view.getContext('2d'), wrap=$('wrap'), loupe=$('loupe'), lctx=loupe.querySelector('canvas').getContext('2d');
+loupe.querySelector('canvas').width=200; loupe.querySelector('canvas').height=200;
+
+// --- ориентиры плана: x поперёк (0..W), y вдоль (0 — линия ворот у постройки, L — у деревьев)
+function landmarks(){ const W=plan.width,L=plan.length,HL=plan.half,bw=plan.box_w,bd=plan.box_d,g=plan.goal;
+  const x0=W/2-bw/2,x1=W/2+bw/2,g0=W/2-g/2,g1=W/2+g/2, out=[];
+  const add=(k,n,x,y,t)=>out.push({key:k,num:n,x,y,title:t});
+  add('c00',1,0,0,'угол поля, дальняя сторона, у постройки'); add('c10',2,W,0,'угол поля, ближняя сторона, у постройки');
+  add('b00',3,x0,0,'штрафная у постройки: угол на линии ворот, дальний'); add('b10',4,x1,0,'штрафная у постройки: угол на линии ворот, ближний');
+  add('b01',5,x0,bd,'штрафная у постройки: передний угол, дальний'); add('b11',6,x1,bd,'штрафная у постройки: передний угол, ближний');
+  add('g00',7,g0,0,'стойка ворот у постройки, дальняя'); add('g10',8,g1,0,'стойка ворот у постройки, ближняя');
+  add('h0',9,0,HL,'средняя линия, дальний край'); add('h1',10,W,HL,'средняя линия, ближний край'); add('hc',11,W/2,HL,'центр поля');
+  add('c01',12,0,L,'угол поля, дальняя сторона, у деревьев'); add('c11',13,W,L,'угол поля, ближняя сторона, у деревьев');
+  add('b02',14,x0,L,'штрафная у деревьев: угол на линии ворот, дальний'); add('b12',15,x1,L,'штрафная у деревьев: угол на линии ворот, ближний');
+  add('b03',16,x0,L-bd,'штрафная у деревьев: передний угол, дальний'); add('b13',17,x1,L-bd,'штрафная у деревьев: передний угол, ближний');
+  add('g01',18,g0,L,'стойка ворот у деревьев, дальняя'); add('g11',19,g1,L,'стойка ворот у деревьев, ближняя');
+  return out; }
+let LM=[];
+function drawPlan(){ const W=plan.width,L=plan.length,HL=plan.half,bw=plan.box_w,bd=plan.box_d,g=plan.goal, x0=W/2-bw/2,x1=W/2+bw/2;
+  // схема повёрнута: x плана → вправо, y плана → вниз; камера снизу справа? нет: камера у ближней боковой (x=W), рисуем x горизонтально
+  const S=[]; const line=(a,b,c,d,col='#fff',w=0.25)=>S.push(`<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" stroke="${col}" stroke-width="${w}"/>`);
+  line(0,0,W,0);line(W,0,W,L);line(W,L,0,L);line(0,L,0,0);line(0,HL,W,HL);
+  line(x0,0,x0,bd);line(x0,bd,x1,bd);line(x1,bd,x1,0); line(x0,L,x0,L-bd);line(x0,L-bd,x1,L-bd);line(x1,L-bd,x1,L);
+  line(W/2-g/2,0,W/2-g/2,-1,'#9cf',0.4);line(W/2+g/2,0,W/2+g/2,-1,'#9cf',0.4);line(W/2-g/2,-1,W/2+g/2,-1,'#9cf',0.4);
+  line(W/2-g/2,L,W/2-g/2,L+1,'#9cf',0.4);line(W/2+g/2,L,W/2+g/2,L+1,'#9cf',0.4);line(W/2-g/2,L+1,W/2+g/2,L+1,'#9cf',0.4);
+  S.push(`<circle cx="${W/2}" cy="${HL}" r="3" fill="none" stroke="#fff" stroke-width="0.15"/>`);
+  S.push(`<text x="${W/2}" y="-3.4" fill="#cde" font-size="1.3" text-anchor="middle">ворота у постройки</text>`);
+  S.push(`<text x="${W/2}" y="${L+4.2}" fill="#cde" font-size="1.3" text-anchor="middle">ворота у деревьев</text>`);
+  S.push(`<text x="${W+3.2}" y="${HL}" fill="#cde" font-size="1.1" transform="rotate(90 ${W+3.2},${HL})" text-anchor="middle">камера с этой стороны</text>`);
+  S.push(`<text x="${-3.2}" y="${HL}" fill="#cde" font-size="1.1" transform="rotate(-90 ${-3.2},${HL})" text-anchor="middle">дальняя боковая</text>`);
+  LM.forEach(l=>{ const set=pts.find(p=>p.key===l.key); const bad=set&&errOf(l.key)>0.7; const cls='lm'+(set?' set':'')+(sel===l.key?' sel':'')+(bad?' bad':'');
+    S.push(`<g class="${cls}" data-key="${l.key}"><title>${l.num}: ${l.title}</title><circle cx="${l.x}" cy="${l.y}" r="1.1"/><text x="${l.x+(l.x<plan.width/2?-1.5:1.5)}" y="${l.y+(l.y<2?-1.4:(l.y>plan.length-2?2.6:0.6))}" text-anchor="${l.x<plan.width/2?'end':'start'}" font-size="1.7">${l.num}</text></g>`); });
+  $('plan').innerHTML=S.join(''); $('plan').querySelectorAll('.lm').forEach(el=>el.onclick=()=>selectLM(el.dataset.key)); }
+function errOf(key){ const k=pts.findIndex(p=>p.key===key); return k>=0&&err[k]!=null?err[k]:0; }
+function selectLM(key){ sel=key; selPt=pts.findIndex(p=>p.key===key); drawPlan(); render(); }
+
+// --- вид
+function fitView(){ if(!img) return; const r=Math.min(wrap.clientWidth/img.width, wrap.clientHeight/img.height); scale=r; ox=(wrap.clientWidth-img.width*r)/2; oy=(wrap.clientHeight-img.height*r)/2; render(); }
+function toImg(e){ const b=wrap.getBoundingClientRect(); return [(e.clientX-b.left-ox)/scale,(e.clientY-b.top-oy)/scale]; }
+function toScr(x,y){ return [x*scale+ox,y*scale+oy]; }
+function apply(Hm,x,y){ const a=Hm; const u=a[0]*x+a[1]*y+a[2], v=a[3]*x+a[4]*y+a[5], w=a[6]*x+a[7]*y+a[8]; return [u/w,v/w,w]; }
+function inv3(m){ const [a,b,c,d,e,f,g,h,i]=m; const A=e*i-f*h,B=-(d*i-f*g),C=d*h-e*g,D=-(b*i-c*h),E=a*i-c*g,F=-(a*h-b*g),G=b*f-c*e,Hh=-(a*f-c*d),I=a*e-b*d; const det=a*A+b*B+c*C; return [A,D,G,B,E,Hh,C,F,I].map(v=>v/det); }
+function render(){ view.width=wrap.clientWidth; view.height=wrap.clientHeight; ctx.fillStyle='#000'; ctx.fillRect(0,0,view.width,view.height); if(!img) return;
+  ctx.imageSmoothingEnabled=scale<1; ctx.drawImage(img,ox,oy,img.width*scale,img.height*scale);
+  if(H&&$('showLines').checked){ const Hp2i=inv3(H.flat()), W=plan.width,L=plan.length,HL=plan.half,bw=plan.box_w,bd=plan.box_d,g=plan.goal,x0=W/2-bw/2,x1=W/2+bw/2;
+    const ref=apply(Hp2i,W/2,HL)[2];
+    const poly=(P,col,w)=>{ ctx.strokeStyle=col; ctx.lineWidth=w; ctx.beginPath(); let on=false;
+      for(let k=0;k<P.length-1;k++){ for(let t=0;t<=1;t+=0.05){ const x=P[k][0]+(P[k+1][0]-P[k][0])*t, y=P[k][1]+(P[k+1][1]-P[k][1])*t; const [u,v,w2]=apply(Hp2i,x,y);
+        if(w2*Math.sign(ref)<=1e-9||Math.abs(u)>6*img.width||Math.abs(v)>6*img.height){ on=false; continue; } const [sx,sy]=toScr(u,v); if(!on){ctx.moveTo(sx,sy);on=true;} else ctx.lineTo(sx,sy); } } ctx.stroke(); };
+    poly([[0,0],[W,0],[W,L],[0,L],[0,0]],'#ffd54a',2); poly([[0,HL],[W,HL]],'#ffd54a',2);
+    poly([[x0,0],[x0,bd],[x1,bd],[x1,0]],'#ff4fd8',2); poly([[x0,L],[x0,L-bd],[x1,L-bd],[x1,L]],'#ff4fd8',2);
+    poly([[W/2-g/2,0],[W/2+g/2,0]],'#6cf',3); poly([[W/2-g/2,L],[W/2+g/2,L]],'#6cf',3);
+    const circ=[]; for(let a=0;a<=Math.PI*2+0.01;a+=Math.PI/24) circ.push([W/2+3*Math.cos(a),HL+3*Math.sin(a)]); poly(circ,'#ffd54a',1.5); }
+  pts.forEach((p,k)=>{ const [sx,sy]=toScr(p.img[0],p.img[1]); const bad=err[k]!=null&&err[k]>0.7; ctx.beginPath(); ctx.arc(sx,sy,k===selPt?9:7,0,7); ctx.fillStyle=bad?'#ff5a5a':(k===selPt?'#4fa3ff':'#4cd964'); ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle='#000'; ctx.stroke();
+    const lm=LM.find(l=>l.key===p.key); ctx.font='bold 13px sans-serif'; ctx.fillStyle='#000'; ctx.fillText(lm.num,sx+10,sy+5); ctx.fillStyle='#fff'; ctx.fillText(lm.num,sx+9,sy+4); });
+  $('zoomlbl').textContent='×'+scale.toFixed(2); }
+function drawLoupe(e){ if(!img||!mouse){ loupe.style.display='none'; return; } const b=wrap.getBoundingClientRect(); const Z=4, R=100/Z;
+  lctx.fillStyle='#000'; lctx.fillRect(0,0,200,200); lctx.imageSmoothingEnabled=false; lctx.drawImage(img, mouse[0]-R, mouse[1]-R, 2*R, 2*R, 0,0,200,200);
+  lctx.strokeStyle='#ffd54a'; lctx.lineWidth=1; lctx.beginPath(); lctx.moveTo(100,0); lctx.lineTo(100,200); lctx.moveTo(0,100); lctx.lineTo(200,100); lctx.stroke();
+  let lx=e.clientX-b.left+24, ly=e.clientY-b.top-224; if(ly<0) ly=e.clientY-b.top+24; if(lx+200>wrap.clientWidth) lx=e.clientX-b.left-224;
+  loupe.style.left=lx+'px'; loupe.style.top=ly+'px'; loupe.style.display='block'; }
+
+// --- точки
+let degen=false;
+async function refit(save=true){ const r=await (await fetch('/api/'+(save?'save':'fit'),{method:'POST',body:JSON.stringify({sec:frame.sec,points:pts,skip:false})})).json(); H=r.H_img2plan; err=r.err||[]; degen=!!r.degenerate; drawPlan(); render(); status(); if(save) markFrame(); }
+function status(){ const n=pts.length; let s=`точек: ${n}`; if(n<4) s+=' — нужно хотя бы 4, лучше 6 и с обоих концов кадра'; else if(degen) s+=' — все на одной линии, добавьте точку с другой линии (угол штрафной, средняя линия)'; else { const mx=Math.max(...err,0); s+=`, ошибка до ${mx.toFixed(2)} м`+(mx>0.7?' — точка с красным номером стоит не там':' ✓'); }
+  $('err').innerHTML=s+(n>=4&&!degen?'<br>'+pts.map((p,k)=>`<span class="${err[k]>0.7?'bad':''}">${LM.find(l=>l.key===p.key).num}: ${(err[k]||0).toFixed(2)} м</span>`).join(''):''); }
+function pushHist(){ hist.push(JSON.stringify(pts)); if(hist.length>50) hist.shift(); }
+function place(p){ if(!sel){ $('hint').style.background='#5a2222'; setTimeout(()=>$('hint').style.background='#000b',600); return; }
+  pushHist(); const k=pts.findIndex(q=>q.key===sel); const lm=LM.find(l=>l.key===sel); const rec={key:sel,plan:[lm.x,lm.y],img:p};
+  if(k>=0) pts[k]=rec; else pts.push(rec); selPt=pts.findIndex(q=>q.key===sel);
+  // следующий ориентир по порядку, если он ещё не поставлен
+  const i=LM.findIndex(l=>l.key===sel); const nxt=LM.slice(i+1).concat(LM.slice(0,i)).find(l=>!pts.find(q=>q.key===l.key)); sel=nxt?nxt.key:null; refit(); }
+function nearest(p){ let b=-1,bd=12/scale; pts.forEach((q,k)=>{ const d=Math.hypot(q.img[0]-p[0],q.img[1]-p[1]); if(d<bd){bd=d;b=k;} }); return b; }
+wrap.addEventListener('contextmenu',e=>e.preventDefault());
+wrap.addEventListener('mousedown',e=>{ const p=toImg(e);
+  if(e.button===2||space){ drag={type:'pan',x:e.clientX,y:e.clientY,ox,oy}; return; }
+  const k=nearest(p); if(k>=0){ pushHist(); drag={type:'pt',k}; selPt=k; sel=pts[k].key; drawPlan(); render(); return; }
+  place(p); });
+wrap.addEventListener('mousemove',e=>{ mouse=toImg(e);
+  if(drag&&drag.type==='pan'){ ox=drag.ox+e.clientX-drag.x; oy=drag.oy+e.clientY-drag.y; render(); }
+  else if(drag&&drag.type==='pt'){ pts[drag.k].img=mouse; render(); }
+  drawLoupe(e); });
+window.addEventListener('mouseup',()=>{ if(drag&&drag.type==='pt') refit(); drag=null; });
+wrap.addEventListener('mouseleave',()=>{ loupe.style.display='none'; });
+wrap.addEventListener('wheel',e=>{ e.preventDefault(); const b=wrap.getBoundingClientRect(), mx=e.clientX-b.left, my=e.clientY-b.top; const f=Math.exp(-e.deltaY*0.0015); const ns=Math.min(8,Math.max(0.1,scale*f)); ox=mx-(mx-ox)*ns/scale; oy=my-(my-oy)*ns/scale; scale=ns; render(); drawLoupe(e); },{passive:false});
+window.addEventListener('resize',fitView);
+window.addEventListener('keydown',e=>{ if(e.target.tagName==='INPUT') return;
+  if(e.code==='Space'){ space=true; wrap.style.cursor='grab'; e.preventDefault(); return; }
+  const num=parseInt(e.key); if(!isNaN(num)&&num>0){ const l=LM.find(x=>x.num===num); if(l) selectLM(l.key); return; }
+  if(e.key==='0') fitView(); if(e.key==='a'||e.key==='A'||e.key==='ф') go(-1); if(e.key==='d'||e.key==='D'||e.key==='в'||e.key==='Enter') go(1);
+  if(e.key==='z'||e.key==='Z'||e.key==='я'){ if(hist.length){ pts=JSON.parse(hist.pop()); selPt=-1; refit(); } }
+  if(e.key==='Delete'||e.key==='Backspace'){ if(selPt>=0){ pushHist(); pts.splice(selPt,1); selPt=-1; refit(); } }
+  if(e.key==='x'||e.key==='X'||e.key==='ч') skipFrame(); if(e.key==='Escape'){ sel=null; selPt=-1; drawPlan(); render(); } });
+window.addEventListener('keyup',e=>{ if(e.code==='Space'){ space=false; wrap.style.cursor='crosshair'; } });
+
+// --- кадры
+function markFrame(){ meta.done[frame.sec]={n:pts.length,err:Math.max(...err,0),skip:false}; framesList(); }
+async function skipFrame(){ await fetch('/api/save',{method:'POST',body:JSON.stringify({sec:frame.sec,points:[],skip:true})}); meta.done[frame.sec]={n:0,err:0,skip:true}; framesList(); go(1); }
+function framesList(){ const el=$('frames'); el.innerHTML=''; let done=0;
+  meta.secs.forEach(s=>{ const b=document.createElement('button'); const d=meta.done[s]; b.textContent=fmt(s);
+    if(d&&d.skip) b.className='skip'; else if(d&&d.n>=4){ b.className=d.err>0.7?'bad':'done'; done++; } if(frame&&frame.sec===s) b.classList.add('cur');
+    b.onclick=()=>load(s); el.appendChild(b); });
+  $('prog').firstElementChild.style.width=Math.min(100,100*done/Math.max(1,Math.min(10,meta.secs.length)))+'%';
+  $('pos').textContent=`  размечено кадров: ${done} (цель 8–12)`; }
+const fmt=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+async function load(sec){ frame=await (await fetch('/api/frame?sec='+sec)).json(); pts=frame.points||[]; pts.forEach(p=>{ if(!p.key){ const l=LM.find(x=>Math.abs(x.x-p.plan[0])<1e-6&&Math.abs(x.y-p.plan[1])<1e-6); p.key=l?l.key:'?'; } });
+  H=frame.H_img2plan; err=frame.err||[]; sel=LM.find(l=>!pts.find(q=>q.key===l.key))?.key||null; selPt=-1; hist=[];
+  img=new Image(); img.onload=()=>{ fitView(); drawPlan(); status(); framesList(); }; img.src='/api/image?sec='+sec; }
+function go(d){ const i=meta.secs.indexOf(frame.sec); const j=Math.min(meta.secs.length-1,Math.max(0,i+d)); if(j!==i) load(meta.secs[j]); }
+$('prev').onclick=()=>go(-1); $('next').onclick=()=>go(1); $('fit').onclick=fitView; $('showLines').onchange=render; $('skip').onclick=skipFrame;
+$('undo').onclick=()=>{ if(hist.length){ pts=JSON.parse(hist.pop()); selPt=-1; refit(); } };
+$('clear').onclick=()=>{ if(pts.length&&confirm('Убрать все точки этого кадра?')){ pushHist(); pts=[]; selPt=-1; refit(); } };
+(async()=>{ meta=await (await fetch('/api/meta')).json(); plan=meta.plan; LM=landmarks(); $('game').textContent=meta.game; load(meta.secs[0]); })();
+</script></body></html>

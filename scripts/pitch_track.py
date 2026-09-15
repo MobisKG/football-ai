@@ -114,7 +114,10 @@ anchors = [] if "--no-ref" in sys.argv else [(ref_i, H_ref2plan)]
 for k, a in enumerate(sys.argv):
     if a == "--anchor":
         c = json.load(open(sys.argv[k + 1]))
-        ai = int(c["frame_index"]) // STEP * STEP
+        if c.get("skip") or not c.get("H_img2plan"): continue
+        # опоры из редактора pitch_marker хранят секунду кадра, из pitch_anchor.py — номер кадра
+        fi = c["frame_index"] if "frame_index" in c else int(round(float(c["frame_sec"]) * FPS))
+        ai = min(frames_idx, key=lambda i: abs(i - fi)) if frames_idx else int(fi) // STEP * STEP
         if ai in small:
             anchors.append((ai, np.array(c["H_img2plan"], float).reshape(3, 3)))
 key = []

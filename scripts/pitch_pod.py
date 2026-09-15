@@ -45,10 +45,12 @@ elif cmd == "video":
     rc, out = p.ssh("bash /root/fb/pitch_dl_%s.sh" % slug, timeout=2400); print(out[-600:])
     if "VIDEO_DONE" not in out or "FAILED" in out or "не скачалось" in out: sys.exit(1)
 elif cmd == "frames":
-    slug = sys.argv[3]; every = float(sys.argv[4]) if len(sys.argv) > 4 else 5.0; p = get(tag)
+    # frames <tag> <slug> [шаг_с] [--full]: --full — полный размер для редактора разметки (pitch_marker)
+    slug = sys.argv[3]; every = float(sys.argv[4]) if len(sys.argv) > 4 and not sys.argv[4].startswith("--") else 5.0; p = get(tag)
+    full = "--full" in sys.argv
     py = ("import cv2,os;v='out/%s.mp4';o='frames_%s';os.makedirs(o,exist_ok=True);c=cv2.VideoCapture(v);f=c.get(5);n=c.get(7);t=0.0\n"
-          "while t<n/f:\n c.set(0,t*1000);ok,fr=c.read()\n if ok: cv2.imwrite('%%s/f_%%05d.jpg'%%(o,int(t)),cv2.resize(fr,(640,360)),[cv2.IMWRITE_JPEG_QUALITY,80])\n t+=%s\n"
-          "print('кадров',len(os.listdir(o)))") % (slug, slug, every)
+          "while t<n/f:\n c.set(0,t*1000);ok,fr=c.read()\n if ok: cv2.imwrite('%%s/t%%04d.jpg'%%(o,int(t)),%s,[cv2.IMWRITE_JPEG_QUALITY,%d])\n t+=%s\n"
+          "print('кадров',len(os.listdir(o)))") % (slug, slug, "fr" if full else "cv2.resize(fr,(640,360))", 92 if full else 80, every)
     rc, out = p.ssh("cd /root/fb && nice -n 10 python -c \"%s\" && tar cf frames_%s.tar frames_%s" % (py.replace('"', '\\"'), slug, slug), timeout=2400); print(out[-300:])
     d = os.path.join(PITCH, slug); os.makedirs(d, exist_ok=True)
     p.scp(p.remote("/root/fb/frames_%s.tar" % slug), os.path.join(d, "frames.tar"))
