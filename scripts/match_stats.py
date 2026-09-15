@@ -132,7 +132,10 @@ for f in pos["frames"]:
 
 dist = defaultdict(float); vmax = defaultdict(float)
 if met_path:
-    met = json.load(open(met_path)); W = int(0.5 * fps); ker = np.ones(W) / W
+    # окно сглаживания для скорости и пробега, с: 0,5 давало дрожание привязки ~1 м/с
+    # у стоящих игроков и скорости 30+ км/ч; при съёмке с рук берём 1,5 (--win 1.5)
+    WIN_S = float(opt("--win", 0.5))
+    met = json.load(open(met_path)); W = max(2, int(round(WIN_S * fps))); ker = np.ones(W) / W
     tracks = defaultdict(list)
     for k, f in enumerate(met["frames"]):
         for tid, X, Y, ins in f["players"]:
@@ -143,7 +146,7 @@ if met_path:
         for seg in np.split(a, np.where(np.diff(a[:, 0]) > 0.2 * fps)[0] + 1):
             if len(seg) < 2 * W: continue
             sx = np.convolve(seg[:, 1], ker, "valid"); sy = np.convolve(seg[:, 2], ker, "valid")
-            v = np.hypot(sx[W:] - sx[:-W], sy[W:] - sy[:-W]) / 0.5
+            v = np.hypot(sx[W:] - sx[:-W], sy[W:] - sy[:-W]) / (W / fps)
             ok = v < 10.0
             if not ok.any(): continue
             dist[key_of(t)] += float(np.hypot(np.diff(sx), np.diff(sy))[:len(ok)][ok[:len(sx) - 1]].sum())

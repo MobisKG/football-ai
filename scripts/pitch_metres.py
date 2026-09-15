@@ -1,6 +1,6 @@
 """Пробег и скорость по готовой привязке: позиции -> метры -> статистика.
 
-    python pitch_metres.py <slug> <track.json>
+    python pitch_metres.py <slug> <track.json> [--out-sub имя] [--win 1.5]
 
 Параметры игры — из results/pitch/jobs.json: откуда брать позиции (ночная папка или
 исправленная), нужно ли табло. Пишет results/pitch/<slug>/: pos_metres.json,
@@ -10,10 +10,12 @@ import json, os, sys, subprocess, statistics
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(HERE)
 PY = "/private/tmp/claude-501/-Users-doni-Documents-football/7f0d34e7-ac71-4fb5-9950-2123175b3367/scratchpad/venv/bin/python"
 slug, track = sys.argv[1], sys.argv[2]
+opt = lambda k, d=None: sys.argv[sys.argv.index(k) + 1] if k in sys.argv else d
+OUT_SUB, WIN = opt("--out-sub", ""), opt("--win")
 job = next(j for j in json.load(open(os.path.join(ROOT, "results/pitch/jobs.json"))) if j["slug"] == slug)
 B = os.path.join(ROOT, "results/batch_2026-09-14")
 src = os.path.join(B, job["posdir"]); night = os.path.join(B, slug)
-out = os.path.join(ROOT, "results/pitch", slug); os.makedirs(out, exist_ok=True)
+out = os.path.join(ROOT, "results/pitch", slug, OUT_SUB); os.makedirs(out, exist_ok=True)
 pos_final = os.path.join(src, "pos_final.json")
 ball = os.path.join(night, "ball.json")
 met = os.path.join(out, "pos_metres.json")
@@ -23,6 +25,7 @@ def run(args):
     return r.stdout
 print(run([os.path.join(HERE, "to_metres.py"), pos_final, track, met]).strip())
 args = [os.path.join(HERE, "match_stats.py"), pos_final, ball, os.path.join(out, "stats.json"), "--metres", met, "--name", slug]
+if WIN: args += ["--win", WIN]
 if job["scoreboard"]: args += ["--scoreboard", os.path.join(night, "scoreboard.json")]
 txt = run(args); open(os.path.join(out, "stats.txt"), "w").write(txt)
 st = json.load(open(os.path.join(out, "stats.json")))
