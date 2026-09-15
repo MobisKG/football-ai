@@ -94,10 +94,14 @@ function render(){ view.width=wrap.clientWidth; view.height=wrap.clientHeight; c
     // на кадрах у ворот центр поля бывает за горизонтом, и тогда рисовались зеркальные линии
     const rp=pts.length?pts.reduce((a,p)=>[a[0]+p.plan[0]/pts.length,a[1]+p.plan[1]/pts.length],[0,0]):[W/2,HL];
     const ref=apply(Hp2i,rp[0],rp[1])[2];
+    const ys=pts.map(p=>p.plan[1]); const ymin=Math.min(...ys), ymax=Math.max(...ys); const narrow=pts.length>=4&&(ymax-ymin)<12;
+    const farY=y=>narrow&&(y<ymin-8||y>ymax+8);
     const poly=(P,col,w)=>{ ctx.strokeStyle=col; ctx.lineWidth=w; ctx.beginPath(); let on=false;
+      ctx.globalAlpha=(narrow&&P.every(q=>farY(q[1])))?0.25:1;
       for(let k=0;k<P.length-1;k++){ for(let t=0;t<=1;t+=0.05){ const x=P[k][0]+(P[k+1][0]-P[k][0])*t, y=P[k][1]+(P[k+1][1]-P[k][1])*t; const [u,v,w2]=apply(Hp2i,x,y);
-        if(w2*Math.sign(ref)<=1e-9||Math.abs(u)>6*img.width||Math.abs(v)>6*img.height){ on=false; continue; } const [sx,sy]=toScr(u,v); if(!on){ctx.moveTo(sx,sy);on=true;} else ctx.lineTo(sx,sy); } } ctx.stroke(); };
-    poly([[0,0],[W,0],[W,L],[0,L],[0,0]],'#ffd54a',2); poly([[0,HL],[W,HL]],'#ffd54a',2);
+        if(w2*Math.sign(ref)<=1e-9||Math.abs(u)>6*img.width||Math.abs(v)>6*img.height){ on=false; continue; } const [sx,sy]=toScr(u,v); if(!on){ctx.moveTo(sx,sy);on=true;} else ctx.lineTo(sx,sy); } } ctx.stroke(); ctx.globalAlpha=1; };
+    poly([[0,0],[W,0]],'#ffd54a',2); poly([[0,L],[W,L]],'#ffd54a',2); poly([[0,HL],[W,HL]],'#ffd54a',2);
+    for(const x of [0,W]) for(let y=0;y<L-0.01;y+=L/8) poly([[x,y],[x,Math.min(L,y+L/8)]],'#ffd54a',2);
     poly([[x0,0],[x0,bd],[x1,bd],[x1,0]],'#ff4fd8',2); poly([[x0,L],[x0,L-bd],[x1,L-bd],[x1,L]],'#ff4fd8',2);
     poly([[W/2-g/2,0],[W/2+g/2,0]],'#6cf',3); poly([[W/2-g/2,L],[W/2+g/2,L]],'#6cf',3);
     const circ=[]; for(let a=0;a<=Math.PI*2+0.01;a+=Math.PI/24) circ.push([W/2+3*Math.cos(a),HL+3*Math.sin(a)]); poly(circ,'#ffd54a',1.5); }
@@ -113,7 +117,9 @@ function drawLoupe(e){ if(!img||!mouse){ loupe.style.display='none'; return; } c
 // --- точки
 let degen=false;
 async function refit(save=true){ const r=await (await fetch('/api/'+(save?'save':'fit'),{method:'POST',body:JSON.stringify({sec:frame.sec,points:pts,skip:false})})).json(); H=r.H_img2plan; err=r.err||[]; degen=!!r.degenerate; drawPlan(); render(); status(); if(save) markFrame(); }
-function status(){ const n=pts.length; let s=`точек: ${n}`; if(n<4) s+=' — нужно хотя бы 4, лучше 6 и с обоих концов кадра'; else if(degen) s+=' — все на одной линии, добавьте точку с другой линии (угол штрафной, средняя линия)'; else { const mx=Math.max(...err,0); s+=`, ошибка до ${mx.toFixed(2)} м`+(mx>0.7?' — точка с красным номером стоит не там':' ✓'); }
+function ySpan(){ if(pts.length<2) return 0; const ys=pts.map(p=>p.plan[1]); return Math.max(...ys)-Math.min(...ys); }
+function status(){ const n=pts.length; let s=`точек: ${n}`;
+  const narrow=n>=4&&!degen&&ySpan()<12; if(n<4) s+=' — нужно хотя бы 4, лучше 6 и с обоих концов кадра'; else if(degen) s+=' — все на одной линии, добавьте точку с другой линии (угол штрафной, средняя линия)'; else { const mx=Math.max(...err,0); s+=`, ошибка до ${mx.toFixed(2)} м`+(mx>0.7?' — точка с красным номером стоит не там':' ✓'); if(narrow) s+='<br><b style="color:#ffd54a">Все точки у одних ворот: дальняя часть поля рисуется приблизительно. Если видна средняя линия или центр (9, 10, 11) — добавьте их.</b>'; }
   $('err').innerHTML=s+(n>=4&&!degen?'<br>'+pts.map((p,k)=>`<span class="${err[k]>0.7?'bad':''}">${LM.find(l=>l.key===p.key).num}: ${(err[k]||0).toFixed(2)} м</span>`).join(''):''); }
 function pushHist(){ hist.push(JSON.stringify(pts)); if(hist.length>50) hist.shift(); }
 function place(p){ if(!sel){ $('hint').style.background='#5a2222'; setTimeout(()=>$('hint').style.background='#000b',600); return; }
