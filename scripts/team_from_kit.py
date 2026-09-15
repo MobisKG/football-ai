@@ -35,12 +35,26 @@ top = [w for w, _ in first_words.most_common(2)]
 # у нормальных игр ночи 15.09 не больше 2,8). Тогда деление по форме ломается,
 # и оставляем исходные команды кластеризации analyze_match.py.
 _fw = first_words.most_common(2)
-DOMINANT = len(_fw) == 2 and _fw[0][1] >= 4 * _fw[1][1]
+DOMINANT = (len(_fw) == 2 and _fw[0][1] >= 4 * _fw[1][1] and not KIT_MAP) or "--use-clusters" in sys.argv
+# --use-clusters: принудительно команды кластеризации — когда слова формы смешивают
+# команды («Казарман vs Гипер Строй»: тёмно-синие ГИПЕРСТРОЙ и голубые оба бывали «синий»)
 if DOMINANT:
     print("один цвет формы подавляет остальные (%s): оставляю команды кластеризации" % dict(first_words.most_common(3)))
 if len(top) < 2: top = (top + ["?", "?"])[:2]
 A_WORDS = (top[0],)          # команда 0
 B_WORDS = (top[1],)          # команда 1
+# Ручное сопоставление, когда модель называет форму одной команды разными словами
+# («Казарман vs Гипер Строй»: голубые футболки читались то «голубой», то «синий»,
+# а тёмно-синие с надписью ГИПЕРСТРОЙ — «чёрный»; два самых частых слова оказались
+# одной командой). Формат: --kit-map "голу,сини:голубые;черн:тёмные"
+KIT_MAP = sys.argv[sys.argv.index("--kit-map") + 1] if "--kit-map" in sys.argv else None
+MANUAL_NAMES = None
+if KIT_MAP:
+    parts = [x.split(":") for x in KIT_MAP.split(";")]
+    A_WORDS = tuple(w.strip()[:4] for w in parts[0][0].split(","))
+    B_WORDS = tuple(w.strip()[:4] for w in parts[1][0].split(","))
+    MANUAL_NAMES = (parts[0][1].strip(), parts[1][1].strip())
+    print("ручное сопоставление форм: команда 0 = %s, команда 1 = %s" % (A_WORDS, B_WORDS))
 print("цвета команд по форме:", dict(first_words.most_common(4)))
 
 # Редкие расцветки — это не форма команды, а вратарь, судья или ошибка чтения.
@@ -61,6 +75,8 @@ def team_of_kit(kit):
         return 0
     if any(first.startswith(w) for w in B_WORDS):
         return 1
+    if KIT_MAP:
+        return -1                # при ручном сопоставлении решает только первое слово
     # цвет мог встать вторым словом: «белый красный»
     if any(w in k for w in B_WORDS):
         return 1
@@ -123,6 +139,8 @@ NAMES = {"син": "синие", "сини": "синие", "голу": "голу
          "жёлт": "жёлтые", "желт": "жёлтые", "зелё": "зелёные", "зеле": "зелёные", "оран": "оранжевые", "фиол": "фиолетовые",
          "серы": "серые", "розо": "розовые", "бord": "бордовые", "борд": "бордовые"}
 pos["team_names"] = {"0": NAMES.get(A_WORDS[0], A_WORDS[0]), "1": NAMES.get(B_WORDS[0], B_WORDS[0])}
+if MANUAL_NAMES:
+    pos["team_names"] = {"0": MANUAL_NAMES[0], "1": MANUAL_NAMES[1]}
 if DOMINANT:
     # названия — по цвету футболок из кластеризации (analyze_match.py), и они должны различаться
     tn = {str(k): v for k, v in (pos.get("team_names") or {}).items()}
