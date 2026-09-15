@@ -29,3 +29,8 @@ docs/sat_grid.jpg
 .idea/
 .DS_Store
 __pycache__/
+results/pitch/videos/
+results/pitch/*/track_*.json
+results/pitch/*/speeds_*/pos_metres.json
+results/pitch/*/frames_*_full/
+results/pitch/*/check_track_*/
