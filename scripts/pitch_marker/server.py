@@ -16,34 +16,53 @@ import numpy as np, cv2
 
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(os.path.dirname(HERE))
 def opt(n, d=None): return sys.argv[sys.argv.index(n) + 1] if n in sys.argv else d
-FRAMES = os.path.abspath(os.path.expanduser(sys.argv[1])); OUT = os.path.abspath(os.path.expanduser(sys.argv[2])); os.makedirs(OUT, exist_ok=True)
+ROOT_MODE = "--root" in sys.argv          # python server.py --root results/pitch : все игры, выбор на странице
 PORT = int(opt("--port", 8770))
 P = json.load(open(os.path.join(ROOT, "docs", "pitch.json")))
-pl = P["pitches"][opt("--pitch", "lower")]
-PLAN = {"width": pl["width"], "length": pl["length"], "half": P["half_length"], "goal": P["goal"]["width"],
-        "box_w": P["penalty_area"]["width"], "box_d": P["penalty_area"]["depth"]}
-
+def plan_of(key):
+    pl = P["pitches"].get(key) or P["pitches"]["lower"]
+    return {"width": pl["width"], "length": pl["length"], "half": P["half_length"], "goal": P["goal"]["width"],
+            "box_w": P["penalty_area"]["width"], "box_d": P["penalty_area"]["depth"], "key": key}
+FIELD_PITCH = {"Полей №3": "field3", "Полей №1": "lower", "Полей №2": "lower"}
+GAMES = {}
+def scan_games():
+    """папки с кадрами — заново при каждом запросе списка: кадры новых игр приходят по ходу работы"""
+    if not ROOT_MODE: return
+    jobs = {j["slug"]: j for j in json.load(open(os.path.join(ROOT, "results/pitch/jobs.json")))}
+    for slug in sorted(os.listdir(PROOT)):
+        if slug in GAMES: continue
+        fr = os.path.join(PROOT, slug, "frames_%s_full" % slug)
+        if not os.path.isdir(fr):
+            alt = glob.glob(os.path.join(PROOT, slug, "full_*")); fr = alt[0] if alt and os.path.isdir(alt[0]) else None
+        if not fr: continue
+        j = jobs.get(slug, {}); GAMES[slug] = {"frames": fr, "out": os.path.join(PROOT, slug, "manual"), "pitch": opt("--pitch") or FIELD_PITCH.get(j.get("field"), "lower"), "field": j.get("field"), "title": slug}
+if ROOT_MODE:
+    PROOT = os.path.abspath(opt("--root")); scan_games()
+    if not GAMES: sys.exit("в " + PROOT + " нет папок с кадрами")
+else:
+    FRAMES = os.path.abspath(os.path.expanduser(sys.argv[1])); OUT = os.path.abspath(os.path.expanduser(sys.argv[2]))
+    slug = os.path.basename(os.path.dirname(FRAMES.rstrip("/"))) or FRAMES
+    GAMES[slug] = {"frames": FRAMES, "out": OUT, "pitch": opt("--pitch", "lower"), "field": None, "title": slug}
 def sec_of(path):
     m = re.search(r"(\d+)", os.path.basename(path)); return int(m.group(1)) if m else 0
-FILES = sorted(glob.glob(os.path.join(FRAMES, "*.jpg")) + glob.glob(os.path.join(FRAMES, "*.png")), key=sec_of)
-if not FILES: sys.exit("в папке нет кадров: " + FRAMES)
-SECS = [sec_of(f) for f in FILES]
-def out_path(sec): return os.path.join(OUT, "frame_t%04d.json" % sec)
-
-def degenerate(points):
-    """матрица не определяется: все точки на одной линии плана, или вне самой
-    населённой линии меньше двух точек (5 точек на линии ворот + 1 угол штрафной —
-    решений бесконечно много, разметка рисуется как попало)"""
-    if len(points) < 4: return False
-    d = np.array([p["plan"] for p in points], float); n = len(d)
-    best = 0
-    for i in range(n):
-        for j in range(i + 1, n):
-            a, b = d[i], d[j]; v = b - a; L = np.linalg.norm(v)
-            if L < 1e-6: continue
-            nrm = np.array([-v[1], v[0]]) / L
-            best = max(best, int((np.abs((d - a) @ nrm) < 0.3).sum()))
-    return n - best < 2
+class Game:
+    def __init__(self, slug):
+        g = GAMES[slug]; self.slug = slug; self.out = g["out"]; os.makedirs(self.out, exist_ok=True)
+        self.files = sorted(glob.glob(os.path.join(g["frames"], "*.jpg")) + glob.glob(os.path.join(g["frames"], "*.png")), key=sec_of)
+        self.secs = [sec_of(f) for f in self.files]; self.plan = plan_of(g["pitch"]); self.field = g["field"]
+    def out_path(self, sec): return os.path.join(self.out, "frame_t%04d.json" % sec)
+    def done(self):
+        d = {}
+        for s in self.secs:
+            p = self.out_path(s)
+            if os.path.exists(p):
+                j = json.load(open(p)); d[s] = {"n": len(j.get("points", [])), "err": max(j.get("reproj_err_m") or [0]), "skip": j.get("skip", False)}
+        return d
+GAME_CACHE = {}
+def game(q):
+    slug = (q.get("game") or [next(iter(GAMES))])[0]
+    if slug not in GAME_CACHE: GAME_CACHE[slug] = Game(slug)
+    return GAME_CACHE[slug]
 
 def fit(points):
     """однородная матрица кадр->план по точкам; ошибка каждой точки на плане, м"""
@@ -63,35 +82,38 @@ class Hd(BaseHTTPRequestHandler):
     def do_GET(self):
         u = urlparse(self.path); q = parse_qs(u.query)
         if u.path in ("/", "/index.html"): return self.send(200, open(os.path.join(HERE, "index.html"), "rb").read(), "text/html; charset=utf-8")
+        if u.path == "/api/games":
+            scan_games(); rows = []
+            for slug in GAMES:
+                g = game({"game": [slug]}); d = g.done(); marked = sum(1 for v in d.values() if v["n"] >= 4)
+                rows.append({"slug": slug, "field": g.field, "frames": len(g.secs), "marked": marked, "pitch": g.plan["key"]})
+            return self.send(200, rows)
         if u.path == "/api/meta":
-            done = {}
-            for s in SECS:
-                p = out_path(s)
-                if os.path.exists(p):
-                    d = json.load(open(p)); done[s] = {"n": len(d.get("points", [])), "err": max(d.get("reproj_err_m") or [0]), "skip": d.get("skip", False)}
-            return self.send(200, {"plan": PLAN, "secs": SECS, "done": done, "game": os.path.basename(os.path.dirname(FRAMES.rstrip("/"))) or FRAMES, "out": OUT})
+            g = game(q)
+            return self.send(200, {"plan": g.plan, "secs": g.secs, "done": g.done(), "game": g.slug, "field": g.field, "out": g.out})
         if u.path == "/api/frame":
-            s = int(q["sec"][0]); p = out_path(s)
+            g = game(q); s = int(q["sec"][0]); p = g.out_path(s)
             d = json.load(open(p)) if os.path.exists(p) else {"points": []}
-            im = cv2.imread(FILES[SECS.index(s)]); h, w = im.shape[:2]
+            im = cv2.imread(g.files[g.secs.index(s)]); h, w = im.shape[:2]
             return self.send(200, {"sec": s, "points": d.get("points", []), "H_img2plan": d.get("H_img2plan"), "err": d.get("reproj_err_m", []), "skip": d.get("skip", False), "w": w, "h": h})
         if u.path == "/api/image":
-            s = int(q["sec"][0]); return self.send(200, open(FILES[SECS.index(s)], "rb").read(), "image/jpeg")
+            g = game(q); s = int(q["sec"][0]); return self.send(200, open(g.files[g.secs.index(s)], "rb").read(), "image/jpeg")
         self.send(404, {"error": "not found"})
     def do_POST(self):
-        u = urlparse(self.path); n = int(self.headers.get("Content-Length", 0)); d = json.loads(self.rfile.read(n) or b"{}")
+        u = urlparse(self.path); q = parse_qs(u.query); n = int(self.headers.get("Content-Length", 0)); d = json.loads(self.rfile.read(n) or b"{}")
+        g = game({"game": [d["game"]]} if d.get("game") else q)
         if u.path == "/api/fit":
             H, err = fit(d.get("points", [])); return self.send(200, {"H_img2plan": H, "err": err, "degenerate": degenerate(d.get("points", []))})
         if u.path == "/api/save":
             s = int(d["sec"]); pts = d.get("points", []); H, err = fit(pts)
-            out = {"frame_sec": s, "sec": s, "source": "manual", "k1": 0.0, "plan": {"width": PLAN["width"], "length": PLAN["length"]},
-                   "points": pts, "H_img2plan": H, "reproj_err_m": err, "skip": bool(d.get("skip", False)), "image": FILES[SECS.index(s)]}
+            out = {"frame_sec": s, "sec": s, "source": "manual", "k1": 0.0, "plan": {"width": g.plan["width"], "length": g.plan["length"]},
+                   "points": pts, "H_img2plan": H, "reproj_err_m": err, "skip": bool(d.get("skip", False)), "image": g.files[g.secs.index(s)], "game": g.slug}
             if not pts and not out["skip"]:
-                if os.path.exists(out_path(s)): os.remove(out_path(s))
+                if os.path.exists(g.out_path(s)): os.remove(g.out_path(s))
             else:
-                json.dump(out, open(out_path(s), "w"), ensure_ascii=False, indent=1)
+                json.dump(out, open(g.out_path(s), "w"), ensure_ascii=False, indent=1)
             return self.send(200, {"ok": True, "H_img2plan": H, "err": err, "degenerate": degenerate(pts)})
         self.send(404, {"error": "not found"})
 
-print("разметка: http://localhost:%d  кадров %d  вывод %s" % (PORT, len(FILES), OUT), flush=True)
+print("разметка: http://localhost:%d  игр %d" % (PORT, len(GAMES)), flush=True)
 ThreadingHTTPServer(("127.0.0.1", PORT), Hd).serve_forever()

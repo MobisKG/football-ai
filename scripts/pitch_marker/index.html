@@ -6,7 +6,7 @@
 #left{flex:1;display:flex;flex-direction:column;min-width:0}
 #top{display:flex;gap:8px;align-items:center;padding:6px 10px;background:var(--panel);border-bottom:1px solid #2b313b;flex-wrap:wrap}
 #top b{color:var(--acc)} button{background:#2b313b;color:var(--fg);border:1px solid #3a414d;border-radius:6px;padding:6px 11px;cursor:pointer;font:inherit}
-button:hover{background:#353c48} button.primary{background:#2f6fd1;border-color:#2f6fd1} button.primary:hover{background:#3b7de0}
+button:hover{background:#353c48} select{background:#2b313b;color:var(--fg);border:1px solid #3a414d;border-radius:6px;padding:5px 8px;font:inherit;max-width:260px} button.primary{background:#2f6fd1;border-color:#2f6fd1} button.primary:hover{background:#3b7de0}
 #wrap{flex:1;position:relative;overflow:hidden;background:#000;cursor:crosshair}
 canvas#view{position:absolute;left:0;top:0}
 #loupe{position:absolute;width:200px;height:200px;border:2px solid var(--acc);border-radius:50%;pointer-events:none;display:none;background:#000;overflow:hidden;box-shadow:0 4px 18px #000a}
@@ -24,7 +24,7 @@ kbd{background:#2b313b;border:1px solid #444;border-radius:4px;padding:0 5px;fon
 </style></head><body>
 <div id="left">
   <div id="top">
-    <b id="game"></b><span class="mut" id="pos"></span>
+    <select id="gameSel" title="игра"></select><b id="game"></b><span class="mut" id="pos"></span>
     <button id="prev">◀ пред. <kbd>A</kbd></button><button id="next" class="primary">след. кадр <kbd>D</kbd> / <kbd>Enter</kbd></button>
     <button id="undo">отменить <kbd>Z</kbd></button><button id="clear">очистить кадр</button><button id="skip">поля не видно <kbd>X</kbd></button>
     <span class="mut" id="zoomlbl"></span><button id="fit">вписать <kbd>0</kbd></button>
@@ -116,7 +116,7 @@ function drawLoupe(e){ if(!img||!mouse){ loupe.style.display='none'; return; } c
 
 // --- точки
 let degen=false;
-async function refit(save=true){ const r=await (await fetch('/api/'+(save?'save':'fit'),{method:'POST',body:JSON.stringify({sec:frame.sec,points:pts,skip:false})})).json(); H=r.H_img2plan; err=r.err||[]; degen=!!r.degenerate; drawPlan(); render(); status(); if(save) markFrame(); }
+async function refit(save=true){ const r=await (await fetch('/api/'+(save?'save':'fit'),{method:'POST',body:JSON.stringify({game:G,sec:frame.sec,points:pts,skip:false})})).json(); H=r.H_img2plan; err=r.err||[]; degen=!!r.degenerate; drawPlan(); render(); status(); if(save) markFrame(); }
 function ySpan(){ if(pts.length<2) return 0; const ys=pts.map(p=>p.plan[1]); return Math.max(...ys)-Math.min(...ys); }
 function status(){ const n=pts.length; let s=`точек: ${n}`;
   const narrow=n>=4&&!degen&&ySpan()<12; if(n<4) s+=' — нужно хотя бы 4, лучше 6 и с обоих концов кадра'; else if(degen) s+=' — почти все на одной линии, нужны хотя бы две точки с других линий (углы штрафной 5 и 6, средняя линия)'; else { const mx=Math.max(...err,0); s+=`, ошибка до ${mx.toFixed(2)} м`+(mx>0.7?' — точка с красным номером стоит не там':' ✓'); if(narrow) s+='<br><b style="color:#ffd54a">Все точки у одних ворот: дальняя часть поля рисуется приблизительно. Если видна средняя линия или центр (9, 10, 11) — добавьте их.</b>'; }
@@ -151,8 +151,8 @@ window.addEventListener('keydown',e=>{ if(e.target.tagName==='INPUT') return;
 window.addEventListener('keyup',e=>{ if(e.code==='Space'){ space=false; wrap.style.cursor='crosshair'; } });
 
 // --- кадры
-function markFrame(){ meta.done[frame.sec]={n:pts.length,err:Math.max(...err,0),skip:false}; framesList(); }
-async function skipFrame(){ await fetch('/api/save',{method:'POST',body:JSON.stringify({sec:frame.sec,points:[],skip:true})}); meta.done[frame.sec]={n:0,err:0,skip:true}; framesList(); go(1); }
+function markFrame(){ meta.done[frame.sec]={n:pts.length,err:Math.max(...err,0),skip:false}; framesList(); refreshGames(); }
+async function skipFrame(){ await fetch('/api/save',{method:'POST',body:JSON.stringify({game:G,sec:frame.sec,points:[],skip:true})}); meta.done[frame.sec]={n:0,err:0,skip:true}; framesList(); go(1); }
 function framesList(){ const el=$('frames'); el.innerHTML=''; let done=0;
   meta.secs.forEach(s=>{ const b=document.createElement('button'); const d=meta.done[s]; b.textContent=fmt(s);
     if(d&&d.skip) b.className='skip'; else if(d&&d.n>=4){ b.className=d.err>0.7?'bad':'done'; done++; } if(frame&&frame.sec===s) b.classList.add('cur');
@@ -160,13 +160,20 @@ function framesList(){ const el=$('frames'); el.innerHTML=''; let done=0;
   $('prog').firstElementChild.style.width=Math.min(100,100*done/Math.max(1,Math.min(10,meta.secs.length)))+'%';
   $('pos').textContent=`  размечено кадров: ${done} (цель 8–12)`; }
 const fmt=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
-async function load(sec){ frame=await (await fetch('/api/frame?sec='+sec)).json(); pts=frame.points||[]; pts.forEach(p=>{ if(!p.key){ const l=LM.find(x=>Math.abs(x.x-p.plan[0])<1e-6&&Math.abs(x.y-p.plan[1])<1e-6); p.key=l?l.key:'?'; } const l=LM.find(x=>x.key===p.key); if(l) p.plan=[l.x,l.y]; });   // координаты плана — по текущим размерам поля
+async function load(sec){ frame=await (await fetch('/api/frame?game='+G+'&sec='+sec)).json(); pts=frame.points||[]; pts.forEach(p=>{ if(!p.key){ const l=LM.find(x=>Math.abs(x.x-p.plan[0])<1e-6&&Math.abs(x.y-p.plan[1])<1e-6); p.key=l?l.key:'?'; } const l=LM.find(x=>x.key===p.key); if(l) p.plan=[l.x,l.y]; });   // координаты плана — по текущим размерам поля
   if(pts.length) refit(); 
   H=frame.H_img2plan; err=frame.err||[]; sel=LM.find(l=>!pts.find(q=>q.key===l.key))?.key||null; selPt=-1; hist=[];
-  img=new Image(); img.onload=()=>{ fitView(); drawPlan(); status(); framesList(); }; img.src='/api/image?sec='+sec; }
+  img=new Image(); img.onload=()=>{ fitView(); drawPlan(); status(); framesList(); }; img.src='/api/image?game='+G+'&sec='+sec; }
 function go(d){ const i=meta.secs.indexOf(frame.sec); const j=Math.min(meta.secs.length-1,Math.max(0,i+d)); if(j!==i) load(meta.secs[j]); }
 $('prev').onclick=()=>go(-1); $('next').onclick=()=>go(1); $('fit').onclick=fitView; $('showLines').onchange=render; $('skip').onclick=skipFrame;
 $('undo').onclick=()=>{ if(hist.length){ pts=JSON.parse(hist.pop()); selPt=-1; refit(); } };
 $('clear').onclick=()=>{ if(pts.length&&confirm('Убрать все точки этого кадра?')){ pushHist(); pts=[]; selPt=-1; refit(); } };
-(async()=>{ meta=await (await fetch('/api/meta')).json(); plan=meta.plan; LM=landmarks(); $('game').textContent=meta.game; load(meta.secs[0]); })();
+let G=null;
+async function openGame(slug){ G=slug; meta=await (await fetch('/api/meta?game='+G)).json(); plan=meta.plan; LM=landmarks();
+  $('game').textContent=(meta.field?meta.field+' · ':'')+'поле '+plan.width+'×'+plan.length+' м'; pts=[]; H=null; frame=null;
+  const first=meta.secs.find(s=>!(meta.done[s]&&(meta.done[s].n>=4||meta.done[s].skip)))||meta.secs[0]; load(first); refreshGames(); }
+async function refreshGames(){ const games=await (await fetch('/api/games')).json(); const sel=$('gameSel'); sel.innerHTML='';
+  games.forEach(g=>{ const o=document.createElement('option'); o.value=g.slug; o.textContent=`${g.marked>=8?'✓ ':g.marked>0?'… ':''}${g.slug} (${g.marked}/${g.frames})`; if(g.slug===G) o.selected=true; sel.appendChild(o); }); }
+$('gameSel').onchange=e=>openGame(e.target.value);
+(async()=>{ const games=await (await fetch('/api/games')).json(); const start=games.find(g=>g.marked<8)||games[0]; await openGame(start.slug); })();
 </script></body></html>
