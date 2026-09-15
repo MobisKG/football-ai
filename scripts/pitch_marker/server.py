@@ -24,14 +24,15 @@ def plan_of(key):
     return {"width": pl["width"], "length": pl["length"], "half": P["half_length"], "goal": P["goal"]["width"],
             "box_w": P["penalty_area"]["width"], "box_d": P["penalty_area"]["depth"], "key": key}
 FIELD_PITCH = {"Полей №3": "field3", "Полей №1": "lower", "Полей №2": "lower"}
-GAMES = {}
+GAMES = {}; GAME_CACHE = {}
 def scan_games():
     """папки с кадрами — заново при каждом запросе списка: кадры новых игр приходят по ходу работы"""
     if not ROOT_MODE: return
     jobs = {j["slug"]: j for j in json.load(open(os.path.join(ROOT, "results/pitch/jobs.json")))}
     for slug in sorted(os.listdir(PROOT)):
-        if slug in GAMES: continue
         fr = os.path.join(PROOT, slug, "frames_%s_full" % slug)
+        if slug in GAMES and (GAMES[slug]["frames"] == fr or not os.path.isdir(fr)): continue
+        GAME_CACHE.pop(slug, None)          # появилась полная папка кадров — перечитать игру
         if not os.path.isdir(fr):
             alt = glob.glob(os.path.join(PROOT, slug, "full_*")); fr = alt[0] if alt and os.path.isdir(alt[0]) else None
         if not fr: continue
@@ -58,7 +59,6 @@ class Game:
             if os.path.exists(p):
                 j = json.load(open(p)); d[s] = {"n": len(j.get("points", [])), "err": max(j.get("reproj_err_m") or [0]), "skip": j.get("skip", False)}
         return d
-GAME_CACHE = {}
 def game(q):
     slug = (q.get("game") or [next(iter(GAMES))])[0]
     if slug not in GAME_CACHE: GAME_CACHE[slug] = Game(slug)
