@@ -12,8 +12,20 @@ SSH = ["ssh", "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/n
 def pods():
     req = urllib.request.Request("https://rest.runpod.io/v1/pods", headers={"Authorization": "Bearer " + RUNPOD_KEY, "User-Agent": "curl/8.4.0"})
     return json.load(urllib.request.urlopen(req, timeout=60))
-armed = set()
+armed = set(); fails = 0
+def netcheck():
+    """сеть с ноутбука: DNS и HTTPS до RunPod; пишем перелом состояния один раз"""
+    global fails
+    try:
+        urllib.request.urlopen(urllib.request.Request("https://rest.runpod.io/v1/pods", headers={"Authorization": "Bearer " + RUNPOD_KEY, "User-Agent": "curl/8.4.0"}), timeout=20).read()
+        if fails >= 3: print(time.strftime("%H:%M:%S"), "сеть вернулась", flush=True)
+        fails = 0; return True
+    except Exception as e:
+        fails += 1
+        if fails == 3: print(time.strftime("%H:%M:%S"), "СЕТЬ ПРОПАЛА:", str(e)[:120], flush=True)
+        return False
 while True:
+    if not netcheck(): time.sleep(60); continue
     try:
         for p in pods():
             pm = p.get("portMappings") or {}

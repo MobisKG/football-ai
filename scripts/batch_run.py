@@ -137,10 +137,20 @@ class Pod:
         self.install_batch_key(); self.start_log_saver()
         self.ready = True; return True
     def scp(self, src, dst, timeout=1800):
-        p = subprocess.run(["scp", "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null", "-o", "LogLevel=ERROR",
-                            "-o", "ConnectTimeout=30", "-i", KEY, "-P", str(self.port), "-q", "-r"] + (src if isinstance(src, list) else [src]) + [dst],
-                           capture_output=True, text=True, timeout=timeout)
-        if p.returncode != 0: raise RuntimeError("scp: " + p.stderr.strip()[:200])
+        # обрыв сети с ноутбука (15.09: «Connection closed», DNS) — три попытки с паузой, а не одна
+        for attempt in range(3):
+            try:
+                p = subprocess.run(["scp", "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null", "-o", "LogLevel=ERROR",
+                                    "-o", "ConnectTimeout=20", "-o", "ServerAliveInterval=15", "-o", "ServerAliveCountMax=3", "-i", KEY, "-P", str(self.port), "-q", "-r"]
+                                   + (src if isinstance(src, list) else [src]) + [dst], capture_output=True, text=True, timeout=timeout)
+                err = p.stderr.strip()[:200]
+            except subprocess.TimeoutExpired:
+                p = None; err = "таймаут %d с" % timeout
+            if p is not None and p.returncode == 0: return
+            if "No such file" in err: raise RuntimeError("scp: " + err)      # локальная ошибка, повтор не поможет
+            log(self.tag, "scp не удалось (%s), попытка %d/3: %s" % (err, attempt + 1, os.path.basename(str(src)[:60])))
+            time.sleep(20)
+        raise RuntimeError("scp: " + err)
     def remote(self, path): return "root@%s:%s" % (self.ip, path)
     def setup(self):
         self.ssh("mkdir -p /root/fb/weights /root/fb/out")
