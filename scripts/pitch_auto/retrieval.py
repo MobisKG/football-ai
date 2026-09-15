@@ -10,12 +10,33 @@ import numpy as np, cv2
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from core import load_manual, ROOT
 
+def load_auto_for_field(field, exclude_games=(), min_cov=0.85, min_lines=5, per_game=12):
+    """уверенные автоматические опоры других игр той же площадки — опоры для галереи (самонаращивание)"""
+    jobs = {j["slug"]: j for j in json.load(open(os.path.join(ROOT, "results/pitch/jobs.json")))}
+    out = []
+    for slug, j in jobs.items():
+        if j.get("field") != field or slug in exclude_games: continue
+        rows = []
+        for f in sorted(glob.glob(os.path.join(ROOT, "results/pitch", slug, "auto", "frame_t*.json"))):
+            try: r = json.load(open(f))
+            except Exception: continue          # файл ещё пишется другим процессом
+            q = r.get("quality") or {}
+            if r.get("ok") and r.get("H_img2plan") and q.get("coverage", 0) >= min_cov and q.get("lines", 0) >= min_lines and os.path.exists(r["image"]):
+                rows.append((q["coverage"], r))
+        rows.sort(key=lambda x: -x[0])
+        # равномерно по времени игры среди лучших
+        pick = [r for _, r in rows[:per_game * 3]]; pick.sort(key=lambda r: r["sec"]); step = max(1, len(pick) // per_game)
+        out += [(r["image"], np.array(r["H_img2plan"]), slug, r["sec"]) for r in pick[::step][:per_game]]
+    return out
+
 class Gallery:
-    def __init__(self, field, exclude_games=(), extra=(), nfeat=4000):
+    def __init__(self, field, exclude_games=(), extra=(), nfeat=4000, auto=True):
         self.sift = cv2.SIFT_create(nfeat); self.bf = cv2.BFMatcher(cv2.NORM_L2); self.items = []
         for m in load_manual():
             if m["H"] is None or m["field"] != field or m["game"] in exclude_games: continue
             self.add(m["image"], m["H"], m["game"], m["sec"])
+        if auto:
+            for path, H, game, sec in load_auto_for_field(field, exclude_games): self.add(path, H, game, sec)
         for path, H, game, sec in extra: self.add(path, H, game, sec)
     def feats(self, img):
         g = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY); g = cv2.resize(g, (960, 540), interpolation=cv2.INTER_AREA)

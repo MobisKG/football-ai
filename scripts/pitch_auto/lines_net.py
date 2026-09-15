@@ -29,13 +29,36 @@ def render_label(H_img2plan, plan, thick=3, ring=3):
     lab[(ring_m > 0) & (lab == 0)] = 255
     return lab
 
-def dataset(exclude_games=(), only_games=None):
+def load_auto(min_cov=0.8, min_lines=5, exclude_games=()):
+    """принятые автоматические опоры как псевдоразметка: results/pitch/*/auto/frame_t*.json"""
+    out = []
+    for f in sorted(glob.glob(os.path.join(ROOT, "results/pitch/*/auto/frame_t*.json"))):
+        try: j = json.load(open(f))
+        except Exception: continue
+        game = j.get("game") or f.split("/")[-3]
+        if game in exclude_games or not j.get("ok") or not j.get("H_img2plan"): continue
+        q = j.get("quality") or {}
+        if q.get("coverage", 0) < min_cov or q.get("lines", 0) < min_lines: continue
+        if not os.path.exists(j["image"]): continue
+        plan = {"width": j["plan"]["width"], "length": j["plan"]["length"], "half": 21.54, "goal": 3.4, "box_w": 9.0, "box_d": 6.4}
+        out.append({"game": game, "sec": j["sec"], "image": j["image"], "H": np.array(j["H_img2plan"], float), "plan": plan, "points": {}})
+    return out
+
+def dataset(exclude_games=(), only_games=None, auto=False, per_game_cap=40, seed=0):
     out = []
     for m in load_manual():
         if m["H"] is None or m["game"] in exclude_games: continue
         if only_games and m["game"] not in only_games: continue
         im = cv2.resize(cv2.imread(m["image"]), (WW, WH), interpolation=cv2.INTER_AREA)
         out.append((im, render_label(m["H"], m["plan"]), m))
+    if auto:
+        rng = random.Random(seed); by = {}
+        for m in load_auto(exclude_games=exclude_games): by.setdefault(m["game"], []).append(m)
+        for g, ms in by.items():
+            for m in rng.sample(ms, min(per_game_cap, len(ms))):
+                im = cv2.imread(m["image"])
+                if im is None: continue
+                out.append((cv2.resize(im, (WW, WH), interpolation=cv2.INTER_AREA), render_label(m["H"], m["plan"]), m))
     return out
 
 # ---------- сеть
@@ -116,13 +139,15 @@ def evaluate(net, device, data):
                      "false_any": float((anyp & ~(cv2.dilate(allgt.astype(np.uint8), np.ones((9, 9), np.uint8)) > 0)).mean())})
     return rows
 
-def train(out_path, exclude=(), epochs=60, iters=40, bs=4, lr=1e-3, seed=0, log=print, duty=1.0):
+def train(out_path, exclude=(), epochs=60, iters=40, bs=4, lr=1e-3, seed=0, log=print, duty=1.0, auto=False, init=None):
     import torch, torch.nn as nn
     device = "mps" if torch.backends.mps.is_available() else ("cuda" if torch.cuda.is_available() else "cpu")
     torch.manual_seed(seed); rng = np.random.default_rng(seed)
-    tr = dataset(exclude_games=exclude); va = dataset(only_games=exclude) if exclude else []
+    tr = dataset(exclude_games=exclude, auto=auto); va = dataset(only_games=exclude) if exclude else []
     log("устройство %s, обучение %d кадров, проверка %d, исключены %s" % (device, len(tr), len(va), list(exclude)))
-    net = build_net().to(device); opt = torch.optim.AdamW(net.parameters(), lr=lr, weight_decay=1e-4)
+    net = build_net()
+    if init: net.load_state_dict(torch.load(init, map_location="cpu")); log("старт с весов " + init)
+    net = net.to(device); opt = torch.optim.AdamW(net.parameters(), lr=lr, weight_decay=1e-4)
     sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=lr, total_steps=epochs * iters, pct_start=0.15)
     wts = torch.tensor([0.2] + [1.0] * (len(CLASSES) - 1), device=device)
     crit = nn.CrossEntropyLoss(weight=wts, ignore_index=255)
@@ -153,4 +178,4 @@ if __name__ == "__main__":
     out = sys.argv[1]; opt = lambda k, d=None: sys.argv[sys.argv.index(k) + 1] if k in sys.argv else d
     ex = tuple(x for x in (opt("--exclude", "") or "").split(",") if x)
     train(out, exclude=ex, epochs=int(opt("--epochs", 60)), iters=int(opt("--iters", 40)), bs=int(opt("--bs", 4)), duty=float(opt("--duty", 1.0)),
-          log=lambda s: print(time.strftime("%H:%M:%S"), s, flush=True))
+          auto="--auto" in sys.argv, init=opt("--init"), log=lambda s: print(time.strftime("%H:%M:%S"), s, flush=True))

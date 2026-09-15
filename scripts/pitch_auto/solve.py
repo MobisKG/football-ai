@@ -13,7 +13,7 @@ import numpy as np, cv2
 from scipy.optimize import least_squares
 from scipy.ndimage import map_coordinates
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from core import plan_lines, sample_lines, project, front_sign, landmarks
+from core import plan_lines, sample_lines, project, front_sign, landmarks, line_mask, dist_map, refine as refine_bin, quality as quality_bin
 from lines_net import CLASSES, LINE_CLASS, WW, WH, SCALE
 
 def class_pixels(prob, c, thr=0.5):
@@ -175,26 +175,86 @@ def quality_cls(H_img2plan, D, plan, shape, tol=2.5):
     trans = [n for n in good if n.startswith("goal") or n == "half" or n.endswith("_f")]
     return {"coverage": float(hit[ok].mean()), "lines": len(good), "per_line": per, "longi": len(longi), "trans": len(trans), "visible": int(ok.sum()), "good": good}
 
-def calibrate(prob, plan, shape, H_init=None, thr=0.5):
-    """полный шаг: карты классов → матрица. H_init (кадр→план) — подсказка (соседний кадр, сверка с опорой);
-    если есть, пробуем и её, и DLT, берём лучшее по качеству. Возвращает dict или None"""
-    det = detect_lines(prob, thr); D = class_dist(prob, thr)
+def fine_dist(prob, img, thr=0.5, gate=9, cap=40.0):
+    """карта расстояний до линий: пиксели любой линии по сети (960×540), внутри них — точные светлые
+    штрихи top-hat полного кадра (сеть говорит «где», top-hat — «точно где»). Если штрихов внутри
+    маски мало, остаётся маска сети"""
+    pred = prob.argmax(0); conf = prob.max(0); m = ((pred > 0) & (conf > thr)).astype(np.uint8)
+    if m.sum() < 30: return dist_map(m, cap), m
+    g = cv2.dilate(m, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (gate, gate)))
+    raw = line_mask(img, k=15, thr=20)
+    raw = (cv2.resize(raw.astype(np.float32), (WW, WH), interpolation=cv2.INTER_AREA) > 0.1).astype(np.uint8) & g
+    fine = raw if raw.sum() >= 0.3 * m.sum() else m
+    return dist_map(fine, cap), fine
+
+def sanity(H_img2plan, plan, shape):
+    """геометрическая правдоподобность: якобиан > 0 (камера сбоку над полем), низ кадра лежит
+    у поля, ширина низа кадра в метрах разумна, линии плана в кадре не слипаются"""
+    h, w = shape[:2]; out = {"det_ok": False, "span_m": None, "pos_ok": False, "sep_px": None}
+    try:
+        out["det_ok"] = jac_sign(H_img2plan, (w / 2, h * 0.8)) > 0
+        q = (H_img2plan @ np.array([[w * 0.15, h * 0.9, 1], [w * 0.85, h * 0.9, 1], [w / 2, h * 0.9, 1]]).T).T; q = q[:, :2] / q[:, 2:3]
+        out["span_m"] = float(np.hypot(*(q[0] - q[1]))); W, L = plan["width"], plan["length"]
+        out["pos_ok"] = bool(-12 <= q[2, 0] <= W + 12 and -12 <= q[2, 1] <= L + 12)
+        # камера стоит у ближней боковой (x = W) на средней линии: точка ниже в кадре ближе к камере.
+        # Это снимает неоднозначность поворота плана на 180° (поле симметрично)
+        cam = np.array([W + 4.0, plan["half"]]); out["cam_ok"] = False
+        for ym in (0.7, 0.8, 0.55):
+            pm = H_img2plan @ np.array([w / 2, h * ym, 1.0]); pb = H_img2plan @ np.array([w / 2, h * 0.97, 1.0])
+            if abs(pm[2]) < 1e-9 or abs(pb[2]) < 1e-9 or np.sign(pm[2]) != np.sign(pb[2]): continue
+            pm = pm[:2] / pm[2]; pb = pb[:2] / pb[2]; v = pb - pm; c = cam - pb
+            if np.linalg.norm(v) < 1e-6 or np.linalg.norm(c) < 1e-6: continue
+            # движение вниз по кадру = к камере: угол между (низ − середина) и (камера − низ) < 70°
+            out["cam_ok"] = bool(v @ c / np.linalg.norm(v) / np.linalg.norm(c) > np.cos(np.radians(70))); break
+        pts, idx, names = sample_lines(plan, 0.5, circle=False); Hp2i = np.linalg.inv(H_img2plan); sg = front_sign(Hp2i, plan, shape)
+        uv, wq = project(Hp2i, pts); ok = (wq * sg > 1e-6) & (uv[:, 0] >= 0) & (uv[:, 0] < w) & (uv[:, 1] >= 0) & (uv[:, 1] < h)
+        seps = []
+        for k in np.unique(idx[ok]):
+            a = uv[ok & (idx == k)]; b = uv[ok & (idx != k)]
+            if len(a) >= 4 and len(b) >= 4:
+                d = np.sqrt(((a[:, None, :] - b[None, :, :]) ** 2).sum(-1)).min(1); seps.append(float(np.median(d)))
+        out["sep_px"] = float(min(seps)) if seps else None
+    except Exception: return out
+    out["ok"] = bool(out["det_ok"] and out["pos_ok"] and out.get("cam_ok") and out["span_m"] is not None and 2.5 <= out["span_m"] <= 45 and (out["sep_px"] is None or out["sep_px"] >= 12))
+    return out
+
+def calibrate(prob, plan, shape, img=None, H_inits=(), thr=0.5, loo=True, classfree=True):
+    """карты классов (+ кадр для точной маски) → матрица. H_inits: [(имя, H кадр→план)] — подсказки
+    (сверка с опорами, соседний кадр). Кандидаты: DLT по классам линий (и варианты без одной линии),
+    подсказки; каждый уточняется по общей карте линий, берётся лучший по покрытию.
+    Возвращает dict: H_img2plan, src, quality, ok, det"""
+    det = detect_lines(prob, thr)
+    if img is not None: dist, fine = fine_dist(prob, img, thr)
+    else:
+        pred = prob.argmax(0); conf = prob.max(0); fine = ((pred > 0) & (conf > thr)).astype(np.uint8); dist = dist_map(fine)
     cands = []
     r = solve_dlt(det, plan, shape)
-    if r is not None:
-        H, end, names, res, flipped = r
-        if not flipped and res < 3.0: cands.append(("dlt", H))
-    if H_init is not None: cands.append(("init", H_init))
+    if r is not None and not r[4] and r[3] < 3.0: cands.append(("dlt", r[0]))
+    if loo and len(det) >= 5:
+        for drop in list(det):
+            d2 = {k: v for k, v in det.items() if k != drop}; r2 = solve_dlt(d2, plan, shape)
+            if r2 is not None and not r2[4] and r2[3] < 3.0: cands.append(("dlt-%s" % drop, r2[0]))
+    weights = {}
+    for it in H_inits:
+        cands.append((it[0], it[1]))
+        if len(it) > 2: weights[it[0]] = it[2]
+    if classfree and (not cands or classfree == "always"): cands += classfree_candidates(fine, plan, shape, dist)
     best = None
     for src, H0 in cands:
-        try: H, q = refine_cls(H0, D, plan, shape)
+        try: H, q = refine_bin(H0, dist, plan, shape, SCALE, circle=False)
         except Exception: continue
         if not np.all(np.isfinite(H)): continue
-        score = (q["lines"] >= 3 and q["longi"] >= 1 and q["trans"] >= 1, q["coverage"])
+        sn = sanity(H, plan, shape); q["sanity"] = sn
+        okq = sn.get("ok", False) and q["lines"] >= 3 and q["longi"] >= 1 and q["trans"] >= 1 and q["coverage"] >= 0.6
+        # слабый ярус: сверка с опорой площадки дала много совпадений (≥ 60 SIFT-инлаеров: по 29 ручным
+        # опорам это ошибка ~0,3–0,6 м), геометрия правдоподобна, линии подтверждают хотя бы частично
+        weak = (not okq) and sn.get("ok", False) and weights.get(src, 0) >= 60 and q["coverage"] >= 0.35 and q["lines"] >= 2
+        q["tier"] = "strong" if okq else ("weak" if weak else "none")
+        score = (okq or weak, okq, sn.get("ok", False), q["lines"], round(q["coverage"], 2))
         if best is None or score > best[0]: best = (score, src, H, q)
     if best is None: return None
     score, src, H, q = best
-    return {"H_img2plan": H, "src": src, "quality": q, "ok": bool(score[0] and q["coverage"] >= 0.5), "det": {k: len(v) for k, v in det.items()}}
+    return {"H_img2plan": H, "src": src, "quality": q, "ok": bool(score[0]), "tier": q["tier"], "det": {k: len(v) for k, v in det.items()}, "fine": fine}
 
 def draw_plan(img, H_img2plan, plan, col=(0, 255, 255), thick=2):
     """разметка плана на кадре (любого размера — матрица для полного 1920×1080)"""
@@ -211,3 +271,71 @@ def draw_plan(img, H_img2plan, plan, col=(0, 255, 255), thick=2):
                 run = []
         if len(run) > 1: cv2.polylines(img, [np.array(run, np.int32)], False, col, thick, cv2.LINE_AA)
     return img
+
+# ---------- решатель без классов: прямые из общей маски линий, семейства по направлению,
+# перебор соответствий с сохранением порядка (продольные: сверху вниз = x плана по возрастанию;
+# поперечные: монотонно по y плана в одну из двух сторон), DLT + правдоподобность + покрытие
+from itertools import combinations
+def classfree_candidates(fine, plan, shape, dist, max_lines=7, top=6):
+    """семейства прямых — по разрыву в углах (в кадре параллельные линии плана почти параллельны);
+    какое семейство — линии x=const (боковые, стороны штрафной), а какое y=const (ворота, передняя
+    штрафной, средняя) — перебираем; порядок внутри семейства (по положению вдоль общей нормали)
+    соответствует порядку на плане в одну из двух сторон"""
+    ys, xs = np.nonzero(fine); pts = np.c_[xs, ys].astype(np.float64)
+    if len(pts) < 100: return []
+    ls = [l for l in ransac_lines(pts, max_lines=max_lines, min_pts=60, tol=2.0) if l["spread"] >= 50]
+    if len(ls) < 4: return []
+    h, w = shape[:2]; S = SCALE
+    # семейства по точке схода: параллельные линии плана в кадре сходятся в одну точку (или
+    # параллельны). Перебираем пары прямых → точка схода → сколько прямых проходят через неё
+    # (угол между прямой и направлением из её середины в точку схода < 2.5°)
+    def vp_family(idx):
+        best = []
+        for a in range(len(idx)):
+            for b in range(a + 1, len(idx)):
+                la, lb = ls[idx[a]]["line"], ls[idx[b]]["line"]; vp = np.cross(la, lb)
+                members = []
+                for i in idx:
+                    l = ls[i]; d = l["dir"]
+                    if abs(vp[2]) < 1e-9 * max(abs(vp[0]), abs(vp[1]), 1e-12): v = vp[:2] / np.linalg.norm(vp[:2])      # точка схода на бесконечности
+                    else:
+                        P = vp[:2] / vp[2]; v = P - l["mu"]; n = np.linalg.norm(v)
+                        if n < 1e-6: members.append(i); continue
+                        v = v / n
+                    if abs(np.degrees(np.arccos(np.clip(abs(v @ d), 0, 1)))) < 2.5: members.append(i)
+                if len(members) > len(best): best = members
+        return best
+    idx = list(range(len(ls))); famA = vp_family(idx)
+    rest = [i for i in idx if i not in famA]; famB = vp_family(rest) if len(rest) >= 2 else rest
+    if len(famA) < 1 or len(famB) < 1: return []
+    def to_full(l): return np.array([l[0] * S, l[1] * S, l[2]])
+    def ordered(f):
+        nrm = np.mean([ls[i]["line"][:2] * np.sign(ls[i]["line"][0] + 1e-9) for i in f], 0)     # общая нормаль
+        return sorted(f, key=lambda i: -ls[i]["line"][2] * np.sign(ls[i]["line"][:2] @ nrm) / np.linalg.norm(ls[i]["line"][:2]))
+    famA, famB = ordered(famA)[:4], ordered(famB)[:4]
+    W, L, HL, bd = plan["width"], plan["length"], plan["half"], plan["box_d"]; x0, x1 = W / 2 - plan["box_w"] / 2, W / 2 + plan["box_w"] / 2
+    LP = [0.0, x0, x1, W]; TP = [0.0, bd, HL, L - bd, L]
+    T = np.array([[1 / w, 0, -0.5], [0, 1 / w, -0.5 * h / w], [0, 0, 1]]); Ti = np.linalg.inv(T)
+    cands = []; seen = 0
+    for Lf, Tf in ((famA, famB), (famB, famA)):
+        for kl in range(1, len(Lf) + 1):
+            for ldet in combinations(Lf, kl):
+                for lsub in combinations(range(4), kl):
+                    for revL in (False, True):
+                        cl = [(Ti.T @ to_full(ls[li]["line"]), np.array([1.0, 0.0, -LP[pi]])) for li, pi in zip(ldet[::-1] if revL else ldet, lsub)]
+                        for kt in range(1, len(Tf) + 1):
+                            if kl + kt < 4: continue
+                            for tdet in combinations(Tf, kt):
+                                for tsub in combinations(range(5), kt):
+                                    for revT in (False, True):
+                                        corr = cl + [(Ti.T @ to_full(ls[ti]["line"]), np.array([0.0, 1.0, -TP[pi]])) for ti, pi in zip(tdet[::-1] if revT else tdet, tsub)]
+                                        Hn = dlt_lines(corr); seen += 1
+                                        if Hn is None: continue
+                                        H = Hn @ T
+                                        if not np.all(np.isfinite(H)): continue
+                                        sn = sanity(H, plan, shape)
+                                        if not sn.get("ok"): continue
+                                        q = quality_bin(np.linalg.inv(H), dist, plan, SCALE, front_sign(np.linalg.inv(H), plan, shape), circle=False, tol=6.0)
+                                        cands.append((q["coverage"], q["lines"], H, (kl, lsub, kt, tsub, revL, revT)))
+    cands.sort(key=lambda c: (-c[1], -c[0]))
+    return [("free%s" % str(c[3]).replace(" ", ""), c[2]) for c in cands[:top]]

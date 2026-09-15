@@ -5,24 +5,32 @@ HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from core import load_manual, landmark_error
 from lines_net import load_net, predict, CLASSES
 from solve import calibrate, draw_plan, detect_lines
+from retrieval import Gallery
 w = sys.argv[1]; games = sys.argv[2].split(",") if len(sys.argv) > 2 and not sys.argv[2].startswith("--") else None
 vis = sys.argv[sys.argv.index("--vis") + 1] if "--vis" in sys.argv else None
 net, dev = load_net(w); M = [m for m in load_manual() if m["H"] is not None and (not games or m["game"] in games)]
+GAL = {}; use_gal = "--gallery" in sys.argv
 rows = []; t0 = time.time()
 for m in M:
     im = cv2.imread(m["image"])
     if im.shape[1] != 1920: im = cv2.resize(im, (1920, 1080))
-    p = predict(net, im, dev); r = calibrate(p, m["plan"], im.shape)
+    p = predict(net, im, dev); inits = []
+    if use_gal:
+        if m["game"] not in GAL: GAL[m["game"]] = Gallery(m["field"], exclude_games=(m["game"],))
+        inits = [("gal_%s_%d" % (g, s), H, inl) for H, inl, g, s in GAL[m["game"]].query(im, top=2)]
+    r = calibrate(p, m["plan"], im.shape, img=im, H_inits=inits, classfree="always" if "--free" in sys.argv else True)
     det = detect_lines(p)
     if r is None: print("%-15s %5d  нет решения; линии: %s" % (m["game"], m["sec"], {k: len(v) for k, v in det.items()})); rows.append((m["game"], m["sec"], None, None, 0, False)); continue
     e = landmark_error(r["H_img2plan"], m["points"], m["plan"]); q = r["quality"]
     rows.append((m["game"], m["sec"], np.mean(list(e.values())), max(e.values()), q["coverage"], r["ok"]))
-    print("%-15s %5d  %s ошибка %.2f/%.2f  cov %.2f lines %d ok %s  найдено %s" % (m["game"], m["sec"], r["src"], rows[-1][2], rows[-1][3], q["coverage"], q["lines"], r["ok"], r["det"]), flush=True)
+    sn = q.get("sanity", {})
+    print("%-15s %5d  %-14s ошибка %.2f/%.2f  cov %.2f lines %d ok %s | det %s span %s sep %s" % (m["game"], m["sec"], r["src"], rows[-1][2], rows[-1][3], q["coverage"], q["lines"], r["ok"], sn.get("det_ok"), None if sn.get("span_m") is None else round(sn["span_m"], 1), None if sn.get("sep_px") is None else round(sn["sep_px"])), flush=True)
     if vis:
         os.makedirs(vis, exist_ok=True); v = cv2.resize(im, (960, 540)); draw_plan(v, m["H"], m["plan"], (0, 255, 255), 1); draw_plan(v, r["H_img2plan"], m["plan"], (0, 0, 255), 2)
         pred = p.argmax(0); conf = p.max(0); cols = [(0,0,0),(255,0,0),(0,255,0),(0,0,255),(255,255,0),(255,0,255),(0,255,255),(255,255,255)]
         pv = np.zeros_like(v)
         for c in range(1, 8): pv[(pred == c) & (conf > 0.5)] = cols[c]
+        pv[r["fine"] > 0] = (255, 255, 255)
         cv2.putText(v, "%s %d err %.2f/%.2f cov %.2f ok %s" % (m["game"], m["sec"], rows[-1][2], rows[-1][3], q["coverage"], r["ok"]), (10, 25), 0, 0.7, (255, 255, 255), 2)
         cv2.imwrite(os.path.join(vis, "ev_%s_%d.jpg" % (m["game"], m["sec"])), np.vstack([v, pv]))
 ok = [r for r in rows if r[2] is not None]

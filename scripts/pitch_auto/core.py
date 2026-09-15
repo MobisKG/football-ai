@@ -67,11 +67,17 @@ def project(H_plan2img, pts):
     p = np.c_[pts, np.ones(len(pts))]; q = (H_plan2img @ p.T).T
     return q[:, :2] / q[:, 2:3], q[:, 2]
 
-def front_sign(H_plan2img, plan):
-    """знак однородной координаты «перед камерой»: по центру поля, если он не за горизонтом,
-    иначе по медиане знаков точек плана"""
-    _, w = project(H_plan2img, np.array([[plan["width"] / 2, plan["half"]]]))
-    return float(np.sign(w[0])) or 1.0
+def front_sign(H_plan2img, plan, shape=(1080, 1920)):
+    """знак однородной координаты «перед камерой»: берём точку кадра в нижней части (она точно
+    на земле перед камерой), переводим на план и смотрим знак w при обратной проекции.
+    По центру поля нельзя: на кадрах у ворот центр бывает за горизонтом"""
+    h, w = shape[:2]; Hi = np.linalg.inv(H_plan2img)
+    for uv in ((w / 2, h * 0.85), (w / 2, h * 0.6), (w * 0.3, h * 0.8), (w * 0.7, h * 0.8)):
+        q = Hi @ np.array([uv[0], uv[1], 1.0])
+        if abs(q[2]) < 1e-9: continue
+        _, ww = project(H_plan2img, np.array([[q[0] / q[2], q[1] / q[2]]]))
+        if abs(ww[0]) > 1e-9: return float(np.sign(ww[0]))
+    return 1.0
 
 def visible(H_plan2img, pts, shape, sign, margin=0):
     uv, w = project(H_plan2img, pts); h, W = shape[:2]
