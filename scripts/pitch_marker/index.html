@@ -90,7 +90,10 @@ function inv3(m){ const [a,b,c,d,e,f,g,h,i]=m; const A=e*i-f*h,B=-(d*i-f*g),C=d*
 function render(){ view.width=wrap.clientWidth; view.height=wrap.clientHeight; ctx.fillStyle='#000'; ctx.fillRect(0,0,view.width,view.height); if(!img) return;
   ctx.imageSmoothingEnabled=scale<1; ctx.drawImage(img,ox,oy,img.width*scale,img.height*scale);
   if(H&&$('showLines').checked){ const Hp2i=inv3(H.flat()), W=plan.width,L=plan.length,HL=plan.half,bw=plan.box_w,bd=plan.box_d,g=plan.goal,x0=W/2-bw/2,x1=W/2+bw/2;
-    const ref=apply(Hp2i,W/2,HL)[2];
+    // знак однородной координаты «перед камерой» — по поставленным точкам, а не по центру поля:
+    // на кадрах у ворот центр поля бывает за горизонтом, и тогда рисовались зеркальные линии
+    const rp=pts.length?pts.reduce((a,p)=>[a[0]+p.plan[0]/pts.length,a[1]+p.plan[1]/pts.length],[0,0]):[W/2,HL];
+    const ref=apply(Hp2i,rp[0],rp[1])[2];
     const poly=(P,col,w)=>{ ctx.strokeStyle=col; ctx.lineWidth=w; ctx.beginPath(); let on=false;
       for(let k=0;k<P.length-1;k++){ for(let t=0;t<=1;t+=0.05){ const x=P[k][0]+(P[k+1][0]-P[k][0])*t, y=P[k][1]+(P[k+1][1]-P[k][1])*t; const [u,v,w2]=apply(Hp2i,x,y);
         if(w2*Math.sign(ref)<=1e-9||Math.abs(u)>6*img.width||Math.abs(v)>6*img.height){ on=false; continue; } const [sx,sy]=toScr(u,v); if(!on){ctx.moveTo(sx,sy);on=true;} else ctx.lineTo(sx,sy); } } ctx.stroke(); };
