@@ -21,6 +21,7 @@ STEP = opt("--step", 2); REF_SEC = opt("--ref-sec", 2.0)
 SCALE = 0.5; REANCHOR = 15; MIN_INL = 60; MIN_ORB = 80
 
 cal = json.load(open(calib_path))
+_PW, _PL = float(cal["plan"]["width"]), float(cal["plan"]["length"])
 H_ref2plan = np.array(cal["H_img2plan"], float).reshape(3, 3)
 
 cap = cv2.VideoCapture(video)
@@ -52,11 +53,33 @@ def read_small(indices):
     return out
 
 orb = cv2.ORB_create(3000)
+# Особые точки — только на газоне. Больше всего точек на сетке, заборе и стене постройки
+# за воротами; это вертикальная плоскость, и при съёмке с рук (оператор чуть смещается)
+# преобразование по ней неверно для поля: на пилоте разметка уезжала на крышу постройки.
+GROUND_MASK = "--no-ground-mask" not in sys.argv
+def ground_mask(H_img2plan, shape):
+    """маска уменьшенного кадра: точки, чья проекция на план внутри поля с запасом 1 м"""
+    if not GROUND_MASK or H_img2plan is None: return None
+    h, w = shape
+    Hi = np.linalg.inv(np.asarray(H_img2plan, float).reshape(3, 3))
+    M = 1.0; poly = np.array([[-M, -M], [_PW + M, -M], [_PW + M, _PL + M], [-M, _PL + M]], float)
+    # густая ломаная по краю поля, отбрасываем точки за горизонтом (другой знак однородной координаты)
+    dense = np.vstack([np.linspace(poly[k], poly[(k + 1) % 4], 60) for k in range(4)])
+    q = (Hi @ np.c_[dense, np.ones(len(dense))].T).T
+    ref = Hi @ np.array([_PW / 2, _PL / 2, 1.0])
+    ok = q[:, 2] * np.sign(ref[2] if ref[2] != 0 else 1) > 1e-9
+    if ok.sum() < 20: return None
+    pts = (q[ok, :2] / q[ok, 2:3]) * SCALE
+    pts = np.clip(pts, -4 * w, 5 * w).astype(np.int32)
+    m = np.zeros((h, w), np.uint8); cv2.fillPoly(m, [cv2.convexHull(pts)], 255)
+    return m if (m > 0).mean() > 0.08 else None
 bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
 
-def pair_H(g1, g2):
+def pair_H(g1, g2, mask=None):
     """Преобразование g1 -> g2 (в координатах полного кадра)."""
-    p1 = cv2.goodFeaturesToTrack(g1, 1500, 0.01, 8)
+    p1 = cv2.goodFeaturesToTrack(g1, 1500, 0.01, 8, mask=mask)
+    if (p1 is None or len(p1) < 30) and mask is not None:
+        p1 = cv2.goodFeaturesToTrack(g1, 1500, 0.01, 8)
     if p1 is None or len(p1) < 30: return None, 0
     p2, st, _ = cv2.calcOpticalFlowPyrLK(g1, g2, p1, None, winSize=(21, 21), maxLevel=4)
     m = st.ravel() == 1
@@ -105,12 +128,16 @@ for k, a in enumerate(sys.argv):
     if a == "--ext-anchor":
         c = json.load(open(sys.argv[k + 1]))
         im = cv2.imread(_os.path.join(_os.path.dirname(_os.path.abspath(sys.argv[k + 1])), c["small"]), cv2.IMREAD_GRAYSCALE)
-        kp, d = orb.detectAndCompute(im, None)
-        key.append((-(len(key) + 1), np.array(c["H_img2plan"], float).reshape(3, 3), kp, d))
+        _Ha = np.array(c["H_img2plan"], float).reshape(3, 3)
+        _PW, _PL = float(c["plan"]["width"]), float(c["plan"]["length"])
+        kp, d = orb.detectAndCompute(im, ground_mask(_Ha, im.shape))
+        key.append((-(len(key) + 1), _Ha, kp, d))
 print("опор: %d (%s)" % (len(key), ", ".join("кадр %d" % k[0] for k in key)), flush=True)
 
-def orb_to_keys(g):
-    kp1, d1 = orb.detectAndCompute(g, None)
+def orb_to_keys(g, H_guess=None):
+    m1 = ground_mask(H_guess, g.shape)
+    kp1, d1 = orb.detectAndCompute(g, m1)
+    if d1 is None and m1 is not None: kp1, d1 = orb.detectAndCompute(g, None)
     if d1 is None: return None, 0, None
     best = (None, 0, None)
     for ai, Ha, kp2, d2 in key:
@@ -148,11 +175,11 @@ for direction in (+1, -1):
     for k, i in enumerate(seq):
         if i in H_plan and quality[i]["src"] in ("anchor", "extref"):
             prev_i, H_prev = i, H_plan[i]; continue
-        Hp, inl = pair_H(small[i], small[prev_i])      # кадр i -> кадр prev
+        Hp, inl = pair_H(small[i], small[prev_i], ground_mask(H_prev, small[i].shape))      # кадр i -> кадр prev
         H_cur = H_prev @ Hp if (Hp is not None and inl >= MIN_INL) else None
         src = "flow" if H_cur is not None else "lost"
         if k % REANCHOR == 0 or H_cur is None:
-            Hd, ninl, ai = orb_to_keys(small[i])
+            Hd, ninl, ai = orb_to_keys(small[i], H_cur if H_cur is not None else H_prev)
             if Hd is not None and ninl >= MIN_ORB:
                 H_cur = Hd; src = "orb%d" % ai; inl = ninl; reanch += 1
         if H_cur is None:
