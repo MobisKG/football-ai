@@ -390,6 +390,11 @@ def merge_parts(m):
                 q = pl.setdefault(p["player"], dict(p))
                 if q is not p:
                     for k in ("time_on_pitch_s", "touches", "possession_s", "passes"): q[k] = round((q.get(k) or 0) + (p.get(k) or 0), 1)
+                    # пробег складывается, максимальная скорость — наибольшая из таймов
+                    if p.get("distance_m") is not None or q.get("distance_m") is not None:
+                        q["distance_m"] = round((q.get("distance_m") or 0) + (p.get("distance_m") or 0))
+                    if p.get("top_speed_kmh") or q.get("top_speed_kmh"):
+                        q["top_speed_kmh"] = max(q.get("top_speed_kmh") or 0, p.get("top_speed_kmh") or 0)
         out["teams"][c] = {"players": sorted(pl.values(), key=lambda r: -r["time_on_pitch_s"]), "unidentified_time_s": sum(s["teams"][c]["unidentified_time_s"] for s in ss)}
     json.dump(out, open(os.path.join(d, "stats.json"), "w"), ensure_ascii=False, indent=1)
     sbs = [json.load(open(os.path.join(p, "scoreboard.json"))) for p in parts if os.path.exists(os.path.join(p, "scoreboard.json"))]

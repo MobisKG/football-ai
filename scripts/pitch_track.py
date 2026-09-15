@@ -21,7 +21,7 @@ STEP = opt("--step", 2); REF_SEC = opt("--ref-sec", 2.0)
 SCALE = 0.5; REANCHOR = 15; MIN_INL = 60; MIN_ORB = 80
 
 cal = json.load(open(calib_path))
-H_ref2plan = np.array(cal["H_img2plan"], float)
+H_ref2plan = np.array(cal["H_img2plan"], float).reshape(3, 3)
 
 cap = cv2.VideoCapture(video)
 FPS = cap.get(cv2.CAP_PROP_FPS); N = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -87,7 +87,7 @@ print("кадры прочитаны за %.0f с, реально %d" % (time.ti
 # Опоры: основная (ближние ворота) и дополнительные через --anchor путь.json.
 # Прямая сверка с ближайшей по содержанию опорой не даёт ошибке копиться на
 # дальнем конце поля, где до первой опоры 43 метра.
-anchors = [(ref_i, H_ref2plan)]
+anchors = [] if "--no-ref" in sys.argv else [(ref_i, H_ref2plan)]
 for k, a in enumerate(sys.argv):
     if a == "--anchor":
         c = json.load(open(sys.argv[k + 1]))
@@ -98,6 +98,15 @@ key = []
 for ai, Ha in anchors:
     kp, d = orb.detectAndCompute(small[ai], None)
     key.append((ai, Ha, kp, d))
+# --ext-anchor anchor.json: опора из другой записи того же поля (оператор снимает с одной
+# трибуны, фон тот же). Номер опоры — отрицательный, в кадры видео не попадает.
+import os as _os
+for k, a in enumerate(sys.argv):
+    if a == "--ext-anchor":
+        c = json.load(open(sys.argv[k + 1]))
+        im = cv2.imread(_os.path.join(_os.path.dirname(_os.path.abspath(sys.argv[k + 1])), c["small"]), cv2.IMREAD_GRAYSCALE)
+        kp, d = orb.detectAndCompute(im, None)
+        key.append((-(len(key) + 1), np.array(c["H_img2plan"], float).reshape(3, 3), kp, d))
 print("опор: %d (%s)" % (len(key), ", ".join("кадр %d" % k[0] for k in key)), flush=True)
 
 def orb_to_keys(g):
@@ -118,7 +127,18 @@ def orb_to_keys(g):
 H_plan = {}
 quality = {}
 for ai, Ha, _, _ in key:
-    H_plan[ai] = Ha; quality[ai] = {"src": "anchor", "inl": 9999}
+    if ai >= 0:
+        H_plan[ai] = Ha; quality[ai] = {"src": "anchor", "inl": 9999}
+if "--no-ref" in sys.argv:
+    # опора только внешняя: ищем кадр видео, лучше всего совпадающий с какой-то опорой
+    best = (None, 0, None)
+    for i in frames_idx[::REANCHOR]:
+        Hd, n, ai = orb_to_keys(small[i])
+        if Hd is not None and n > best[1]: best = (Hd, n, i)
+        if n >= 4 * MIN_ORB: break
+    if best[0] is None: sys.exit("ни один кадр не совпал с внешними опорами")
+    ref_i = best[2]; H_plan[ref_i] = best[0]; quality[ref_i] = {"src": "extref", "inl": best[1]}
+    print("стартовый кадр %d по внешней опоре, совпадений %d" % (ref_i, best[1]), flush=True)
 lost = 0; reanch = 0
 
 for direction in (+1, -1):
@@ -126,7 +146,7 @@ for direction in (+1, -1):
     if direction < 0: seq = seq[::-1]
     prev_i = ref_i; H_prev = H_plan[ref_i]
     for k, i in enumerate(seq):
-        if i in H_plan and quality[i]["src"] == "anchor":
+        if i in H_plan and quality[i]["src"] in ("anchor", "extref"):
             prev_i, H_prev = i, H_plan[i]; continue
         Hp, inl = pair_H(small[i], small[prev_i])      # кадр i -> кадр prev
         H_cur = H_prev @ Hp if (Hp is not None and inl >= MIN_INL) else None
