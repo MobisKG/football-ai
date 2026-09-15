@@ -34,6 +34,8 @@ for t in times:
     if not ok: continue
     H = np.array(f["H_img2plan"], float).reshape(3, 3); Hi = np.linalg.inv(H)
     h, w = fr.shape[:2]
+    # матрицы привязки — в координатах 1920×1080; видео может быть 720p
+    if w != 1920: Hi = np.diag([w / 1920.0, w / 1920.0, 1.0]) @ Hi
     for pts, col in LINES:
         dense = []
         for a_, b_ in zip(pts, pts[1:]):

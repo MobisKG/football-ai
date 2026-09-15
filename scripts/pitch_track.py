@@ -22,7 +22,11 @@ SCALE = 0.5; REANCHOR = 15; MIN_INL = 60; MIN_ORB = 80
 
 cal = json.load(open(calib_path))
 _PW, _PL = float(cal["plan"]["width"]), float(cal["plan"]["length"])
-H_ref2plan = np.array(cal["H_img2plan"], float).reshape(3, 3)
+# --anchor-scale s: опоры размечены на кадре другого размера (1920×1080), а видео, например, 1280×720:
+# s = ширина_видео / 1920; матрицы опор пересчитываются на вход, матрицы результата — обратно
+ASCALE = opt("--anchor-scale", 1.0); A_IN = np.diag([ASCALE, ASCALE, 1.0]); A_OUT = np.diag([1 / ASCALE, 1 / ASCALE, 1.0])
+def load_H(c): return np.array(c["H_img2plan"], float).reshape(3, 3) @ A_OUT      # кадр видео -> кадр опоры (÷s) -> план
+H_ref2plan = load_H(cal)
 
 cap = cv2.VideoCapture(video)
 FPS = cap.get(cv2.CAP_PROP_FPS); N = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -119,7 +123,7 @@ for k, a in enumerate(sys.argv):
         fi = c["frame_index"] if "frame_index" in c else int(round(float(c["frame_sec"]) * FPS))
         ai = min(frames_idx, key=lambda i: abs(i - fi)) if frames_idx else int(fi) // STEP * STEP
         if ai in small:
-            anchors.append((ai, np.array(c["H_img2plan"], float).reshape(3, 3)))
+            anchors.append((ai, load_H(c)))
 key = []
 for ai, Ha in anchors:
     kp, d = orb.detectAndCompute(small[ai], None)
@@ -137,7 +141,8 @@ for k, a in enumerate(sys.argv):
         key.append((-(len(key) + 1), _Ha, kp, d))
 print("опор: %d (%s)" % (len(key), ", ".join("кадр %d" % k[0] for k in key)), flush=True)
 
-def orb_to_keys(g, H_guess=None):
+NEAR = opt("--near-anchors", 0.0)     # сек: сверять только с опорами не дальше этого по времени (0 — со всеми)
+def orb_to_keys(g, H_guess=None, i=None):
     m1 = ground_mask(H_guess, g.shape)
     kp1, d1 = orb.detectAndCompute(g, m1)
     if d1 is None and m1 is not None: kp1, d1 = orb.detectAndCompute(g, None)
@@ -145,6 +150,7 @@ def orb_to_keys(g, H_guess=None):
     best = (None, 0, None)
     for ai, Ha, kp2, d2 in key:
         if d2 is None: continue
+        if NEAR > 0 and i is not None and ai >= 0 and abs(ai - i) > NEAR * FPS: continue
         ms = bf.match(d1, d2)
         if len(ms) < MIN_ORB: continue
         a = np.float32([kp1[m.queryIdx].pt for m in ms]); b = np.float32([kp2[m.trainIdx].pt for m in ms])
@@ -182,7 +188,7 @@ for direction in (+1, -1):
         H_cur = H_prev @ Hp if (Hp is not None and inl >= MIN_INL) else None
         src = "flow" if H_cur is not None else "lost"
         if k % REANCHOR == 0 or H_cur is None:
-            Hd, ninl, ai = orb_to_keys(small[i], H_cur if H_cur is not None else H_prev)
+            Hd, ninl, ai = orb_to_keys(small[i], H_cur if H_cur is not None else H_prev, i)
             if Hd is not None and ninl >= MIN_ORB:
                 H_cur = Hd; src = "orb%d" % ai; inl = ninl; reanch += 1
         if H_cur is None:
@@ -193,10 +199,36 @@ for direction in (+1, -1):
             print("  %s: %d кадров, потеряно %d, пересверок %d, %.0f с" %
                   ("вперёд" if direction > 0 else "назад", k + 1, lost, reanch, time.time() - t0), flush=True)
 
+if "--blend" in sys.argv:
+    # между двумя опорами a < b кадры считались только вперёд от a; считаем ещё назад от b
+    # и смешиваем: четыре точки кадра переводятся на план обеими матрицами, позиции
+    # интерполируются по времени, матрица подгоняется заново. Дрейф потока к концу
+    # промежутка перестаёт накапливаться.
+    anchor_idx = sorted(i for i in H_plan if quality[i]["src"] in ("anchor", "extref"))
+    hh, ww = small[frames_idx[0]].shape; corners = np.array([[0, 0], [ww / SCALE, 0], [ww / SCALE, hh / SCALE], [0, hh / SCALE], [ww / SCALE / 2, hh / SCALE * 0.7]], float)
+    def to_plan(H, pts):
+        q = (H @ np.c_[pts, np.ones(len(pts))].T).T; return q[:, :2] / q[:, 2:3]
+    blended = 0
+    for a, b in zip(anchor_idx, anchor_idx[1:]):
+        seq = [i for i in frames_idx if a < i < b]
+        if not seq: continue
+        back = {}; prev_i = b; H_prev = H_plan[b]; ok_chain = True
+        for i in seq[::-1]:
+            Hp, inl = pair_H(small[i], small[prev_i], ground_mask(H_prev, small[i].shape))
+            if Hp is None or inl < MIN_INL: ok_chain = False; break
+            H_prev = H_prev @ Hp; back[i] = H_prev; prev_i = i
+        if not ok_chain: continue
+        for i in seq:
+            t = (i - a) / float(b - a); pf = to_plan(H_plan[i], corners); pb = to_plan(back[i], corners)
+            if np.any(~np.isfinite(pf)) or np.any(~np.isfinite(pb)) or np.abs(pf - pb).max() > 15: continue
+            Hn, _ = cv2.findHomography(corners, (1 - t) * pf + t * pb, 0)
+            if Hn is not None: H_plan[i] = Hn; quality[i]["src"] = "blend"; blended += 1
+    print("смешано прямого и обратного прохода: %d кадров" % blended, flush=True)
+
 out = {"fps": FPS / STEP, "step": STEP, "source_fps": FPS, "ref_frame": ref_i,
        "anchors": [k[0] for k in key], "plan": cal["plan"], "frames": []}
 for i in frames_idx:
-    H = H_plan[i]
+    H = H_plan[i] @ A_IN            # обратно в координаты кадра опор (1920×1080)
     out["frames"].append({"i": i, "H_img2plan": (H / H[2, 2]).ravel().round(8).tolist(),
                           "src": quality[i]["src"], "inl": quality[i]["inl"]})
 json.dump(out, open(out_path, "w"))
