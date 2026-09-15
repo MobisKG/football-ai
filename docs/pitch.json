@@ -3,15 +3,32 @@
  "date": "2026-09-13",
  "venue": "Динамо, Бишкек, 42.8387 74.5912",
  "clip5_pitch": "upper",
- "goal": {"width": 3.40, "height": 2.13},
- "penalty_area": {"width": 9.0, "depth": 6.4},
+ "goal": {
+  "width": 3.4,
+  "height": 2.13
+ },
+ "penalty_area": {
+  "width": 9.0,
+  "depth": 6.4
+ },
  "half_length": 21.54,
  "length": 43.08,
  "length_as_written_by_user": 43.8,
  "length_note": "21.54 * 2 = 43.08; 43.8 is likely a typo, recheck on site",
  "pitches": {
-  "lower": {"width": 19.20, "length": 43.08},
-  "upper": {"width": 19.00, "length": 43.08}
+  "lower": {
+   "width": 19.2,
+   "length": 43.08
+  },
+  "upper": {
+   "width": 19.0,
+   "length": 43.08
+  },
+  "field3": {
+   "width": 17.0,
+   "length": 43.08,
+   "note": "поле №3 Душанбинки: ширина оценена по кадрам 15.09.2026 (углы поля при привязке по штрафной попали на 1,4 и 18,35 м) — проверить рулеткой"
+  }
  },
  "fence_post_spacing": 3.8,
  "fence_post_spacing_note": "one span measured, a few may differ"
