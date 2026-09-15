@@ -9,7 +9,9 @@ video, track_path, out_dir = sys.argv[1], sys.argv[2], sys.argv[3]
 times = [float(t) for t in sys.argv[4:]]
 os.makedirs(out_dir, exist_ok=True)
 T = json.load(open(track_path))
-P = json.load(open("/Users/doni/Documents/sport/football/docs/pitch.json"))
+_here = os.path.dirname(os.path.abspath(__file__))
+# размеры полей: рядом со скриптом (на машине) или в docs/ проекта (на ноутбуке)
+P = json.load(open(next(x for x in (os.path.join(_here, "pitch.json"), os.path.join(_here, "..", "docs", "pitch.json")) if os.path.exists(x))))
 W_P, L_P = T["plan"]["width"], T["plan"]["length"]
 BW, BD, GW, HALF = P["penalty_area"]["width"], P["penalty_area"]["depth"], P["goal"]["width"], P["half_length"]
 byi = {f["i"]: f for f in T["frames"]}
