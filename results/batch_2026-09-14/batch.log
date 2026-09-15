@@ -1,0 +1,454 @@
+[14.09 21:59:24] старт: 1 видео, 1 машин, python /private/tmp/claude-501/-Users-doni-Documents-football/7f0d34e7-ac71-4fb5-9950-2123175b3367/scratchpad/venv/bin/python
+[14.09 21:59:25] m0 под не создан: HTTP 403 error code: 1010
+
+[14.09 22:00:30] старт: 1 видео, 1 машин, python /private/tmp/claude-501/-Users-doni-Documents-football/7f0d34e7-ac71-4fb5-9950-2123175b3367/scratchpad/venv/bin/python
+[14.09 22:00:32] m0 под nongo53prmmvgc NVIDIA GeForce RTX 4090 0.74 $/ч
+[14.09 22:00:55] m0 адрес 103.196.86.137 19640
+[14.09 22:01:00] m0 CUDA: NVIDIA GeForce RTX 4090
+[14.09 22:03:59] m0 установка готова
+[14.09 22:03:59] m0 старт shiko_h2 попытка 1
+[14.09 22:05:14] m0 shiko_h2 | [16:04:54] разбор
+[14.09 22:26:08] m0 shiko_h2 | [16:26:01] готово: 9.5M
+[14.09 22:26:32] m0 shiko_h2 результаты скачаны, машина 22 мин
+[14.09 22:26:33] shiko_h2 статистика готова; хозяева: {"confident": false, "reason": "(os.path.dirname(os.path.abspath(matches_path)), \"rosters.json\")))\n                  ~~~~^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: 'res
+[14.09 22:26:39] m0 под nongo53prmmvgc удалён (ok), 0.32 $ за 26 мин
+[14.09 22:26:47] список машин после очистки: []
+[14.09 22:26:47] готово. потрачено 0.32 $
+[14.09 22:32:49] старт: 24 видео, 4 машин, python /private/tmp/claude-501/-Users-doni-Documents-football/7f0d34e7-ac71-4fb5-9950-2123175b3367/scratchpad/venv/bin/python
+[14.09 22:32:49] shiko_h2 статистика готова; хозяева: {"slug": "shiko_h2", "match_guid": "931a15b4-c4cd-8c5b-ea9b-51846c8e1cfe", "home": "SHIKO", "away": "90-Ынтымак", "home_colour": null, "home_is_top": null, "confident": false, "reason": "табло не проч
+[14.09 22:32:55] m0 под g0zp4y94w3z39p NVIDIA GeForce RTX 4090 0.74 $/ч
+[14.09 22:33:14] m1 под u21065h2vkwjln NVIDIA GeForce RTX 4090 0.74 $/ч
+[14.09 22:33:23] m0 адрес 213.181.111.2 51445
+[14.09 22:33:26] m0 CUDA: NVIDIA GeForce RTX 4090
+[14.09 22:33:31] m2 под x8qhbxpviz10ur NVIDIA GeForce RTX 4090 0.74 $/ч
+[14.09 22:33:37] m1 адрес 149.36.1.192 15792
+[14.09 22:33:40] m1 CUDA: NVIDIA GeForce RTX 4090
+[14.09 22:33:51] m3 под cr33y7vym3ttyw NVIDIA A40 0.49 $/ч
+[14.09 22:33:55] m2 адрес 213.173.110.104 19593
+[14.09 22:33:58] m2 CUDA: NVIDIA GeForce RTX 4090
+[14.09 22:34:15] m3 адрес 69.30.85.36 22002
+[14.09 22:34:20] m3 CUDA: NVIDIA A40
+[14.09 22:36:18] m1 установка готова
+[14.09 22:36:18] m1 старт matai_afm попытка 1
+[14.09 22:36:19] m1 matai_afm машина умерла: kex_exchange_identification: read: Connection reset by peer
+[14.09 22:36:22] m1 под u21065h2vkwjln удалён (ok), 0.04 $ за 3 мин
+[14.09 22:36:24] m1 под 3s3ado1uiumr0d NVIDIA GeForce RTX 4090 0.74 $/ч
+[14.09 22:36:27] m2 установка готова
+[14.09 22:36:27] m2 старт bsht_baldariki попытка 1
+[14.09 22:36:49] m1 адрес 149.36.1.192 31930
+[14.09 22:36:52] m1 CUDA: NVIDIA GeForce RTX 4090
+[14.09 22:37:15] старт: 24 видео, 4 машин, python /private/tmp/claude-501/-Users-doni-Documents-football/7f0d34e7-ac71-4fb5-9950-2123175b3367/scratchpad/venv/bin/python
+[14.09 22:37:18] m0 машина g0zp4y94w3z39p из прошлого запуска не отвечает, удаляю
+[14.09 22:37:20] m0 под g0zp4y94w3z39p удалён (ok), 0.05 $ за 4 мин
+[14.09 22:37:21] m0 shiko_h1 машина умерла: Connection to 213.181.111.2 closed by remote host.
+[14.09 22:37:22] m0 под g0zp4y94w3z39p удалён (HTTP 404 {"error":"pod not found to terminate","status":404}
+), 0.05 $ за 4 мин
+[14.09 22:37:23] m0 переподхвачен под x8qhbxpviz10ur NVIDIA GeForce RTX 4090 213.173.110.104 19593
+[14.09 22:37:23] m0 старт shiko_h1 попытка 1
+[14.09 22:37:24] m0 под 5asfjrsjchdsur NVIDIA GeForce RTX 4090 0.74 $/ч
+[14.09 22:37:33] m2 bsht_baldariki | [16:36:30] скачивание 4E5knC2Y62A
+[14.09 22:37:39] m1 машина cr33y7vym3ttyw из прошлого запуска не отвечает, удаляю
+[14.09 22:37:40] m1 под cr33y7vym3ttyw удалён (ok), 0.03 $ за 4 мин
+[14.09 22:37:41] m3 yntymak_moskva машина умерла: Connection to 69.30.85.36 closed by remote host.
+[14.09 22:37:41] m3 под cr33y7vym3ttyw удалён (HTTP 404 {"error":"pod not found to terminate","status":404}
+), 0.03 $ за 4 мин
+[14.09 22:37:43] m1 машина 3s3ado1uiumr0d из прошлого запуска не отвечает, удаляю
+[14.09 22:37:43] m3 под pnsqksxqpkt5ny NVIDIA GeForce RTX 4090 0.74 $/ч
+[14.09 22:37:44] m1 под 3s3ado1uiumr0d удалён (ok), 0.02 $ за 1 мин
+[14.09 22:37:44] m1 matai_afm ошибка: scp: Connection to 149.36.1.192 closed by remote host.
+scp: Connection closed
+[14.09 22:37:44] m1 старт matai_afm попытка 1
+[14.09 22:37:45] m1 под z0igys6kzt0xut NVIDIA GeForce RTX 4090 0.74 $/ч
+[14.09 22:37:49] m0 адрес 213.181.111.2 51405
+[14.09 22:37:53] m0 CUDA: NVIDIA GeForce RTX 4090
+[14.09 22:37:57] m2 под xqqnsj1n44pisn NVIDIA GeForce RTX 4090 0.74 $/ч
+[14.09 22:37:58] m0 shiko_h1 машина умерла: 
+[14.09 22:37:59] m0 под x8qhbxpviz10ur удалён (ok), 0.06 $ за 4 мин
+[14.09 22:38:01] m0 под uo01nxlsspdxm7 NVIDIA A40 0.49 $/ч
+[14.09 22:38:08] m1 адрес 149.36.1.192 46249
+[14.09 22:38:09] m2 адрес 213.173.102.88 11690
+[14.09 22:38:11] m1 CUDA: NVIDIA GeForce RTX 4090
+[14.09 22:38:12] m2 CUDA: NVIDIA GeForce RTX 4090
+[14.09 22:38:14] m1 matai_afm машина умерла: ssh: connect to host 149.36.1.192 port 31930: Operation timed out
+[14.09 22:38:16] m1 под 3s3ado1uiumr0d удалён (HTTP 404 {"error":"pod not found to terminate","status":404}
+), 0.02 $ за 2 мин
+[14.09 22:38:18] m3 адрес 69.145.85.70 18230
+[14.09 22:38:18] m3 под r84wolmlxdz2dt NVIDIA A40 0.49 $/ч
+[14.09 22:38:18] m1 под 2yatu5sd9o3nxy NVIDIA A40 0.49 $/ч
+[14.09 22:38:23] m3 CUDA: NVIDIA GeForce RTX 4090
+[14.09 22:38:25] m0 адрес 63.141.33.129 22111
+[14.09 22:39:24] старт: 24 видео, 4 машин, python /private/tmp/claude-501/-Users-doni-Documents-football/7f0d34e7-ac71-4fb5-9950-2123175b3367/scratchpad/venv/bin/python
+[14.09 22:39:26] m0 под q5rkn08cuis5dv NVIDIA GeForce RTX 4090 0.74 $/ч
+[14.09 22:39:46] m1 под buc9w1ejnmbe2n NVIDIA GeForce RTX 4090 0.74 $/ч
+[14.09 22:39:50] m0 адрес 69.145.85.70 12549
+[14.09 22:39:55] m0 CUDA: NVIDIA GeForce RTX 4090
+[14.09 22:40:06] m2 под u38nisg9sypozq NVIDIA GeForce RTX 4090 0.74 $/ч
+[14.09 22:40:09] m1 адрес 149.36.1.192 14120
+[14.09 22:40:13] m1 CUDA: NVIDIA GeForce RTX 4090
+[14.09 22:40:26] m3 под yowx7f4gkx3t80 NVIDIA A40 0.49 $/ч
+[14.09 22:40:41] m2 адрес 213.173.102.153 20995
+[14.09 22:40:44] m2 CUDA: NVIDIA GeForce RTX 4090
+[14.09 22:41:10] m3 адрес 69.30.85.141 22121
+[14.09 22:41:15] m3 CUDA: NVIDIA A40
+[14.09 22:42:54] m1 установка готова
+[14.09 22:42:54] m1 старт matai_afm попытка 1
+[14.09 22:43:16] m2 установка готова
+[14.09 22:43:16] m2 старт bsht_baldariki попытка 1
+[14.09 22:43:30] m1 matai_afm машина умерла: 
+[14.09 22:43:31] m1 под buc9w1ejnmbe2n удалён (ok), 0.05 $ за 4 мин
+[14.09 22:43:33] m1 под tdy1l4fqt93333 NVIDIA GeForce RTX 4090 0.74 $/ч
+[14.09 22:43:45] m1 адрес 149.36.1.192 41460
+[14.09 22:43:48] m1 CUDA: NVIDIA GeForce RTX 4090
+[14.09 22:43:54] старт: 24 видео, 4 машин, python /private/tmp/claude-501/-Users-doni-Documents-football/7f0d34e7-ac71-4fb5-9950-2123175b3367/scratchpad/venv/bin/python
+[14.09 22:43:58] m0 машина q5rkn08cuis5dv из прошлого запуска не отвечает, удаляю
+[14.09 22:44:02] m0 под q5rkn08cuis5dv удалён (ok), 0.06 $ за 5 мин
+[14.09 22:44:06] m0 переподхвачен под u38nisg9sypozq NVIDIA GeForce RTX 4090 213.173.102.153 20995
+[14.09 22:44:06] m0 старт shiko_h1 попытка 0
+[14.09 22:44:17] m1 машина yowx7f4gkx3t80 из прошлого запуска не отвечает, удаляю
+[14.09 22:44:18] m1 под yowx7f4gkx3t80 удалён (ok), 0.03 $ за 4 мин
+[14.09 22:44:20] m1 машина tdy1l4fqt93333 из прошлого запуска не отвечает, удаляю
+[14.09 22:44:21] m1 под tdy1l4fqt93333 удалён (ok), 0.01 $ за 1 мин
+[14.09 22:44:23] m1 под v828qxn3kngirv NVIDIA GeForce RTX 4090 0.74 $/ч
+[14.09 22:44:36] m2 под opaqvoa7tt398u NVIDIA GeForce RTX 4090 0.74 $/ч
+[14.09 22:44:41] m0 shiko_h1 машина умерла: 
+[14.09 22:44:42] m0 под u38nisg9sypozq удалён (ok), 0.06 $ за 5 мин
+[14.09 22:44:44] m0 под 7rnesvhoj11oct NVIDIA GeForce RTX 4090 0.74 $/ч
+[14.09 22:44:46] m1 адрес 47.47.180.29 11053
+[14.09 22:44:48] m2 адрес 69.145.85.73 10854
+[14.09 22:44:51] m1 CUDA: NVIDIA GeForce RTX 4090
+[14.09 22:44:53] m2 CUDA: NVIDIA GeForce RTX 4090
+[14.09 22:44:56] m3 под qatwxk18oc6j3k NVIDIA GeForce RTX 4090 0.74 $/ч
+[14.09 22:45:08] m3 адрес 149.36.0.35 19478
+[14.09 22:45:11] m3 CUDA: NVIDIA GeForce RTX 4090
+[14.09 22:45:17] m0 адрес 103.196.86.125 16371
+[14.09 22:45:21] m0 CUDA: NVIDIA GeForce RTX 4090
+[14.09 22:46:23] старт: 24 видео, 4 машин, python /private/tmp/claude-501/-Users-doni-Documents-football/7f0d34e7-ac71-4fb5-9950-2123175b3367/scratchpad/venv/bin/python
+[14.09 22:46:33] m0 переподхвачен под v828qxn3kngirv NVIDIA GeForce RTX 4090 47.47.180.29 11053 (установку повторю)
+[14.09 22:46:50] m1 переподхвачен под opaqvoa7tt398u NVIDIA GeForce RTX 4090 69.145.85.73 10854 (установку повторю)
+[14.09 22:47:08] m2 переподхвачен под 7rnesvhoj11oct NVIDIA GeForce RTX 4090 103.196.86.125 16371 (установку повторю)
+[14.09 22:47:30] m3 переподхвачен под qatwxk18oc6j3k NVIDIA GeForce RTX 4090 149.36.0.35 19478 (установку повторю)
+[14.09 22:48:48] m3 установка готова
+[14.09 22:48:48] m3 старт shiko_h1 попытка 0
+[14.09 22:49:28] m3 shiko_h1 машина умерла: 
+[14.09 22:49:29] m3 под qatwxk18oc6j3k удалён (ok), 0.06 $ за 5 мин
+[14.09 22:49:31] m3 под b842h7irgknxpb NVIDIA GeForce RTX 4090 0.74 $/ч
+[14.09 22:49:55] старт: 24 видео, 4 машин, python /private/tmp/claude-501/-Users-doni-Documents-football/7f0d34e7-ac71-4fb5-9950-2123175b3367/scratchpad/venv/bin/python
+[14.09 22:50:01] m0 переподхвачен под v828qxn3kngirv NVIDIA GeForce RTX 4090 47.47.180.29 11053 (установку повторю)
+[14.09 22:50:22] m1 переподхвачен под opaqvoa7tt398u NVIDIA GeForce RTX 4090 69.145.85.73 10854 (установку повторю)
+[14.09 22:50:40] m2 переподхвачен под 7rnesvhoj11oct NVIDIA GeForce RTX 4090 103.196.86.125 16371 (установка готова)
+[14.09 22:50:40] m2 старт shiko_h1 попытка 0
+[14.09 22:51:04] m3 переподхвачен под b842h7irgknxpb NVIDIA GeForce RTX 4090 203.57.40.193 10176 (установку повторю)
+[14.09 22:51:50] m2 shiko_h1 | [16:50:47] скачивание Z-WIGVMt0nk
+[14.09 22:52:40] m1 установка готова
+[14.09 22:52:40] m1 старт matai_afm попытка 1
+[14.09 22:53:00] m2 shiko_h1 | [16:51:52] разбор
+[14.09 22:54:08] m1 matai_afm | [16:52:59] скачивание ltXq2xJRcHw
+[14.09 22:54:46] m0 установка готова
+[14.09 22:54:46] m0 старт bsht_baldariki попытка 1
+[14.09 22:55:08] m3 установка готова
+[14.09 22:55:08] m3 старт yntymak_moskva попытка 0
+[14.09 22:55:23] m1 matai_afm | [16:55:08] разбор
+[14.09 22:56:26] m0 bsht_baldariki | [16:55:22] !!! видео не скачалось
+[14.09 22:56:26] m0 bsht_baldariki ошибка: шаг на машине упал: [16:55:22] !!! видео не скачалось
+[14.09 22:56:26] m0 старт bsht_baldariki попытка 2
+[14.09 22:56:46] m3 yntymak_moskva | [16:55:40] скачивание 6nqKYkW5sE0
+[14.09 22:57:13] старт: 24 видео, 4 машин, python /private/tmp/claude-501/-Users-doni-Documents-football/7f0d34e7-ac71-4fb5-9950-2123175b3367/scratchpad/venv/bin/python
+[14.09 22:57:22] m0 переподхвачен под v828qxn3kngirv NVIDIA GeForce RTX 4090 47.47.180.29 11053 (установка готова)
+[14.09 22:57:41] m1 переподхвачен под opaqvoa7tt398u NVIDIA GeForce RTX 4090 69.145.85.73 10854 (установка готова)
+[14.09 22:57:59] m2 переподхвачен под 7rnesvhoj11oct NVIDIA GeForce RTX 4090 103.196.86.125 16371 (установка готова)
+[14.09 22:58:23] m3 переподхвачен под b842h7irgknxpb NVIDIA GeForce RTX 4090 203.57.40.193 10176 (установка готова)
+[14.09 22:59:06] старт: 24 видео, 4 машин, python /private/tmp/claude-501/-Users-doni-Documents-football/7f0d34e7-ac71-4fb5-9950-2123175b3367/scratchpad/venv/bin/python
+[14.09 22:59:12] m0 переподхвачен под v828qxn3kngirv NVIDIA GeForce RTX 4090 47.47.180.29 11053 (установка готова)
+[14.09 22:59:32] m1 переподхвачен под opaqvoa7tt398u NVIDIA GeForce RTX 4090 69.145.85.73 10854 (установка готова)
+[14.09 22:59:51] m2 переподхвачен под 7rnesvhoj11oct NVIDIA GeForce RTX 4090 103.196.86.125 16371 (установка готова)
+[14.09 23:00:12] m3 переподхвачен под b842h7irgknxpb NVIDIA GeForce RTX 4090 203.57.40.193 10176 (установка готова)
+[14.09 23:00:58] m0 старт shiko_h1 попытка 1
+[14.09 23:01:19] m1 старт matai_afm попытка 1
+[14.09 23:01:22] m2 старт bsht_baldariki попытка 2
+[14.09 23:02:04] m3 старт yntymak_moskva попытка 1
+[14.09 23:02:26] m0 shiko_h1 | [17:01:34] !!! видео не скачалось
+[14.09 23:02:26] m0 shiko_h1 ошибка: шаг на машине упал: [17:01:34] !!! видео не скачалось
+[14.09 23:02:26] m0 YouTube не отдаёт видео с этого адреса, меняю машину
+[14.09 23:02:36] m0 под v828qxn3kngirv удалён (ok), 0.22 $ за 18 мин
+[14.09 23:02:41] m0 под 4jm2nxt97vy80d NVIDIA GeForce RTX 4090 0.74 $/ч
+[14.09 23:02:48] m2 bsht_baldariki | [17:01:41] скачивание 4E5knC2Y62A
+[14.09 23:02:48] m1 matai_afm | [17:01:43] разбор
+[14.09 23:02:59] m0 адрес 47.47.180.29 19722
+[14.09 23:03:06] m0 CUDA: NVIDIA GeForce RTX 4090
+[14.09 23:03:30] m3 yntymak_moskva | [17:02:26] разбор
+[14.09 23:04:03] старт: 24 видео, 4 машин, python /private/tmp/claude-501/-Users-doni-Documents-football/7f0d34e7-ac71-4fb5-9950-2123175b3367/scratchpad/venv/bin/python
+[14.09 23:04:15] m0 переподхвачен под opaqvoa7tt398u NVIDIA GeForce RTX 4090 69.145.85.73 10854 (установка готова)
+[14.09 23:04:35] m1 переподхвачен под 7rnesvhoj11oct NVIDIA GeForce RTX 4090 103.196.86.125 16371 (установка готова)
+[14.09 23:04:57] m2 переподхвачен под b842h7irgknxpb NVIDIA GeForce RTX 4090 203.57.40.193 10176 (установка готова)
+[14.09 23:05:29] m3 переподхвачен под 4jm2nxt97vy80d NVIDIA GeForce RTX 4090 47.47.180.29 19722 (установку повторю)
+[14.09 23:06:19] m1 старт shiko_h1 попытка 1
+[14.09 23:06:20] m0 старт matai_afm попытка 1
+[14.09 23:06:57] m2 старт bsht_baldariki попытка 2
+[14.09 23:07:53] m1 shiko_h1 | [17:06:33] разбор
+[14.09 23:07:55] m0 matai_afm | [17:06:36] разбор
+[14.09 23:10:10] m2 bsht_baldariki | [17:07:21] скачивание 4E5knC2Y62A
+[14.09 23:15:19] m2 bsht_baldariki | [17:14:39] разбор
+[14.09 23:24:21] старт: 24 видео, 4 машин, python /private/tmp/claude-501/-Users-doni-Documents-football/7f0d34e7-ac71-4fb5-9950-2123175b3367/scratchpad/venv/bin/python
+[14.09 23:24:38] m0 переподхвачен под opaqvoa7tt398u NVIDIA GeForce RTX 4090 69.145.85.73 10854 (установка готова)
+[14.09 23:24:59] m1 переподхвачен под 7rnesvhoj11oct NVIDIA GeForce RTX 4090 103.196.86.125 16371 (установка готова)
+[14.09 23:25:14] m2 переподхвачен под b842h7irgknxpb NVIDIA GeForce RTX 4090 203.57.40.193 10176 (установка готова)
+[14.09 23:25:32] m3 переподхвачен под 4jm2nxt97vy80d NVIDIA GeForce RTX 4090 47.47.180.29 19722 (установку повторю)
+[14.09 23:27:05] m0 старт matai_afm попытка 1
+[14.09 23:27:05] m1 старт shiko_h1 попытка 1
+[14.09 23:27:20] m2 старт bsht_baldariki попытка 2
+[14.09 23:28:06] m3 переподхват 4jm2nxt97vy80d не удался: scp: scp: Connection closed — удаляю
+[14.09 23:28:16] m3 под 4jm2nxt97vy80d удалён (ok), 0.32 $ за 26 мин
+[14.09 23:28:25] m3 под mzrnysco1xptrb NVIDIA GeForce RTX 4090 0.74 $/ч
+[14.09 23:28:31] m1 shiko_h1 | [17:27:23] разбор
+[14.09 23:28:33] m3 адрес 47.47.180.29 11917
+[14.09 23:28:33] m0 matai_afm | [17:27:25] разбор
+[14.09 23:28:47] m2 bsht_baldariki | [17:27:39] разбор
+[14.09 23:28:58] m3 CUDA: NVIDIA GeForce RTX 4090
+[14.09 23:34:37] m3 установка готова
+[14.09 23:34:37] m3 старт yntymak_moskva попытка 1
+[14.09 23:35:50] m3 yntymak_moskva | [17:35:01] !!! видео не скачалось
+[14.09 23:35:50] m3 yntymak_moskva ошибка: шаг на машине упал: [17:35:01] !!! видео не скачалось
+[14.09 23:39:22] m3 yntymak_moskva видео получено с машины m0
+[14.09 23:39:22] m3 старт yntymak_moskva попытка 1
+[14.09 23:40:37] m3 yntymak_moskva | [17:39:33] разбор
+[14.09 23:47:57] m1 shiko_h1 | [17:47:06] готово: 9.3M
+[14.09 23:48:17] m1 shiko_h1 результаты скачаны, машина 20 мин
+[14.09 23:48:19] shiko_h1 статистика готова; хозяева: {"slug": "shiko_h1", "match_guid": "931a15b4-c4cd-8c5b-ea9b-51846c8e1cfe", "home": "SHIKO", "away": "90-Ынтымак", "home_colour": "зелёные", "home_is_top": null, "confident": true, "reason": "табло не 
+[14.09 23:48:23] m1 старт talas91_361 попытка 1
+[14.09 23:49:35] m1 talas91_361 | [17:48:31] скачивание YZ5Fq98VpdI
+[14.09 23:50:37] m1 talas91_361 | [17:50:16] разбор
+[14.09 23:52:38] m0 matai_afm | [17:52:05] !!! цепочка не завершилась (rc=1)
+[14.09 23:52:38] m0 matai_afm ошибка: шаг на машине упал: [17:52:05] !!! цепочка не завершилась (rc=1)
+[14.09 23:52:38] m0 старт matai_afm попытка 2
+[14.09 23:54:00] m0 matai_afm | [17:52:56] разбор
+[15.09 00:15:23] m2 bsht_baldariki | [18:15:06] готово: 17M
+[15.09 00:16:31] m2 bsht_baldariki результаты скачаны, машина 48 мин
+[15.09 00:16:34] bsht_baldariki статистика готова; хозяева: {"slug": "bsht_baldariki", "match_guid": "a01c1ee1-2c3d-ba40-c8f9-34d63509aa00", "home": "Балдарики", "away": "БШТ МИ", "home_colour": "синие", "home_is_top": null, "confident": true, "reason": "табло
+[15.09 00:16:35] bsht_baldariki загружено, проверено чтением
+[15.09 00:16:38] m2 старт ilmar_dinamo попытка 1
+[15.09 00:17:50] m2 ilmar_dinamo | [18:16:46] скачивание LPYkgGA8iUg
+[15.09 00:18:52] m2 ilmar_dinamo | [18:18:18] разбор
+[15.09 00:31:29] m3 yntymak_moskva | [18:31:15] готово: 19M
+[15.09 00:31:50] m3 yntymak_moskva результаты скачаны, машина 52 мин
+[15.09 00:31:53] yntymak_moskva статистика готова; хозяева: {"slug": "yntymak_moskva", "match_guid": "18d7bb3e-8427-8789-d14b-ecce0e14c3d5", "home": "Ынтымак (1)", "away": "Москва-89", "home_colour": null, "home_is_top": null, "confident": false, "reason": "та
+[15.09 00:31:57] m3 старт povorot_kadamjai попытка 1
+[15.09 00:32:09] m1 talas91_361 | [18:31:12] готово: 17M
+[15.09 00:32:27] m1 talas91_361 результаты скачаны, машина 43 мин
+[15.09 00:32:29] talas91_361 статистика готова; хозяева: {"slug": "talas91_361", "match_guid": "ac7da585-086e-f8de-727d-6d39e38c1ac4", "home": "Талас-91", "away": "361", "home_colour": null, "home_is_top": null, "confident": false, "reason": "табло не прочи
+[15.09 00:32:32] m1 старт amigo_dosluk попытка 1
+[15.09 00:33:09] m3 povorot_kadamjai | [18:32:24] !!! видео не скачалось
+[15.09 00:33:09] m3 povorot_kadamjai ошибка: шаг на машине упал: [18:32:24] !!! видео не скачалось
+[15.09 00:33:42] m1 amigo_dosluk | [18:32:39] скачивание dei_g7dSr8U
+[15.09 00:34:44] m1 amigo_dosluk | [18:34:12] разбор
+[15.09 00:34:57] m0 matai_afm | [18:33:59] готово: 18M
+[15.09 00:35:15] m3 povorot_kadamjai видео получено с машины m0
+[15.09 00:35:15] m3 старт povorot_kadamjai попытка 1
+[15.09 00:35:17] m0 matai_afm результаты скачаны, машина 42 мин
+[15.09 00:35:19] matai_afm статистика готова; хозяева: {"slug": "matai_afm", "match_guid": "f033abee-6ef7-0c2b-6a61-3fd73a742306", "home": "AFM-KG", "away": "Матай", "home_colour": "синие", "home_is_top": null, "confident": true, "reason": "табло не прочи
+[15.09 00:35:20] matai_afm загружено, проверено чтением
+[15.09 00:35:23] m0 старт uchtontos_minkush попытка 1
+[15.09 00:36:27] m3 povorot_kadamjai | [18:35:25] разбор
+[15.09 00:36:35] m0 uchtontos_minkush | [18:35:31] скачивание dvDyb4cbnns
+[15.09 00:38:41] m0 uchtontos_minkush | [18:37:46] разбор
+[15.09 00:50:25] m2 ilmar_dinamo | [18:49:52] !!! цепочка не завершилась (rc=1)
+[15.09 00:50:25] m2 ilmar_dinamo ошибка: шаг на машине упал: [18:49:52] !!! цепочка не завершилась (rc=1)
+[15.09 00:50:25] m2 старт ilmar_dinamo попытка 2
+[15.09 00:51:38] m2 ilmar_dinamo | [18:50:34] разбор
+[15.09 01:01:54] m1 amigo_dosluk | [19:01:41] !!! цепочка не завершилась (rc=1)
+[15.09 01:01:54] m1 amigo_dosluk ошибка: шаг на машине упал: [19:01:41] !!! цепочка не завершилась (rc=1)
+[15.09 01:01:54] m1 старт amigo_dosluk попытка 2
+[15.09 01:03:04] m1 amigo_dosluk | [19:02:02] разбор
+[15.09 01:11:18] m0 uchtontos_minkush | [19:10:18] !!! цепочка не завершилась (rc=1)
+[15.09 01:11:18] m0 uchtontos_minkush ошибка: шаг на машине упал: [19:10:18] !!! цепочка не завершилась (rc=1)
+[15.09 01:11:18] m0 старт uchtontos_minkush попытка 2
+[15.09 01:12:30] m0 uchtontos_minkush | [19:11:29] разбор
+[15.09 01:17:15] m2 ilmar_dinamo | [19:16:15] !!! цепочка не завершилась (rc=1)
+[15.09 01:17:15] m2 ilmar_dinamo ошибка: шаг на машине упал: [19:16:15] !!! цепочка не завершилась (rc=1)
+[15.09 01:17:15] m2 ilmar_dinamo две попытки не удались, пропускаю
+[15.09 01:17:18] m2 старт mix_beshkungoi попытка 1
+[15.09 01:18:31] m2 mix_beshkungoi | [19:17:26] скачивание xdzab0F063c
+[15.09 01:19:36] m2 mix_beshkungoi | [19:19:08] разбор
+[15.09 01:23:56] m1 amigo_dosluk | [19:23:31] !!! цепочка не завершилась (rc=1)
+[15.09 01:23:56] m1 amigo_dosluk ошибка: шаг на машине упал: [19:23:31] !!! цепочка не завершилась (rc=1)
+[15.09 01:23:56] m1 amigo_dosluk две попытки не удались, пропускаю
+[15.09 01:23:59] m1 старт tennisi_booterek попытка 1
+[15.09 01:25:09] m1 tennisi_booterek | :08] клиент 'default', формат 299: ERROR: [youtube] ac278aNOH2M: Requested format is not available. Use --list-formats for a list of available formats
+[15.09 01:25:57] m3 povorot_kadamjai | [19:25:11] готово: 19M
+[15.09 01:26:12] m1 tennisi_booterek | [19:25:11] разбор
+[15.09 01:26:25] m3 povorot_kadamjai результаты скачаны, машина 51 мин
+[15.09 01:26:27] povorot_kadamjai статистика готова; хозяева: {"slug": "povorot_kadamjai", "match_guid": "a21c7163-465a-86a3-84be-6d16fb4eddd3", "home": "Кадамжай", "away": "Поворот-89", "home_colour": "розовые", "home_is_top": null, "confident": true, "reason":
+[15.09 01:26:29] povorot_kadamjai загружено, проверено чтением
+[15.09 01:26:34] m3 старт birimdik_abai попытка 1
+[15.09 01:27:46] m3 birimdik_abai | [19:27:05] !!! видео не скачалось
+[15.09 01:27:46] m3 birimdik_abai ошибка: шаг на машине упал: [19:27:05] !!! видео не скачалось
+[15.09 01:34:55] m3 birimdik_abai видео получено с машины m0
+[15.09 01:34:55] m3 старт birimdik_abai попытка 1
+[15.09 01:36:08] m3 birimdik_abai | [19:35:05] разбор
+[15.09 01:36:44] m0 uchtontos_minkush | [19:36:41] !!! цепочка не завершилась (rc=1)
+[15.09 01:36:44] m0 uchtontos_minkush ошибка: шаг на машине упал: [19:36:41] !!! цепочка не завершилась (rc=1)
+[15.09 01:36:44] m0 uchtontos_minkush две попытки не удались, пропускаю
+[15.09 01:36:47] m0 старт mihailovka_bashkarasuu попытка 1
+[15.09 01:38:00] m0 mihailovka_bashkarasuu | [19:36:56] скачивание qkzYq2Ftjiw
+[15.09 01:41:08] m0 mihailovka_bashkarasuu | [19:40:59] разбор
+[15.09 01:44:56] m1 tennisi_booterek | [19:44:47] готово: 12M
+[15.09 01:45:12] m1 tennisi_booterek результаты скачаны, машина 21 мин
+[15.09 01:45:13] tennisi_booterek статистика готова; хозяева: {"slug": "tennisi_booterek", "match_guid": "1dadaf3e-29c2-7f5a-98ba-4293bb4df2bd", "home": "Тенниси", "away": "Боо-Терек", "home_colour": "красные", "home_is_top": null, "confident": true, "reason": "
+[15.09 01:45:15] tennisi_booterek загружено, проверено чтением
+[15.09 01:45:17] m1 старт dolon попытка 1
+[15.09 01:46:27] m1 dolon | :25] клиент 'default', формат 299: ERROR: [youtube] DBN4U2xtcnY: Requested format is not available. Use --list-formats for a list of available formats
+[15.09 01:47:30] m1 dolon | [19:46:37] разбор
+[15.09 01:58:14] m3 birimdik_abai | [19:57:40] готово: 11M
+[15.09 01:58:36] m3 birimdik_abai результаты скачаны, машина 23 мин
+[15.09 01:58:37] birimdik_abai статистика готова; хозяева: {"slug": "birimdik_abai", "match_guid": "9ecedd35-a2e8-afad-38fc-47bb00f3ad3b", "home": "Биримдик", "away": "Абай", "home_colour": "синие", "home_is_top": null, "confident": true, "reason": "табло не 
+[15.09 01:58:39] birimdik_abai загружено, проверено чтением
+[15.09 01:58:42] m3 старт manastalas_ironmix попытка 1
+[15.09 01:59:54] m3 manastalas_ironmix | [19:59:14] !!! видео не скачалось
+[15.09 01:59:54] m3 manastalas_ironmix ошибка: шаг на машине упал: [19:59:14] !!! видео не скачалось
+[15.09 02:05:30] m2 mix_beshkungoi | [20:04:42] готово: 19M
+[15.09 02:05:53] m2 mix_beshkungoi результаты скачаны, машина 48 мин
+[15.09 02:05:56] mix_beshkungoi статистика готова; хозяева: {"slug": "mix_beshkungoi", "match_guid": "71bcf19d-d39a-b962-61ba-377ef9ae0879", "home": "Беш-Кунгой", "away": "MIX", "home_colour": null, "home_is_top": null, "confident": false, "reason": "табло не 
+[15.09 02:05:58] m2 старт atscargo_ruor попытка 1
+[15.09 02:07:13] m2 atscargo_ruor | [20:06:52] !!! видео не скачалось
+[15.09 02:07:13] m2 atscargo_ruor ошибка: шаг на машине упал: [20:06:52] !!! видео не скачалось
+[15.09 02:13:31] m1 dolon | [20:13:25] готово: 16M
+[15.09 02:13:48] m1 dolon результаты скачаны, машина 28 мин
+[15.09 02:13:49] dolon статистика готова; хозяева: {"slug": "dolon", "match_guid": "145bd970-f9e0-ed9b-a165-d9e308b1bf74", "home": "Bishkek Technics", "away": "Долон", "home_colour": "красные", "home_is_top": null, "confident": true, "reason": "табло 
+[15.09 02:13:53] dolon загружено, проверено чтением
+[15.09 02:13:56] m1 старт elkat_ailin попытка 1
+[15.09 02:15:06] m1 elkat_ailin | [20:14:03] скачивание kSwrxpa5sDA
+[15.09 02:16:09] m1 elkat_ailin | [20:16:02] разбор
+[15.09 02:16:19] m3 manastalas_ironmix видео получено с машины m0
+[15.09 02:16:19] m3 старт manastalas_ironmix попытка 1
+[15.09 02:17:31] m3 manastalas_ironmix | [20:16:29] разбор
+[15.09 02:32:37] m2 atscargo_ruor видео получено с машины m0
+[15.09 02:32:37] m2 старт atscargo_ruor попытка 1
+[15.09 02:32:49] m0 mihailovka_bashkarasuu | [20:32:13] готово: 25M
+[15.09 02:33:18] m0 mihailovka_bashkarasuu результаты скачаны, машина 56 мин
+[15.09 02:33:21] mihailovka_bashkarasuu статистика готова; хозяева: {"slug": "mihailovka_bashkarasuu", "match_guid": "dda507eb-7484-853d-0a4b-42c570c195b5", "home": "Баш-Кара-Суу", "away": "Михайловка", "home_colour": null, "home_is_top": false, "confident": false, "r
+[15.09 02:33:24] m0 старт kazarman_giperstroi попытка 1
+[15.09 02:33:50] m2 atscargo_ruor | [20:32:48] разбор
+[15.09 02:34:37] m0 kazarman_giperstroi | [20:33:32] скачивание pGBBlt334Y0
+[15.09 02:45:11] m0 kazarman_giperstroi | [20:44:22] разбор
+[15.09 03:00:54] m1 elkat_ailin | [21:00:34] готово: 25M
+[15.09 03:01:13] m1 elkat_ailin результаты скачаны, машина 47 мин
+[15.09 03:01:16] elkat_ailin статистика готова; хозяева: {"slug": "elkat_ailin", "match_guid": "97beb443-9fa2-98a3-6ad3-0d43d0102a8b", "home": "Ailin", "away": "ЭлКат", "home_colour": "красные", "home_is_top": false, "confident": true, "reason": "табло ['ЭЛ
+[15.09 03:01:18] elkat_ailin загружено, проверено чтением
+[15.09 03:01:22] m1 старт shalta попытка 1
+[15.09 03:02:32] m1 shalta | :30] клиент 'default', формат 299: ERROR: [youtube] wSiXJ5r3yeU: Requested format is not available. Use --list-formats for a list of available formats
+[15.09 03:03:35] m1 shalta | [21:02:45] разбор
+[15.09 03:11:15] m3 manastalas_ironmix | [21:10:41] готово: 23M
+[15.09 03:11:46] m3 manastalas_ironmix результаты скачаны, машина 55 мин
+[15.09 03:11:49] manastalas_ironmix статистика готова; хозяева: {"slug": "manastalas_ironmix", "match_guid": "796f9071-e56b-fdb9-59b5-918f8931c300", "home": "IRON MIX", "away": "Манас Талас", "home_colour": "синие", "home_is_top": null, "confident": true, "reason"
+[15.09 03:11:51] manastalas_ironmix загружено, проверено чтением
+[15.09 03:11:55] m3 старт dosatletik попытка 1
+[15.09 03:13:07] m3 dosatletik | [21:12:24] !!! видео не скачалось
+[15.09 03:13:07] m3 dosatletik ошибка: шаг на машине упал: [21:12:24] !!! видео не скачалось
+[15.09 03:14:22] m2 atscargo_ruor | [21:13:26] готово: 19M
+[15.09 03:15:04] m2 atscargo_ruor результаты скачаны, машина 42 мин
+[15.09 03:15:07] atscargo_ruor статистика готова; хозяева: {"slug": "atscargo_ruor", "match_guid": "aeae053b-5a3a-fc9b-cc71-d9ade8101fd2", "home": "АТС Карго", "away": "РУОР", "home_colour": "белые", "home_is_top": null, "confident": false, "reason": "табло [
+[15.09 03:15:10] m2 старт kokjar_temirkanat попытка 1
+[15.09 03:16:24] m2 kokjar_temirkanat | [21:16:15] !!! видео не скачалось
+[15.09 03:16:24] m2 kokjar_temirkanat ошибка: шаг на машине упал: [21:16:15] !!! видео не скачалось
+[15.09 03:26:12] m3 dosatletik видео получено с машины m0
+[15.09 03:26:12] m3 старт dosatletik попытка 1
+[15.09 03:27:26] m3 dosatletik | [21:26:22] разбор
+[15.09 03:28:38] m1 shalta | [21:28:13] готово: 15M
+[15.09 03:28:55] m1 shalta результаты скачаны, машина 27 мин
+[15.09 03:28:56] shalta статистика готова; хозяева: {"slug": "shalta", "match_guid": "388b3fac-d248-7f20-197d-690f7ba6ae51", "home": "Шалта", "away": "FC-90", "home_colour": null, "home_is_top": null, "confident": false, "reason": "табло не прочитано; 
+[15.09 03:28:59] m1 старт untitled_4208 попытка 1
+[15.09 03:30:10] m1 untitled_4208 | [21:29:06] скачивание PRUQLA0spTY
+[15.09 03:31:12] m1 untitled_4208 | [21:30:26] разбор
+[15.09 03:48:28] m0 kazarman_giperstroi | [21:48:01] готово: 29M
+[15.09 03:49:19] m0 kazarman_giperstroi результаты скачаны, машина 75 мин
+[15.09 03:49:23] kazarman_giperstroi статистика готова; хозяева: {"slug": "kazarman_giperstroi", "match_guid": "8ec05886-e17c-61e4-a606-d1348cc7a001", "home": "Гипер Строй", "away": "Казарман", "home_colour": null, "home_is_top": null, "confident": false, "reason":
+[15.09 03:49:26] m0 старт untitled_3735 попытка 1
+[15.09 03:50:40] m0 untitled_3735 | [21:49:36] скачивание f9n8sqOgxRY
+[15.09 03:54:56] m0 передача видео не удалась: /.ssh/batch_key -P 10854 root@69.145.85.73:/root/fb/out/kokjar_temirkanat.mp4 out/ && ls -la out/kokjar_temirkanat.mp4']' timed out after 1530 seconds
+[15.09 03:54:56] m2 YouTube не отдаёт видео с этого адреса, меняю машину
+[15.09 03:54:57] m2 под b842h7irgknxpb удалён (ok), 3.77 $ за 305 мин
+[15.09 03:54:59] m2 под lw1v65dzlavpe9 NVIDIA GeForce RTX 4090 0.74 $/ч
+[15.09 03:55:12] m2 адрес 47.47.180.78 19761
+[15.09 03:55:18] m2 CUDA: NVIDIA GeForce RTX 4090
+[15.09 04:02:18] m0 untitled_3735 | [22:01:16] разбор
+[15.09 04:05:43] m2 установка готова
+[15.09 04:05:43] m2 старт kokjar_temirkanat попытка 1
+[15.09 04:06:58] m2 kokjar_temirkanat | [22:05:53] скачивание muJLW2YW2-w
+[15.09 04:13:53] m3 dosatletik | [22:13:34] готово: 21M
+[15.09 04:14:25] m3 dosatletik результаты скачаны, машина 48 мин
+[15.09 04:14:28] dosatletik статистика готова; хозяева: {"slug": "dosatletik", "match_guid": "52afab6b-e8c9-1f13-f6d0-b69626725f69", "home": "Ынтымак (2)", "away": "DOS ATHLETIC", "home_colour": "красные", "home_is_top": null, "confident": true, "reason": 
+[15.09 04:14:30] dosatletik загружено, проверено чтением
+[15.09 04:14:35] m3 под mzrnysco1xptrb удалён (ok), 3.53 $ за 286 мин
+[15.09 04:15:24] m2 kokjar_temirkanat | [22:15:12] разбор
+[15.09 04:20:14] m1 untitled_4208 | [22:19:35] готово: 25M
+[15.09 04:20:33] m1 untitled_4208 результаты скачаны, машина 51 мин
+[15.09 04:20:37] untitled_4208 статистика готова; хозяева: {"slug": "untitled_4208", "match_guid": "89816a9c-e4f8-5d3d-4b0d-012ba18447b0", "home": "3-Тайм", "away": "Карпинка", "home_colour": "красные", "home_is_top": null, "confident": true, "reason": "матч 
+[15.09 04:20:39] untitled_4208 загружено, проверено чтением
+[15.09 04:20:42] m1 под 7rnesvhoj11oct удалён (ok), 4.14 $ за 336 мин
+[15.09 04:56:03] m0 untitled_3735 | [22:55:16] готово: 28M
+[15.09 04:56:38] m0 untitled_3735 результаты скачаны, машина 67 мин
+[15.09 04:56:43] untitled_3735 статистика готова; хозяева: {"slug": "untitled_3735", "match_guid": "0d4f3062-fa1f-36ad-0cf9-c5c18afd29c5", "home": "Ак-Суу", "away": "КНУ", "home_colour": "синие", "home_is_top": false, "confident": true, "reason": "матч по таб
+[15.09 04:56:44] untitled_3735 загружено, проверено чтением
+[15.09 04:56:49] m0 под opaqvoa7tt398u удалён (ok), 4.59 $ за 372 мин
+[15.09 05:20:51] m2 kokjar_temirkanat | [23:20:25] готово: 33M
+[15.09 05:21:26] m2 kokjar_temirkanat результаты скачаны, машина 75 мин
+[15.09 05:21:31] kokjar_temirkanat статистика готова; хозяева: {"slug": "kokjar_temirkanat", "match_guid": "3315a306-a88b-1726-b0c9-098afcca0ff0", "home": "Кок-Жар", "away": "Темир Канат", "home_colour": "красные", "home_is_top": true, "confident": true, "reason"
+[15.09 05:21:32] kokjar_temirkanat загружено, проверено чтением
+[15.09 05:21:37] m2 под lw1v65dzlavpe9 удалён (ok), 1.07 $ за 87 мин
+[15.09 05:21:39] список машин после очистки: []
+[15.09 05:21:40] shiko загружено, проверено чтением
+[15.09 05:21:40] готово. потрачено 18.48 $
+[15.09 05:25:28] старт: 24 видео, 4 машин, python /private/tmp/claude-501/-Users-doni-Documents-football/7f0d34e7-ac71-4fb5-9950-2123175b3367/scratchpad/venv/bin/python
+[15.09 05:25:30] m0 под n2y928wv653e09 NVIDIA GeForce RTX 4090 0.74 $/ч
+[15.09 05:25:50] m1 под zcixfhly2tvylu NVIDIA GeForce RTX 4090 0.74 $/ч
+[15.09 05:26:01] m1 адрес 47.47.180.4 11850
+[15.09 05:26:03] m0 адрес 213.173.109.8 19872
+[15.09 05:26:06] m0 CUDA: NVIDIA GeForce RTX 4090
+[15.09 05:26:07] m1 CUDA: NVIDIA GeForce RTX 4090
+[15.09 05:26:10] m2 под v776u63alo08z5 NVIDIA GeForce RTX 4090 0.74 $/ч
+[15.09 05:26:30] m3 под 65kliawelrbmbr NVIDIA GeForce RTX 4090 0.74 $/ч
+[15.09 05:26:43] m2 адрес 213.173.109.202 10144
+[15.09 05:26:46] m2 CUDA: NVIDIA GeForce RTX 4090
+[15.09 05:26:54] m3 адрес 213.173.103.135 45917
+[15.09 05:26:58] m3 CUDA: NVIDIA GeForce RTX 4090
+[15.09 05:29:02] m0 установка готова
+[15.09 05:29:02] m0 старт ilmar_dinamo попытка 1
+[15.09 05:29:44] m2 установка готова
+[15.09 05:29:44] m2 старт uchtontos_minkush попытка 1
+[15.09 05:29:53] m3 установка готова
+[15.09 05:29:53] m3 старт atscargo_ruor попытка 1
+[15.09 05:30:12] m0 ilmar_dinamo | [23:29:40] разбор
+[15.09 05:30:53] m2 uchtontos_minkush | [23:30:39] разбор
+[15.09 05:31:09] m3 atscargo_ruor | [23:30:15] !!! видео не скачалось
+[15.09 05:31:09] m3 atscargo_ruor ошибка: шаг на машине упал: [23:30:15] !!! видео не скачалось
+[15.09 05:32:00] m3 atscargo_ruor видео получено с машины m0
+[15.09 05:32:00] m3 старт atscargo_ruor попытка 1
+[15.09 05:32:54] m1 установка готова
+[15.09 05:32:54] m1 старт amigo_dosluk попытка 1
+[15.09 05:33:12] m3 atscargo_ruor | [23:32:08] разбор
+[15.09 05:34:07] m1 amigo_dosluk | [23:33:23] !!! видео не скачалось
+[15.09 05:34:07] m1 amigo_dosluk ошибка: шаг на машине упал: [23:33:23] !!! видео не скачалось
+[15.09 05:38:51] m1 amigo_dosluk видео получено с машины m0
+[15.09 05:38:51] m1 старт amigo_dosluk попытка 1
+[15.09 05:40:05] m1 amigo_dosluk | [23:39:02] разбор
+[15.09 06:03:21] m0 ilmar_dinamo | [00:02:26] готово: 20M
+[15.09 06:03:40] m0 ilmar_dinamo результаты скачаны, машина 34 мин
+[15.09 06:03:43] ilmar_dinamo статистика готова; хозяева: {"slug": "ilmar_dinamo", "match_guid": "ebb050b5-06bc-8d79-0584-91c06dd48fe1", "home": "Динамо", "away": "ILMAR", "home_colour": "жёлтые", "home_is_top": null, "confident": true, "reason": "табло не п
+[15.09 06:03:44] ilmar_dinamo загружено, проверено чтением
+[15.09 06:03:47] m0 под n2y928wv653e09 удалён (ok), 0.47 $ за 38 мин
+[15.09 06:06:05] m2 uchtontos_minkush | [00:05:20] готово: 22M
+[15.09 06:06:24] m2 uchtontos_minkush результаты скачаны, машина 36 мин
+[15.09 06:06:28] uchtontos_minkush статистика готова; хозяева: {"slug": "uchtontos_minkush", "match_guid": "59f11241-df3c-a481-c8f7-bab1851c0323", "home": "Миң-Куш", "away": "Үч-Тонтосс", "home_colour": null, "home_is_top": null, "confident": false, "reason": "та
+[15.09 06:06:31] m2 под v776u63alo08z5 удалён (ok), 0.50 $ за 40 мин
+[15.09 06:11:39] m3 atscargo_ruor | [00:11:15] готово: 25M
+[15.09 06:12:13] m3 atscargo_ruor результаты скачаны, машина 40 мин
+[15.09 06:12:17] atscargo_ruor статистика готова; хозяева: {"slug": "atscargo_ruor", "match_guid": "aeae053b-5a3a-fc9b-cc71-d9ade8101fd2", "home": "АТС Карго", "away": "РУОР", "home_colour": "белые", "home_is_top": true, "confident": true, "reason": "табло ['
+[15.09 06:12:19] atscargo_ruor загружено, проверено чтением
+[15.09 06:12:23] m3 под 65kliawelrbmbr удалён (ok), 0.57 $ за 46 мин
+[15.09 06:31:00] m1 amigo_dosluk | [00:30:35] готово: 19M
+[15.09 06:31:51] m1 amigo_dosluk результаты скачаны, машина 52 мин
+[15.09 06:31:54] amigo_dosluk статистика готова; хозяева: {"slug": "amigo_dosluk", "match_guid": "a02d0373-5a66-b81c-3e64-329f9f9aa5c2", "home": "Дослук", "away": "Amigo-eco", "home_colour": "синие", "home_is_top": null, "confident": true, "reason": "табло н
+[15.09 06:31:55] amigo_dosluk загружено, проверено чтением
+[15.09 06:32:09] m1 под zcixfhly2tvylu удалён (ok), 0.82 $ за 66 мин
+[15.09 06:32:10] список машин после очистки: []
+[15.09 06:32:12] shiko загружено, проверено чтением
+[15.09 06:32:12] готово. потрачено 20.84 $

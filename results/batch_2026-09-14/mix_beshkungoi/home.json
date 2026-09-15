@@ -1,0 +1,21 @@
+{
+ "slug": "mix_beshkungoi",
+ "match_guid": "71bcf19d-d39a-b962-61ba-377ef9ae0879",
+ "home": "Беш-Кунгой",
+ "away": "MIX",
+ "home_colour": null,
+ "home_is_top": null,
+ "confident": false,
+ "reason": "табло не прочитано; составы не различают цвета (1638 с против 1356 с); ",
+ "roster_scores": {
+  "синие=хозяева": 1356,
+  "красные=хозяева": 1638
+ },
+ "support_numbers": [
+  "синие №14",
+  "синие №2",
+  "синие №5",
+  "синие №7",
+  "синие №8"
+ ]
+}

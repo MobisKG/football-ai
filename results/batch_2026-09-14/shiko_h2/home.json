@@ -1,0 +1,18 @@
+{
+ "slug": "shiko_h2",
+ "match_guid": "931a15b4-c4cd-8c5b-ea9b-51846c8e1cfe",
+ "home": "SHIKO",
+ "away": "90-Ынтымак",
+ "home_colour": null,
+ "home_is_top": null,
+ "confident": false,
+ "reason": "табло не прочитано; составы не различают цвета (207 с против 154 с); ",
+ "roster_scores": {
+  "зелёные=хозяева": 154,
+  "красные=хозяева": 207
+ },
+ "support_numbers": [
+  "зелёные №6",
+  "красные №16"
+ ]
+}

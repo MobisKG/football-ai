@@ -1,0 +1,17 @@
+{
+ "slug": "shalta",
+ "match_guid": "388b3fac-d248-7f20-197d-690f7ba6ae51",
+ "home": "Шалта",
+ "away": "FC-90",
+ "home_colour": null,
+ "home_is_top": null,
+ "confident": false,
+ "reason": "табло не прочитано; составы не различают цвета (127 с против 84 с); ",
+ "roster_scores": {
+  "синие=хозяева": 127,
+  "оранжевые=хозяева": 84
+ },
+ "support_numbers": [
+  "синие №4"
+ ]
+}

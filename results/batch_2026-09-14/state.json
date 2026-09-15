@@ -1,0 +1,1063 @@
+{
+ "videos": {
+  "shiko_h2": {
+   "status": "done",
+   "attempts": 1,
+   "gpu_min": 22,
+   "log": [],
+   "pod": "nongo53prmmvgc",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "home": {
+    "slug": "shiko_h2",
+    "match_guid": "931a15b4-c4cd-8c5b-ea9b-51846c8e1cfe",
+    "home": "SHIKO",
+    "away": "90-Ынтымак",
+    "home_colour": null,
+    "home_is_top": null,
+    "confident": false,
+    "reason": "табло не прочитано; составы не различают цвета (207 с против 154 с); ",
+    "roster_scores": {
+     "зелёные=хозяева": 154,
+     "красные=хозяева": 207
+    }
+   },
+   "upload": "часть сдвоенной игры, грузится объединённо"
+  },
+  "shiko_h1": {
+   "status": "done",
+   "attempts": 1,
+   "gpu_min": 21,
+   "log": [
+    "машина умерла: Connection to 213.181.111.2 closed by remote host.",
+    "машина умерла: ",
+    "машина умерла: ",
+    "шаг на машине упал: [17:01:34] !!! видео не скачалось"
+   ],
+   "pod": "7rnesvhoj11oct",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "home": {
+    "slug": "shiko_h1",
+    "match_guid": "931a15b4-c4cd-8c5b-ea9b-51846c8e1cfe",
+    "home": "SHIKO",
+    "away": "90-Ынтымак",
+    "home_colour": "зелёные",
+    "home_is_top": null,
+    "confident": true,
+    "reason": "табло не прочитано; по составам: зелёные хозяева (316 с против 57 с); ",
+    "roster_scores": {
+     "зелёные=хозяева": 316,
+     "красные=хозяева": 57
+    }
+   },
+   "upload": "часть сдвоенной игры, грузится объединённо"
+  },
+  "matai_afm": {
+   "status": "done",
+   "attempts": 2,
+   "gpu_min": 42,
+   "log": [
+    "машина умерла: kex_exchange_identification: read: Connection reset by peer",
+    "scp: Connection to 149.36.1.192 closed by remote host.\nscp: Connection closed",
+    "машина умерла: ssh: connect to host 149.36.1.192 port 31930: Operation timed out",
+    "машина умерла: ",
+    "шаг на машине упал: [17:52:05] !!! цепочка не завершилась (rc=1)"
+   ],
+   "pod": "opaqvoa7tt398u",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "home": {
+    "slug": "matai_afm",
+    "match_guid": "f033abee-6ef7-0c2b-6a61-3fd73a742306",
+    "home": "AFM-KG",
+    "away": "Матай",
+    "home_colour": "синие",
+    "home_is_top": null,
+    "confident": true,
+    "reason": "табло не прочитано; по составам: синие хозяева (233 с против 43 с); ",
+    "roster_scores": {
+     "красные=хозяева": 43,
+     "синие=хозяева": 233
+    },
+    "support_numbers": [
+     "красные №11",
+     "красные №19",
+     "красные №22",
+     "красные №5",
+     "красные №6"
+    ]
+   },
+   "upload": "загружено, проверено чтением"
+  },
+  "bsht_baldariki": {
+   "status": "done",
+   "attempts": 2,
+   "gpu_min": 48,
+   "log": [
+    "шаг на машине упал: [16:55:22] !!! видео не скачалось"
+   ],
+   "pod": "b842h7irgknxpb",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "home": {
+    "slug": "bsht_baldariki",
+    "match_guid": "a01c1ee1-2c3d-ba40-c8f9-34d63509aa00",
+    "home": "Балдарики",
+    "away": "БШТ МИ",
+    "home_colour": "синие",
+    "home_is_top": null,
+    "confident": true,
+    "reason": "табло не прочитано; по составам: синие хозяева (2682 с против 1583 с), состав только одной команды; ",
+    "roster_scores": {
+     "синие=хозяева": 2682,
+     "жёлтые=хозяева": 1583
+    }
+   },
+   "upload": "загружено, проверено чтением"
+  },
+  "yntymak_moskva": {
+   "status": "done",
+   "attempts": 1,
+   "gpu_min": 52,
+   "log": [
+    "машина умерла: Connection to 69.30.85.36 closed by remote host.",
+    "шаг на машине упал: [17:35:01] !!! видео не скачалось"
+   ],
+   "pod": "mzrnysco1xptrb",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "home": {
+    "slug": "yntymak_moskva",
+    "match_guid": "18d7bb3e-8427-8789-d14b-ecce0e14c3d5",
+    "home": "Ынтымак (1)",
+    "away": "Москва-89",
+    "home_colour": null,
+    "home_is_top": null,
+    "confident": false,
+    "reason": "табло не прочитано; нет составов на сайте (0 / 0); "
+   },
+   "upload": "цвет хозяев не определён: табло не прочитано; нет составов на сайте (0 / 0); "
+  },
+  "talas91_361": {
+   "status": "done",
+   "attempts": 1,
+   "gpu_min": 44,
+   "log": [],
+   "pod": "7rnesvhoj11oct",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "home": {
+    "slug": "talas91_361",
+    "match_guid": "ac7da585-086e-f8de-727d-6d39e38c1ac4",
+    "home": "Талас-91",
+    "away": "361",
+    "home_colour": null,
+    "home_is_top": null,
+    "confident": false,
+    "reason": "табло не прочитано; составы не различают цвета (1078 с против 1014 с); ",
+    "roster_scores": {
+     "синие=хозяева": 1014,
+     "белые=хозяева": 1078
+    }
+   },
+   "upload": "загружено вручную в 06:05 по надписи «ТАЛАС 91» на белых футболках (хозяева = белые), проверено чтением"
+  },
+  "ilmar_dinamo": {
+   "status": "done",
+   "attempts": 1,
+   "gpu_min": 34,
+   "log": [
+    "шаг на машине упал: [18:49:52] !!! цепочка не завершилась (rc=1)",
+    "шаг на машине упал: [19:16:15] !!! цепочка не завершилась (rc=1)",
+    "возвращено в очередь сторожем после завершения прогона (было: failed)"
+   ],
+   "pod": "n2y928wv653e09",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "home": {
+    "slug": "ilmar_dinamo",
+    "match_guid": "ebb050b5-06bc-8d79-0584-91c06dd48fe1",
+    "home": "Динамо",
+    "away": "ILMAR",
+    "home_colour": "жёлтые",
+    "home_is_top": null,
+    "confident": true,
+    "reason": "табло не прочитано; по составам: жёлтые хозяева (1090 с против 64 с), состав только одной команды; ",
+    "roster_scores": {
+     "жёлтые=хозяева": 1090,
+     "красные=хозяева": 64
+    },
+    "support_numbers": [
+     "красные №4",
+     "красные №6",
+     "красные №7",
+     "красные №8",
+     "красные №9"
+    ],
+    "roster_share": {
+     "жёлтые": 0.03,
+     "красные": 0.46
+    }
+   },
+   "upload": "загружено, проверено чтением"
+  },
+  "povorot_kadamjai": {
+   "status": "done",
+   "attempts": 1,
+   "gpu_min": 51,
+   "log": [
+    "шаг на машине упал: [18:32:24] !!! видео не скачалось"
+   ],
+   "pod": "mzrnysco1xptrb",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "home": {
+    "slug": "povorot_kadamjai",
+    "match_guid": "a21c7163-465a-86a3-84be-6d16fb4eddd3",
+    "home": "Кадамжай",
+    "away": "Поворот-89",
+    "home_colour": "розовые",
+    "home_is_top": null,
+    "confident": true,
+    "reason": "табло не прочитано; по составам: розовые хозяева (429 с против 30 с); ",
+    "roster_scores": {
+     "розовые=хозяева": 429,
+     "чёрные=хозяева": 30
+    },
+    "support_numbers": [
+     "розовые №77",
+     "розовые №78",
+     "чёрные №16",
+     "чёрные №18"
+    ]
+   },
+   "upload": "загружено, проверено чтением"
+  },
+  "amigo_dosluk": {
+   "status": "done",
+   "attempts": 1,
+   "gpu_min": 52,
+   "log": [
+    "шаг на машине упал: [19:01:41] !!! цепочка не завершилась (rc=1)",
+    "шаг на машине упал: [19:23:31] !!! цепочка не завершилась (rc=1)",
+    "возвращено в очередь сторожем после завершения прогона (было: failed)",
+    "шаг на машине упал: [23:33:23] !!! видео не скачалось"
+   ],
+   "pod": "zcixfhly2tvylu",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "home": {
+    "slug": "amigo_dosluk",
+    "match_guid": "a02d0373-5a66-b81c-3e64-329f9f9aa5c2",
+    "home": "Дослук",
+    "away": "Amigo-eco",
+    "home_colour": "синие",
+    "home_is_top": null,
+    "confident": true,
+    "reason": "табло не прочитано; по составам: синие хозяева (1494 с против 155 с); ",
+    "roster_scores": {
+     "зелёные=хозяева": 155,
+     "синие=хозяева": 1494
+    },
+    "support_numbers": [
+     "зелёные №5",
+     "зелёные №58",
+     "зелёные №8",
+     "зелёные №85",
+     "зелёные №91",
+     "синие №17",
+     "синие №2",
+     "синие №22",
+     "синие №30",
+     "синие №33",
+     "синие №4",
+     "синие №7"
+    ]
+   },
+   "upload": "загружено, проверено чтением"
+  },
+  "uchtontos_minkush": {
+   "status": "done",
+   "attempts": 1,
+   "gpu_min": 36,
+   "log": [
+    "шаг на машине упал: [19:10:18] !!! цепочка не завершилась (rc=1)",
+    "шаг на машине упал: [19:36:41] !!! цепочка не завершилась (rc=1)",
+    "возвращено в очередь сторожем после завершения прогона (было: failed)"
+   ],
+   "pod": "v776u63alo08z5",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "home": {
+    "slug": "uchtontos_minkush",
+    "match_guid": "59f11241-df3c-a481-c8f7-bab1851c0323",
+    "home": "Миң-Куш",
+    "away": "Үч-Тонтосс",
+    "home_colour": null,
+    "home_is_top": null,
+    "confident": false,
+    "reason": "табло не прочитано; составы не различают цвета (539 с против 410 с); ",
+    "roster_scores": {
+     "белые=хозяева": 539,
+     "зелёные=хозяева": 410
+    },
+    "support_numbers": [
+     "белые №17",
+     "белые №21",
+     "белые №3",
+     "белые №5",
+     "белые №7"
+    ]
+   },
+   "upload": "загружено вручную в 06:09 по надписи «Уч-Тонтос» на белых (хозяева = бирюзовые/зелёные = Миң-Куш), пересчёт форм, проверено чтением"
+  },
+  "mix_beshkungoi": {
+   "status": "done",
+   "attempts": 1,
+   "gpu_min": 48,
+   "log": [],
+   "pod": "b842h7irgknxpb",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "home": {
+    "slug": "mix_beshkungoi",
+    "match_guid": "71bcf19d-d39a-b962-61ba-377ef9ae0879",
+    "home": "Беш-Кунгой",
+    "away": "MIX",
+    "home_colour": null,
+    "home_is_top": null,
+    "confident": false,
+    "reason": "табло не прочитано; составы не различают цвета (1638 с против 1356 с); ",
+    "roster_scores": {
+     "синие=хозяева": 1356,
+     "красные=хозяева": 1638
+    },
+    "support_numbers": [
+     "синие №14",
+     "синие №2",
+     "синие №5",
+     "синие №7",
+     "синие №8"
+    ]
+   },
+   "upload": "загружено вручную в 06:05 по надписям «БЕШ-КУНГОЙ» / «FC MIX» (хозяева = синие), проверено чтением"
+  },
+  "tennisi_booterek": {
+   "status": "done",
+   "attempts": 1,
+   "gpu_min": 21,
+   "log": [],
+   "pod": "7rnesvhoj11oct",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "home": {
+    "slug": "tennisi_booterek",
+    "match_guid": "1dadaf3e-29c2-7f5a-98ba-4293bb4df2bd",
+    "home": "Тенниси",
+    "away": "Боо-Терек",
+    "home_colour": "красные",
+    "home_is_top": null,
+    "confident": true,
+    "reason": "табло не прочитано; по составам: красные хозяева (1068 с против 0 с); ",
+    "roster_scores": {
+     "синие=хозяева": 0,
+     "красные=хозяева": 1068
+    },
+    "support_numbers": [
+     "красные №11",
+     "красные №13",
+     "красные №20",
+     "красные №22",
+     "красные №23",
+     "красные №27",
+     "красные №9",
+     "красные №99",
+     "синие №8",
+     "синие №85",
+     "синие №90",
+     "синие №92"
+    ]
+   },
+   "upload": "загружено, проверено чтением"
+  },
+  "birimdik_abai": {
+   "status": "done",
+   "attempts": 1,
+   "gpu_min": 23,
+   "log": [
+    "шаг на машине упал: [19:27:05] !!! видео не скачалось"
+   ],
+   "pod": "mzrnysco1xptrb",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "home": {
+    "slug": "birimdik_abai",
+    "match_guid": "9ecedd35-a2e8-afad-38fc-47bb00f3ad3b",
+    "home": "Биримдик",
+    "away": "Абай",
+    "home_colour": "синие",
+    "home_is_top": null,
+    "confident": true,
+    "reason": "табло не прочитано; по составам: синие хозяева (127 с против 17 с), состав только одной команды; ",
+    "roster_scores": {
+     "синие=хозяева": 127,
+     "оранжевые=хозяева": 17
+    },
+    "support_numbers": [
+     "оранжевые №7",
+     "оранжевые №77",
+     "оранжевые №8",
+     "оранжевые №9"
+    ],
+    "roster_share": {
+     "синие": 0.02,
+     "оранжевые": 0.33
+    }
+   },
+   "upload": "загружено, проверено чтением"
+  },
+  "mihailovka_bashkarasuu": {
+   "status": "done",
+   "attempts": 1,
+   "gpu_min": 56,
+   "log": [],
+   "pod": "opaqvoa7tt398u",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "home": {
+    "slug": "mihailovka_bashkarasuu",
+    "match_guid": "dda507eb-7484-853d-0a4b-42c570c195b5",
+    "home": "Баш-Кара-Суу",
+    "away": "Михайловка",
+    "home_colour": null,
+    "home_is_top": false,
+    "confident": false,
+    "reason": "табло ['МИХАЙЛОВКА', 'БАШ КАРА СУУ']: хозяева снизу (0.57/2.00); счёт табло [0, 2], судьи [5, 1]; один состав: доли номеров из состава {'синие': 0.48, 'зелёные': 0.44} — разрыв мал или противоречит; составы не различают цвета (811 с против 46 с); ",
+    "score_match": false,
+    "roster_scores": {
+     "синие=хозяева": 811,
+     "зелёные=хозяева": 46
+    },
+    "support_numbers": [
+     "синие №16",
+     "синие №4",
+     "синие №7",
+     "синие №8"
+    ],
+    "roster_share": {
+     "синие": 0.48,
+     "зелёные": 0.44
+    }
+   },
+   "upload": "загружено вручную в 06:07 по надписи «ФК БАШКАРАСУУ» (хозяева = синие), без неверного табло, проверено чтением"
+  },
+  "dolon": {
+   "status": "done",
+   "attempts": 1,
+   "gpu_min": 28,
+   "log": [],
+   "pod": "7rnesvhoj11oct",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "home": {
+    "slug": "dolon",
+    "match_guid": "145bd970-f9e0-ed9b-a165-d9e308b1bf74",
+    "home": "Bishkek Technics",
+    "away": "Долон",
+    "home_colour": "красные",
+    "home_is_top": null,
+    "confident": true,
+    "reason": "табло не прочитано; по составам: красные хозяева (1824 с против 423 с); ",
+    "roster_scores": {
+     "красные=хозяева": 1824,
+     "белые=хозяева": 423
+    },
+    "support_numbers": [
+     "белые №16",
+     "белые №20",
+     "белые №21",
+     "красные №12",
+     "красные №13",
+     "красные №2",
+     "красные №3",
+     "красные №4",
+     "красные №9"
+    ]
+   },
+   "upload": "загружено, проверено чтением"
+  },
+  "manastalas_ironmix": {
+   "status": "done",
+   "attempts": 1,
+   "gpu_min": 55,
+   "log": [
+    "шаг на машине упал: [19:59:14] !!! видео не скачалось"
+   ],
+   "pod": "mzrnysco1xptrb",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "home": {
+    "slug": "manastalas_ironmix",
+    "match_guid": "796f9071-e56b-fdb9-59b5-918f8931c300",
+    "home": "IRON MIX",
+    "away": "Манас Талас",
+    "home_colour": "синие",
+    "home_is_top": null,
+    "confident": true,
+    "reason": "табло ['МАНАС ТАЛА', 'IRON MIX']: хозяева снизу (0.24/1.95); счёт табло [2, 0], судьи [1, 14]; по составам: синие хозяева (2367 с против 16 с); табло отброшено: счёт не совпал с судейским, голы не грузим; ",
+    "score_match": false,
+    "roster_scores": {
+     "синие=хозяева": 2367,
+     "оранжевые=хозяева": 16
+    },
+    "support_numbers": [
+     "синие №14",
+     "синие №18",
+     "синие №19",
+     "синие №5",
+     "синие №7",
+     "синие №9"
+    ],
+    "scoreboard_rejected": true
+   },
+   "upload": "загружено в 03:11 с ошибкой (владение 99/1), перезаписано в 03:20 исправленным пересчётом, проверено чтением"
+  },
+  "atscargo_ruor": {
+   "status": "done",
+   "attempts": 1,
+   "gpu_min": 82,
+   "log": [
+    "шаг на машине упал: [20:06:52] !!! видео не скачалось",
+    "разобрано 2037 с из 2718 с — видео было обрезано, результаты в atscargo_ruor_truncated_1789428326",
+    "возвращено в очередь сторожем после завершения прогона (было: failed)",
+    "шаг на машине упал: [23:30:15] !!! видео не скачалось"
+   ],
+   "pod": "65kliawelrbmbr",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "home": {
+    "slug": "atscargo_ruor",
+    "match_guid": "aeae053b-5a3a-fc9b-cc71-d9ade8101fd2",
+    "home": "АТС Карго",
+    "away": "РУОР",
+    "home_colour": "белые",
+    "home_is_top": true,
+    "confident": true,
+    "reason": "табло ['АТС КАРГО', 'РУОР']: хозяева сверху (2.00/0.67); счёт табло [5, 1], судьи [5, 1]; по составам: белые хозяева (1356 с против 737 с), состав только одной команды; ",
+    "score_match": true,
+    "roster_scores": {
+     "жёлтые=хозяева": 737,
+     "белые=хозяева": 1356
+    },
+    "support_numbers": [
+     "жёлтые №11",
+     "жёлтые №22",
+     "жёлтые №25",
+     "жёлтые №7",
+     "жёлтые №77",
+     "жёлтые №8",
+     "жёлтые №80",
+     "жёлтые №85",
+     "жёлтые №9"
+    ],
+    "roster_share": {
+     "жёлтые": 0.62,
+     "белые": 0.36
+    }
+   },
+   "upload": "загружено, проверено чтением"
+  },
+  "elkat_ailin": {
+   "status": "done",
+   "attempts": 1,
+   "gpu_min": 47,
+   "log": [],
+   "pod": "7rnesvhoj11oct",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "home": {
+    "slug": "elkat_ailin",
+    "match_guid": "97beb443-9fa2-98a3-6ad3-0d43d0102a8b",
+    "home": "Ailin",
+    "away": "ЭлКат",
+    "home_colour": "красные",
+    "home_is_top": false,
+    "confident": true,
+    "reason": "табло ['ЭЛКАТ', 'AILIN']: хозяева снизу (0.40/2.00); счёт табло [6, 1], судьи [6, 1]; по составам: красные хозяева (1129 с против 471 с); ",
+    "score_match": true,
+    "roster_scores": {
+     "красные=хозяева": 1129,
+     "белые=хозяева": 471
+    },
+    "support_numbers": [
+     "белые №11",
+     "белые №13",
+     "белые №17",
+     "белые №18",
+     "белые №4",
+     "белые №5",
+     "белые №77",
+     "белые №9",
+     "белые №90",
+     "красные №2",
+     "красные №21",
+     "красные №8"
+    ]
+   },
+   "upload": "загружено, проверено чтением"
+  },
+  "kazarman_giperstroi": {
+   "status": "done",
+   "attempts": 1,
+   "gpu_min": 75,
+   "log": [],
+   "pod": "opaqvoa7tt398u",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "home": {
+    "slug": "kazarman_giperstroi",
+    "match_guid": "8ec05886-e17c-61e4-a606-d1348cc7a001",
+    "home": "Гипер Строй",
+    "away": "Казарман",
+    "home_colour": null,
+    "home_is_top": null,
+    "confident": false,
+    "reason": "табло ['КАЗАРМАН', 'ГИПЕР СТРОЙ']: хозяева снизу (0.22/2.00); счёт табло [0, 2], судьи [2, 3]; составы не различают цвета (1073 с против 950 с); табло отброшено: счёт не совпал с судейским, голы не грузим; не загружать: паузы 1350 с из 2926 с взяты с отброшенного табло; ",
+    "score_match": false,
+    "roster_scores": {
+     "синие=хозяева": 950,
+     "голубые=хозяева": 1073
+    },
+    "support_numbers": [
+     "голубые №13",
+     "голубые №21",
+     "голубые №22",
+     "голубые №5",
+     "голубые №8",
+     "голубые №9"
+    ],
+    "scoreboard_rejected": true,
+    "sanity_failed": [
+     "паузы 1350 с из 2926 с взяты с отброшенного табло"
+    ]
+   },
+   "upload": "цвет хозяев не определён: табло ['КАЗАРМАН', 'ГИПЕР СТРОЙ']: хозяева снизу (0.22/2.00); счёт табло [0, 2], судьи [2, 3]; составы не различают цвета (1073 с против 950 с); табло отброшено: счёт не совпал с судейским, голы не грузим; не загружать: паузы 1350 с из 2926 с взяты с отброшенного табло; "
+  },
+  "shalta": {
+   "status": "done",
+   "attempts": 1,
+   "gpu_min": 27,
+   "log": [],
+   "pod": "7rnesvhoj11oct",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "home": {
+    "slug": "shalta",
+    "match_guid": "388b3fac-d248-7f20-197d-690f7ba6ae51",
+    "home": "Шалта",
+    "away": "FC-90",
+    "home_colour": null,
+    "home_is_top": null,
+    "confident": false,
+    "reason": "табло не прочитано; составы не различают цвета (127 с против 84 с); ",
+    "roster_scores": {
+     "синие=хозяева": 127,
+     "оранжевые=хозяева": 84
+    },
+    "support_numbers": [
+     "синие №4"
+    ]
+   },
+   "upload": "цвет хозяев не определён: табло не прочитано; составы не различают цвета (127 с против 84 с); "
+  },
+  "dosatletik": {
+   "status": "done",
+   "attempts": 1,
+   "gpu_min": 48,
+   "log": [
+    "шаг на машине упал: [21:12:24] !!! видео не скачалось"
+   ],
+   "pod": "mzrnysco1xptrb",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "home": {
+    "slug": "dosatletik",
+    "match_guid": "52afab6b-e8c9-1f13-f6d0-b69626725f69",
+    "home": "Ынтымак (2)",
+    "away": "DOS ATHLETIC",
+    "home_colour": "красные",
+    "home_is_top": null,
+    "confident": true,
+    "reason": "табло не прочитано; по составам: красные хозяева (1113 с против 376 с), состав только одной команды; ",
+    "roster_scores": {
+     "чёрные=хозяева": 376,
+     "красные=хозяева": 1113
+    },
+    "support_numbers": [
+     "чёрные №11",
+     "чёрные №15",
+     "чёрные №17",
+     "чёрные №4",
+     "чёрные №5",
+     "чёрные №6",
+     "чёрные №7",
+     "чёрные №77",
+     "чёрные №8",
+     "чёрные №91"
+    ],
+    "roster_share": {
+     "чёрные": 0.77,
+     "красные": 0.39
+    }
+   },
+   "upload": "загружено, проверено чтением"
+  },
+  "kokjar_temirkanat": {
+   "status": "done",
+   "attempts": 1,
+   "gpu_min": 75,
+   "log": [
+    "шаг на машине упал: [21:16:15] !!! видео не скачалось"
+   ],
+   "pod": "lw1v65dzlavpe9",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "home": {
+    "slug": "kokjar_temirkanat",
+    "match_guid": "3315a306-a88b-1726-b0c9-098afcca0ff0",
+    "home": "Кок-Жар",
+    "away": "Темир Канат",
+    "home_colour": "красные",
+    "home_is_top": true,
+    "confident": true,
+    "reason": "табло ['КОК ЖАР', 'ТЕМИР КАНАТ']: хозяева сверху (2.00/0.35); счёт табло [0, 3], судьи [0, 3]; по составам: красные хозяева (2734 с против 460 с); ",
+    "score_match": true,
+    "roster_scores": {
+     "красные=хозяева": 2734,
+     "оранжевые=хозяева": 460
+    },
+    "support_numbers": [
+     "красные №13",
+     "красные №15",
+     "красные №16",
+     "красные №2",
+     "красные №3",
+     "красные №7",
+     "красные №9"
+    ]
+   },
+   "upload": "загружено, проверено чтением"
+  },
+  "untitled_4208": {
+   "status": "done",
+   "attempts": 1,
+   "gpu_min": 51,
+   "log": [],
+   "pod": "7rnesvhoj11oct",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "home": {
+    "slug": "untitled_4208",
+    "match_guid": "89816a9c-e4f8-5d3d-4b0d-012ba18447b0",
+    "home": "3-Тайм",
+    "away": "Карпинка",
+    "home_colour": "красные",
+    "home_is_top": null,
+    "confident": true,
+    "reason": "матч по табло: 3-Тайм vs Карпинка (1.80); табло ['3 TIME', 'КАРПИНКА']: хозяева сверху (1.80/0.46); счёт табло [7, 3], судьи [7, 4]; по составам: красные хозяева (1020 с против 97 с); табло отброшено: счёт не совпал с судейским, голы не грузим; ",
+    "score_match": false,
+    "roster_scores": {
+     "синие=хозяева": 97,
+     "красные=хозяева": 1020
+    },
+    "support_numbers": [
+     "красные №6",
+     "красные №8",
+     "красные №81",
+     "красные №86",
+     "синие №16",
+     "синие №21",
+     "синие №27"
+    ],
+    "scoreboard_rejected": true
+   },
+   "match_guid": "89816a9c-e4f8-5d3d-4b0d-012ba18447b0",
+   "upload": "загружено, проверено чтением"
+  },
+  "untitled_3735": {
+   "status": "done",
+   "attempts": 1,
+   "gpu_min": 66,
+   "log": [],
+   "pod": "opaqvoa7tt398u",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "home": {
+    "slug": "untitled_3735",
+    "match_guid": "0d4f3062-fa1f-36ad-0cf9-c5c18afd29c5",
+    "home": "Ак-Суу",
+    "away": "КНУ",
+    "home_colour": "синие",
+    "home_is_top": false,
+    "confident": true,
+    "reason": "матч по табло: Ак-Суу vs КНУ (2.00); табло ['КНУ', 'АК СУУ']: хозяева снизу (1.00/2.00); счёт табло [6, 2], судьи [6, 2]; по составам: синие хозяева (774 с против 393 с); ",
+    "score_match": true,
+    "roster_scores": {
+     "синие=хозяева": 774,
+     "зелёные=хозяева": 393
+    },
+    "support_numbers": [
+     "зелёные №2",
+     "зелёные №23",
+     "зелёные №87",
+     "синие №6"
+    ]
+   },
+   "match_guid": "0d4f3062-fa1f-36ad-0cf9-c5c18afd29c5",
+   "upload": "загружено, проверено чтением"
+  },
+  "shiko": {
+   "status": "done",
+   "attempts": 0,
+   "gpu_min": 0,
+   "log": [],
+   "home": {
+    "slug": "shiko",
+    "match_guid": "931a15b4-c4cd-8c5b-ea9b-51846c8e1cfe",
+    "home": "SHIKO",
+    "away": "90-Ынтымак",
+    "home_colour": "зелёные",
+    "home_is_top": null,
+    "confident": true,
+    "reason": "табло не прочитано; по составам: зелёные хозяева (786 с против 377 с); ",
+    "roster_scores": {
+     "зелёные=хозяева": 786,
+     "красные=хозяева": 377
+    },
+    "support_numbers": [
+     "зелёные №15",
+     "зелёные №17",
+     "зелёные №33",
+     "красные №20",
+     "красные №6",
+     "красные №8"
+    ]
+   },
+   "upload": "загружено, проверено чтением"
+  }
+ },
+ "pods": [
+  {
+   "id": "nongo53prmmvgc",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789401632.712436,
+   "tag": "m0",
+   "t1": 1789403199.028464,
+   "spent": 0.322
+  },
+  {
+   "id": "g0zp4y94w3z39p",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789403575.547803,
+   "tag": "m0",
+   "t1": 1789403842.452883,
+   "spent": 0.055
+  },
+  {
+   "id": "u21065h2vkwjln",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789403594.103991,
+   "tag": "m1",
+   "t1": 1789403782.000513,
+   "spent": 0.039
+  },
+  {
+   "id": "x8qhbxpviz10ur",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789403611.494772,
+   "tag": "m2",
+   "t1": 1789403951.325666,
+   "spent": 0.07
+  },
+  {
+   "id": "cr33y7vym3ttyw",
+   "gpu": "NVIDIA A40",
+   "cost": 0.49,
+   "t0": 1789403631.5685298,
+   "tag": "m3",
+   "t1": 1789403861.913877,
+   "spent": 0.031
+  },
+  {
+   "id": "3s3ado1uiumr0d",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789403784.186461,
+   "tag": "m1",
+   "t1": 1789403896.443435,
+   "spent": 0.023
+  },
+  {
+   "id": "5asfjrsjchdsur",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789403844.381928,
+   "tag": "m0",
+   "t1": 1789403951.325671,
+   "spent": 0.022
+  },
+  {
+   "id": "pnsqksxqpkt5ny",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789403863.781894,
+   "tag": "m3",
+   "t1": 1789403951.3256729,
+   "spent": 0.018
+  },
+  {
+   "id": "2yatu5sd9o3nxy",
+   "gpu": "NVIDIA A40",
+   "cost": 0.49,
+   "t0": 1789403898.527751,
+   "tag": "m1",
+   "t1": 1789403951.325674,
+   "spent": 0.007
+  },
+  {
+   "id": "q5rkn08cuis5dv",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789403966.176207,
+   "tag": "m0",
+   "t1": 1789404242.91203,
+   "spent": 0.057
+  },
+  {
+   "id": "buc9w1ejnmbe2n",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789403986.167331,
+   "tag": "m1",
+   "t1": 1789404211.703083,
+   "spent": 0.046
+  },
+  {
+   "id": "u38nisg9sypozq",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789404006.206132,
+   "tag": "m2",
+   "t1": 1789404282.8305762,
+   "spent": 0.057
+  },
+  {
+   "id": "yowx7f4gkx3t80",
+   "gpu": "NVIDIA A40",
+   "cost": 0.49,
+   "t0": 1789404026.216259,
+   "tag": "m3",
+   "t1": 1789404258.519341,
+   "spent": 0.032
+  },
+  {
+   "id": "tdy1l4fqt93333",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789404213.407561,
+   "tag": "m1",
+   "t1": 1789404261.825927,
+   "spent": 0.01
+  },
+  {
+   "id": "v828qxn3kngirv",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789404263.582693,
+   "tag": "m1",
+   "t1": 1789405356.40621,
+   "spent": 0.225
+  },
+  {
+   "id": "opaqvoa7tt398u",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789404276.5135639,
+   "tag": "m2",
+   "t1": 1789426609.079517,
+   "spent": 4.591
+  },
+  {
+   "id": "7rnesvhoj11oct",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789404284.425026,
+   "tag": "m0",
+   "t1": 1789424442.5610502,
+   "spent": 4.144
+  },
+  {
+   "id": "qatwxk18oc6j3k",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789404296.209182,
+   "tag": "m3",
+   "t1": 1789404569.4377642,
+   "spent": 0.056
+  },
+  {
+   "id": "b842h7irgknxpb",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789404571.10754,
+   "tag": "m3",
+   "t1": 1789422897.9436748,
+   "spent": 3.767
+  },
+  {
+   "id": "4jm2nxt97vy80d",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789405361.131839,
+   "tag": "m0",
+   "t1": 1789406896.6202528,
+   "spent": 0.316
+  },
+  {
+   "id": "mzrnysco1xptrb",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789406905.278155,
+   "tag": "m3",
+   "t1": 1789424075.7091992,
+   "spent": 3.529
+  },
+  {
+   "id": "lw1v65dzlavpe9",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789422899.800544,
+   "tag": "m2",
+   "t1": 1789428097.819017,
+   "spent": 1.068
+  },
+  {
+   "id": "n2y928wv653e09",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789428330.091417,
+   "tag": "m0",
+   "t1": 1789430627.17489,
+   "spent": 0.472
+  },
+  {
+   "id": "zcixfhly2tvylu",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789428350.1427991,
+   "tag": "m1",
+   "t1": 1789432329.3382971,
+   "spent": 0.818
+  },
+  {
+   "id": "v776u63alo08z5",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789428370.069589,
+   "tag": "m2",
+   "t1": 1789430791.0044959,
+   "spent": 0.498
+  },
+  {
+   "id": "65kliawelrbmbr",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789428390.111806,
+   "tag": "m3",
+   "t1": 1789431143.192395,
+   "spent": 0.566
+  }
+ ],
+ "spent_usd": 20.839
+}
