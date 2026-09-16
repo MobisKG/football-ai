@@ -63,11 +63,12 @@
   "pos_fps": 14.985,
   "frames": 36057,
   "posdir": "yntymak_moskva",
-  "uploaded": false,
-  "home_colour": null,
+  "uploaded": true,
+  "home_colour": "чёрные",
   "scoreboard": false,
   "home_is_top": false,
-  "merged_into": null
+  "merged_into": null,
+  "home_source": "instagram dordoifood_liga_35, карточка FULL TIME 1-тур"
  },
  {
   "slug": "talas91_361",
