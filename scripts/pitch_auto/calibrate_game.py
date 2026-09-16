@@ -101,6 +101,7 @@ def sheet(slug, results, plan, out_path, n=8, seed=0):
     acc = [r for r in results if r["ok"]]; rej = [r for r in results if not r["ok"]]
     rnd = random.Random(seed); pick = rnd.sample(acc, min(n, len(acc)))
     worst = sorted(acc, key=lambda r: r["quality"]["coverage"])[:2] + rnd.sample(rej, min(2, len(rej)))
+    if not acc and not rej: return
     tiles = []
     for r, tag in [(r, "случайный") for r in pick] + [(r, "контроль") for r in worst]:
         im = cv2.resize(cv2.imread(r["image"]), (960, 540))
@@ -109,6 +110,7 @@ def sheet(slug, results, plan, out_path, n=8, seed=0):
         cv2.rectangle(im, (0, 0), (960, 28), (0, 0, 0), -1)
         cv2.putText(im, "%s t=%d %s %s cov %.2f lines %s %s" % (slug, r["sec"], tag, "OK" if r["ok"] else "ОТКЛ", q.get("coverage", 0) or 0, q.get("lines", "-"), r.get("src") or ""), (8, 20), 0, 0.6, (255, 255, 255), 1)
         tiles.append(im)
+    if not tiles: return
     while len(tiles) % 2: tiles.append(np.zeros((540, 960, 3), np.uint8))
     rows = [np.hstack(tiles[i:i + 2]) for i in range(0, len(tiles), 2)]
     cv2.imwrite(out_path, np.vstack(rows), [cv2.IMWRITE_JPEG_QUALITY, 80])
