@@ -33,14 +33,29 @@ away_colour = [c for c in colours if c != home_colour][0]
 side_of = {home_colour: "home", away_colour: "away"}
 
 def players(colour):
+    """ВРЕМЕННО (16.09.2026): №10 и игроки без прочитанного номера идут на сайт одной строкой №0
+    («номер не прочитан или манишка»). Работает и для stats.json, посчитанных до этого правила."""
     t = st["teams"].get(colour) or {}
-    out = []
+    out = []; zero = None
     for p in t.get("players", []):
         num = p["player"][1:] if p["player"].startswith("№") else None
-        out.append({"number": int(num) if num and num.isdigit() else None,
-                    "time_on_pitch_s": p["time_on_pitch_s"], "touches": p.get("touches"),
-                    "possession_s": p.get("possession_s"), "passes": p.get("passes"),
-                    "distance_m": p.get("distance_m"), "top_speed_kmh": p.get("top_speed_kmh")})
+        n = int(num) if num and num.isdigit() else None
+        row = {"number": n, "time_on_pitch_s": p["time_on_pitch_s"], "touches": p.get("touches"),
+               "possession_s": p.get("possession_s"), "passes": p.get("passes"),
+               "distance_m": p.get("distance_m"), "top_speed_kmh": p.get("top_speed_kmh")}
+        if n in (0, 10, None):
+            if zero is None:
+                zero = {"number": 0, "time_on_pitch_s": 0, "touches": 0, "possession_s": 0, "passes": 0, "distance_m": None, "top_speed_kmh": None}
+            for k in ("time_on_pitch_s", "touches", "passes"): zero[k] += row[k] or 0
+            zero["possession_s"] = round(zero["possession_s"] + (row["possession_s"] or 0), 1)
+            continue
+        out.append(row)
+    if zero is None and t.get("unidentified_time_s"):
+        zero = {"number": 0, "time_on_pitch_s": 0, "touches": 0, "possession_s": 0, "passes": 0, "distance_m": None, "top_speed_kmh": None}
+    if zero is not None:
+        # старые stats.json: время кусков без номера лежит отдельно — добавляем, если его нет в строке №0
+        if not any(p["player"] == "№0" for p in t.get("players", [])): zero["time_on_pitch_s"] += t.get("unidentified_time_s", 0)
+        out.append(zero)
     return {"colour": colour, "players": out, "unidentified_time_s": t.get("unidentified_time_s", 0)}
 
 data = {

@@ -203,8 +203,21 @@ for tm in (0, 1):
         if met_path:
             m["distance_m"] += r["distance_m"] or 0
             if r["top_speed_kmh"]: m["top_speed_kmh"] = max(m["top_speed_kmh"] or 0, r["top_speed_kmh"])
-    numbered = sorted(merged.values(), key=lambda r: -r["time_on_pitch_s"])
     anon = [r for r in rows[tm] if r["player"] == "без номера"]
+    # ВРЕМЕННО (16.09.2026, до улучшения чтения номеров): игрок с непрочитанным номером
+    # показывается как №0 — «номер не прочитан или играл в манишке». №10 туда же: Qwen
+    # называет «10», когда цифр не видно, и на сайт шёл ложный №10 с большим временем.
+    zero = {"player": "№0", "time_on_pitch_s": 0, "touches": 0, "possession_s": 0, "passes": 0,
+            "distance_m": 0 if met_path else None, "top_speed_kmh": None}
+    for r in anon + ([merged.pop("№10")] if "№10" in merged else []):
+        zero["time_on_pitch_s"] += r["time_on_pitch_s"]; zero["touches"] += r["touches"]
+        zero["possession_s"] = round(zero["possession_s"] + r["possession_s"], 1); zero["passes"] += r["passes"]
+        if met_path:
+            zero["distance_m"] += r["distance_m"] or 0
+    # пробег и скорость у №0 — сумма разных людей, на сайт их не даём
+    if met_path: zero["distance_m"] = None
+    numbered = sorted(merged.values(), key=lambda r: -r["time_on_pitch_s"])
+    if zero["time_on_pitch_s"] > 0: numbered.append(zero)
     out["teams"][names.get(tm, str(tm))] = {"players": numbered,
                                              "unidentified_time_s": sum(r["time_on_pitch_s"] for r in anon)}
     lines.append("%s:" % names.get(tm, tm))
