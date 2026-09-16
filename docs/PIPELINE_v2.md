@@ -101,9 +101,10 @@ bash /opt/football-runner/repo/server/install.sh
 
 ## Что осталось за рамками
 
-- **`match_guid`** автоматически не находится: у текущей учётной записи сайта нет
-  доступа к спискам матчей (`v1/league/` возвращает пусто, `match/timetable`
-  требует `group_guid` лиги пользователя). Пока его вписывают в `plan.json` руками,
-  без него статистика считается, но загрузка придерживается.
+- **`match_guid`** находится через API сайта с токеном (проверено 16.09.2026): `team/?page_size=1000`
+  → `match/team?team_guid=<команда>` (у каждого матча `match.match_guid`, `match_datetime`, хозяева и
+  гости) → карточка `match/detail/?match_guid=` без токена (`playing_field.sport_arena_title`,
+  `playing_field.playing_field_title`). Команды ищутся по названию из заголовка видео и дате тура;
+  латинские названия бывают длиннее («Ak-Bars Consult»). Пример результата: `results/pitch/new_matches.json`.
 - **Скорости и пробег** этот прогон не считает: нужна разметка поля, см.
   `docs/PROMPT_autocalib.md` и `scripts/pitch_marker/`.
