@@ -7,5 +7,5 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir yt-dlp
 WORKDIR /app
-ENV PYTHONUNBUFFERED=1 PYTHONPATH=/app/scripts FB_SSH_KEY=/app/ssh/id_ed25519
+ENV PYTHONUNBUFFERED=1 PYTHONPATH=/app/scripts FB_SSH_KEY=/data/ssh/id_ed25519 FB_RESULTS=/data/results
 CMD ["bash", "/app/server/watch_loop.sh"]

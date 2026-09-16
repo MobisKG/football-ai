@@ -13,9 +13,9 @@ services:
     environment:
       TZ: Asia/Bishkek
     volumes:
-      - ./repo:/app:ro                 # код только на чтение: меняется через git pull на хосте
-      - ./results:/app/results         # состояние прогонов, отчёты, логи
-      - ./ssh:/app/ssh:ro              # ключ, которым управляющий узел ходит на машины RunPod
+      - ./repo:/app:ro                 # код только на чтение: обновляется с ноутбука (remote.py deploy)
+      - ./results:/data/results        # состояние прогонов, отчёты, логи (вне /app: тот только на чтение)
+      - ./ssh:/data/ssh:ro             # ключ, которым управляющий узел ходит на машины RunPod
       - ./cache:/root/.cache           # токен сайта и кэш yt-dlp
     logging:
       driver: json-file

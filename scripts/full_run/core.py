@@ -84,14 +84,33 @@ def list_pods():
     if isinstance(r, dict): return r.get("pods") or []
     return []
 
-def delete_all_pods(keep=()):
-    """Удалить все машины прогона и убедиться, что их нет. keep — id, которые не трогать."""
-    for p in list_pods():
-        if isinstance(p, dict) and p.get("id") and p["id"] not in keep:
-            log("удаляю машину", p["id"], p.get("name") or "")
-            rp("DELETE", "/pods/" + p["id"])
-    left = [p.get("id") for p in list_pods() if isinstance(p, dict) and p.get("id") not in keep]
-    log("машин после очистки:", left if left else "нет")
+def delete_run_pods(state, tags=None):
+    """Удалить ТОЛЬКО машины этого прогона (их id записаны в состоянии).
+
+    Раньше здесь был сплошной снос всех машин аккаунта — 16.09 он убил чужую
+    работающую машину соседней задачи (2,5 часа расчёта). Сплошной снос остался
+    отдельной командой sweep_pods(), и её никто не вызывает сам по себе.
+    """
+    mine = [p for p in state.d.get("pods", []) if not p.get("t1")]
+    if tags: mine = [p for p in mine if p.get("tag") in tags]
+    for rec in mine:
+        log("удаляю машину прогона", rec["id"], rec.get("tag") or "")
+        r = rp("DELETE", "/pods/" + rec["id"])
+        rec["t1"] = time.time(); rec["deleted"] = r.get("error") or "ok"
+    state.save()
+    alive = [p.get("id") for p in list_pods()
+             if isinstance(p, dict) and p.get("id") in {m["id"] for m in mine}]
+    log("машин прогона осталось:", alive if alive else "нет")
+    return alive
+
+def sweep_pods(prefix="fb-", ask=True):
+    """Снести машины по имени. Вызывать только по прямой просьбе человека:
+    на счету могут работать машины других задач."""
+    doomed = [p for p in list_pods() if isinstance(p, dict) and str(p.get("name", "")).startswith(prefix)]
+    for p in doomed:
+        log("снос:", p["id"], p.get("name")); rp("DELETE", "/pods/" + p["id"])
+    left = [(p.get("id"), p.get("name")) for p in list_pods() if isinstance(p, dict)]
+    log("после сноса на счету машин:", left if left else "нет")
     return left
 
 def netcheck(timeout=20):

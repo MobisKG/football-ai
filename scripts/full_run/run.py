@@ -26,11 +26,14 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 SCRIPTS = os.path.dirname(HERE); ROOT = os.path.dirname(SCRIPTS)
 sys.path.insert(0, SCRIPTS)
 from full_run import core, channel, site                                  # noqa: E402
-from full_run.core import Pod, State, log, rp, list_pods, delete_all_pods  # noqa: E402
+from full_run.core import Pod, State, log, rp, list_pods, delete_run_pods  # noqa: E402
 
 opt = lambda k, d=None: sys.argv[sys.argv.index(k) + 1] if k in sys.argv else d
-OUT = os.path.abspath(opt("--outdir", os.path.join(ROOT, "results", "run_" + time.strftime("%Y-%m-%d"))))
+# на сервере состояние лежит вне кода (/data/results): /app примонтирован только на чтение
+RESULTS = os.environ.get("FB_RESULTS", os.path.join(ROOT, "results"))
+OUT = os.path.abspath(opt("--outdir", os.path.join(RESULTS, "run_" + time.strftime("%Y-%m-%d"))))
 PER_POD = int(opt("--per-pod", 2)); LIMIT = int(opt("--limit", 60)); STEP = int(opt("--gpu-step", 4))
+DAYS = int(opt("--days", 14))          # «новое» — за последние N дней; 0 — всё неразобранное
 DL_DISK = int(opt("--dl-disk", 40)); MAX_USD = float(opt("--max-usd", 30))
 ONLY = set(opt("--only", "").split(",")) - {""}
 STAGE = opt("--stage", "all"); DRY = "--dry-run" in sys.argv
@@ -43,8 +46,12 @@ RELAY = os.path.join(OUT, "relay_key")
 st = State(os.path.join(OUT, "state.json"))
 
 def pubkeys():
+    """Ключи, которые кладутся на арендованные машины: ключ управляющего узла
+    (на сервере он свой, в /app/ssh), ключи с ноутбука для ручного захода и общий
+    ключ машин друг для друга."""
     import glob
-    keys = [open(f).read().strip() for f in sorted(glob.glob(os.path.expanduser("~/.ssh/id_ed25519*.pub")))]
+    paths = [core.SSH_KEY + ".pub"] + sorted(glob.glob(os.path.expanduser("~/.ssh/id_ed25519*.pub")))
+    keys = [open(f).read().strip() for f in dict.fromkeys(paths) if os.path.exists(f)]
     if os.path.exists(RELAY + ".pub"): keys.append(open(RELAY + ".pub").read().strip())
     return "\n".join(k for k in keys if k)
 
@@ -58,8 +65,8 @@ def spent():
 
 def budget_left(msg=""):
     if spent() >= MAX_USD:
-        log("!!! предел бюджета %.1f $ достигнут (%s), машины удаляются" % (MAX_USD, msg))
-        delete_all_pods(); return False
+        log("!!! предел бюджета %.1f $ достигнут (%s), машины прогона удаляются" % (MAX_USD, msg))
+        delete_run_pods(st); return False
     return True
 
 # ---------------- 1. план ----------------
@@ -67,7 +74,8 @@ def stage_plan():
     if os.path.exists(PLAN):
         plan = json.load(open(PLAN)); log("план уже есть:", PLAN, "игр:", len(plan))
     else:
-        vids = channel.new_videos(limit=LIMIT)
+        vids = channel.new_videos(limit=LIMIT, days=DAYS)
+        log("отбор: не разбирались раньше и опубликованы за %d дней" % DAYS)
         for v in vids: v.setdefault("match_guid", None); v.setdefault("field", None)
         json.dump(vids, open(PLAN, "w"), ensure_ascii=False, indent=1); plan = vids
         log("новых видео:", len(plan), "суммарно %.1f ч" % (sum(v["duration_s"] for v in plan) / 3600))
@@ -270,6 +278,8 @@ def collect_from(pod, group, plan_by_slug):
 
 def stage_collect(plan, workers, limit_h=6):
     plan_by_slug = {v["slug"]: v for v in plan}
+    if not workers and not (st.d.get("workers") or st.d.get("downloader")):
+        log("этап сбора: машин этого прогона нет, ничего не делаю"); return
     if not workers:                                     # перезапуск: машины взяты из состояния
         for tag, w in (st.d.get("workers") or {}).items():
             p = Pod(tag, st); p.id, p.ip, p.port = w["id"], w["ip"], w["port"]; p.ready = True
@@ -285,7 +295,7 @@ def stage_collect(plan, workers, limit_h=6):
         if alive: time.sleep(120)
     if alive: log("предел времени сбора, удаляю оставшиеся машины")
     for pod, _ in alive: pod.delete()
-    delete_all_pods()
+    delete_run_pods(st)                 # только свои: чужие задачи на этом счету не трогаем
 
 # ---------------- отчёт ----------------
 def report(plan):
@@ -323,7 +333,7 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        log("остановлено вручную: удаляю машины"); delete_all_pods(); raise
+        log("остановлено вручную: удаляю машины прогона"); delete_run_pods(st); raise
     except Exception:
         import traceback
-        log("СБОЙ управляющего скрипта:", traceback.format_exc()[-700:]); delete_all_pods(); raise
+        log("СБОЙ управляющего скрипта:", traceback.format_exc()[-700:]); delete_run_pods(st); raise
