@@ -44,7 +44,16 @@ def load_auto(min_cov=0.8, min_lines=5, exclude_games=()):
         out.append({"game": game, "sec": j["sec"], "image": j["image"], "H": np.array(j["H_img2plan"], float), "plan": plan, "points": {}})
     return out
 
-def dataset(exclude_games=(), only_games=None, auto=False, per_game_cap=40, seed=0):
+def load_extra(path, exclude_games=()):
+    """дополнительная псевдоразметка списком: [{game, image, H, plan}] (harvest_pseudo.py)"""
+    out = []
+    for r in json.load(open(path)):
+        if r["game"] in exclude_games or not os.path.exists(r["image"]): continue
+        plan = {"width": r["plan"]["width"], "length": r["plan"]["length"], "half": 21.54, "goal": 3.4, "box_w": 9.0, "box_d": 6.4}
+        out.append({"game": r["game"], "sec": r.get("sec"), "image": r["image"], "H": np.array(r["H"], float), "plan": plan, "points": {}})
+    return out
+
+def dataset(exclude_games=(), only_games=None, auto=False, per_game_cap=40, seed=0, extra=None, extra_repeat=1):
     out = []
     for m in load_manual():
         if m["H"] is None or m["game"] in exclude_games: continue
@@ -59,6 +68,12 @@ def dataset(exclude_games=(), only_games=None, auto=False, per_game_cap=40, seed
                 im = cv2.imread(m["image"])
                 if im is None: continue
                 out.append((cv2.resize(im, (WW, WH), interpolation=cv2.INTER_AREA), render_label(m["H"], m["plan"]), m))
+    if extra:
+        for m in load_extra(extra, exclude_games):
+            im = cv2.imread(m["image"])
+            if im is None: continue
+            item = (cv2.resize(im, (WW, WH), interpolation=cv2.INTER_AREA), render_label(m["H"], m["plan"]), m)
+            out += [item] * max(1, extra_repeat)       # поля №1 и №2 чаще: их в данных мало
     return out
 
 # ---------- сеть
@@ -139,11 +154,11 @@ def evaluate(net, device, data):
                      "false_any": float((anyp & ~(cv2.dilate(allgt.astype(np.uint8), np.ones((9, 9), np.uint8)) > 0)).mean())})
     return rows
 
-def train(out_path, exclude=(), epochs=60, iters=40, bs=4, lr=1e-3, seed=0, log=print, duty=1.0, auto=False, init=None):
+def train(out_path, exclude=(), epochs=60, iters=40, bs=4, lr=1e-3, seed=0, log=print, duty=1.0, auto=False, init=None, extra=None, extra_repeat=1):
     import torch, torch.nn as nn
     device = "mps" if torch.backends.mps.is_available() else ("cuda" if torch.cuda.is_available() else "cpu")
     torch.manual_seed(seed); rng = np.random.default_rng(seed)
-    tr = dataset(exclude_games=exclude, auto=auto); va = dataset(only_games=exclude) if exclude else []
+    tr = dataset(exclude_games=exclude, auto=auto, extra=extra, extra_repeat=extra_repeat); va = dataset(only_games=exclude) if exclude else []
     log("устройство %s, обучение %d кадров, проверка %d, исключены %s" % (device, len(tr), len(va), list(exclude)))
     net = build_net()
     if init: net.load_state_dict(torch.load(init, map_location="cpu")); log("старт с весов " + init)
@@ -178,4 +193,5 @@ if __name__ == "__main__":
     out = sys.argv[1]; opt = lambda k, d=None: sys.argv[sys.argv.index(k) + 1] if k in sys.argv else d
     ex = tuple(x for x in (opt("--exclude", "") or "").split(",") if x)
     train(out, exclude=ex, epochs=int(opt("--epochs", 60)), iters=int(opt("--iters", 40)), bs=int(opt("--bs", 4)), duty=float(opt("--duty", 1.0)),
-          auto="--auto" in sys.argv, init=opt("--init"), log=lambda s: print(time.strftime("%H:%M:%S"), s, flush=True))
+          auto="--auto" in sys.argv, init=opt("--init"), extra=opt("--extra"), extra_repeat=int(opt("--extra-repeat", 1)),
+          lr=float(opt("--lr", 1e-3)), log=lambda s: print(time.strftime("%H:%M:%S"), s, flush=True))

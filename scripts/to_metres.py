@@ -36,7 +36,8 @@ for k, f in enumerate(pos["frames"]):
     if f["players"]:
         xy = apply(H, [[x, y] for _, x, y in f["players"]])
         for (tid, _, _), (X, Y) in zip(f["players"], xy):
-            inside = -MARGIN <= X <= W_P + MARGIN and -MARGIN <= Y <= L_P + MARGIN
+            # кадр без разметки (src="gap"): точка не идёт в пробег и скорость
+            inside = (not src.startswith("gap")) and -MARGIN <= X <= W_P + MARGIN and -MARGIN <= Y <= L_P + MARGIN
             on += inside; off += (not inside)
             rec["players"].append([int(tid), round(float(X), 2), round(float(Y), 2), bool(inside)])
     if f["ball"]:
