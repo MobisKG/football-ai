@@ -23,6 +23,10 @@ st = json.load(open(os.path.join(sp, "stats.json")))
 pl = plausible(st); pl.update(jitter(os.path.join(sp, "pos_metres.json"), None))
 if pl.get("standing_speed_median_mps") is not None and pl["standing_speed_median_mps"] > 1.0:
     pl["ok"] = False; pl["reason"] = (pl["reason"] + "; " if pl["reason"] else "") + "дрожание у стоящих %.2f м/с > 1" % pl["standing_speed_median_mps"]
+try:
+    from check_tracks import summary as track_summary
+    pl["tracks"] = track_summary(os.path.join(sp, "pos_metres.json"))
+except Exception as e: pl["tracks"] = {"error": str(e)[:80]}
 anch = json.load(open(os.path.join(D, "auto", "summary.json"))) if os.path.exists(os.path.join(D, "auto", "summary.json")) else {}
 pl["anchors"] = anch.get("accepted"); pl["frames"] = anch.get("frames")
 json.dump(pl, open(os.path.join(sp, "plausibility.json"), "w"), ensure_ascii=False, indent=1)

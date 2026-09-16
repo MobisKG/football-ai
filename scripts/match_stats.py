@@ -130,7 +130,7 @@ for f in pos["frames"]:
         if team.get(t, -1) in (0, 1) and t not in side:
             on_time[key_of(t)] += 1 / fps
 
-dist = defaultdict(float); vmax = defaultdict(float)
+dist = defaultdict(float); vmax = defaultdict(float); vall = defaultdict(list)
 if met_path:
     # окно сглаживания для скорости и пробега, с: 0,5 давало дрожание привязки ~1 м/с
     # у стоящих игроков и скорости 30+ км/ч; при съёмке с рук берём 1,5 (--win 1.5)
@@ -150,7 +150,13 @@ if met_path:
             ok = v < 10.0
             if not ok.any(): continue
             dist[key_of(t)] += float(np.hypot(np.diff(sx), np.diff(sy))[:len(ok)][ok[:len(sx) - 1]].sum())
-            vmax[key_of(t)] = max(vmax[key_of(t)], float(np.percentile(v[ok], 95)))
+            vall[key_of(t)].append(v[ok])
+    # «максимальная скорость» — 99,5-й процентиль по всем окнам игрока за игру. Наибольший
+    # из отрезков давал 30+ км/ч от одного сбоя привязки, 95-й процентиль — скорость обычного
+    # бега (10 км/ч); 99,5-й оставляет рывки и отбрасывает единичные скачки
+    for key, vs in vall.items():
+        vv = np.concatenate(vs)
+        if len(vv): vmax[key] = float(np.percentile(vv, 99.5))
 
 def label(key):
     if key[0] == "gk": return "вратарь"

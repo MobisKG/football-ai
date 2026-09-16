@@ -20,7 +20,9 @@ def log(*a): print(time.strftime("%H:%M:%S"), *a, flush=True)
 def plausible(st):
     """проверка 3 из задачи: пробег 40–70 м/мин у игроков с ≥5 мин, макс. скорость медиана 16–24, единичные до 30"""
     rows = [p for t in st["teams"].values() for p in t["players"] if p.get("distance_m") is not None and p["time_on_pitch_s"] >= 300]
-    if len(rows) < 4: return {"ok": False, "reason": "мало игроков с ≥5 мин: %d" % len(rows)}
+    # игроки собираются из треков по номерам; в части игр номеров читается мало.
+    # трёх игроков хватает, чтобы увидеть неверную привязку (пробег и скорость уезжают у всех сразу)
+    if len(rows) < 3: return {"ok": False, "reason": "мало игроков с ≥5 мин: %d (номера прочитаны плохо)" % len(rows), "players": len(rows)}
     per_min = [p["distance_m"] / (p["time_on_pitch_s"] / 60) for p in rows]; tops = [p["top_speed_kmh"] for p in rows if p.get("top_speed_kmh")]
     r = {"players": len(rows), "dist_per_min_median": round(statistics.median(per_min), 1), "dist_per_min_range": [round(min(per_min)), round(max(per_min))],
          "top_speed_median": round(statistics.median(tops), 1), "top_speed_max": round(max(tops), 1), "top_over_30": sum(1 for t in tops if t > 30)}

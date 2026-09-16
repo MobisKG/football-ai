@@ -15,7 +15,7 @@ from full_run.core import Pod, log, rp
 
 def opt(k, d=None): return sys.argv[sys.argv.index(k) + 1] if k in sys.argv else d
 FMT = opt("--fmt", "298/bv[height<=720][ext=mp4][vcodec^=avc1]/bv[height<=720][ext=mp4]")
-DISK = int(opt("--disk", 60)); MAX_SWAPS = int(opt("--max-swaps", 4))
+DISK = int(opt("--disk", 60)); MAX_SWAPS = int(opt("--max-swaps", 4)); B2 = "--no-b2" not in sys.argv
 STATE = os.path.join(ROOT, "results/pitch/downloader.json")
 RELAY = os.path.join(ROOT, "results/pitch/relay_key")
 BLOCKED = ("Sign in to confirm", "not a bot", "HTTP Error 403", "blocked it in your country")
@@ -71,6 +71,13 @@ def main():
             subprocess.run(["scp", "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null", "-o", "LogLevel=ERROR",
                             "-i", core.SSH_KEY, "-P", str(pod.port), "-q", RELAY, "root@%s:/root/.ssh/relay_key" % pod.ip], timeout=120)
             pod.ssh("chmod 600 /root/.ssh/relay_key", timeout=60, raise_dead=False)
+            if B2:      # ключи хранилища и библиотека: видео переживает удаление машины
+                subprocess.run(["scp", "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null", "-o", "LogLevel=ERROR",
+                                "-i", core.SSH_KEY, "-P", str(pod.port), "-q", "/tmp/b2env", "root@%s:/root/.b2env" % pod.ip], timeout=120)
+                subprocess.run(["scp", "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null", "-o", "LogLevel=ERROR",
+                                "-i", core.SSH_KEY, "-P", str(pod.port), "-q", os.path.join(HERE, "b2.py"), "root@%s:/root/fb/scripts/pitch_auto/b2.py" % pod.ip], timeout=120)
+                pod.ssh("mkdir -p /root/fb/scripts/pitch_auto; chmod 600 /root/.b2env; pip3 install -q --root-user-action=ignore b2sdk 2>&1 | tail -0; "
+                        "P=$(head -1 $(command -v pip3) | sed 's/^#!//'); echo \"$P\" > /root/.b2py; $P -c 'import b2sdk' && echo b2 ok", timeout=900, raise_dead=False)
             state["pods"].append({"id": pod.id, "ip": pod.ip, "port": pod.port, "t0": time.time()})
             state["pod"] = {"id": pod.id, "ip": pod.ip, "port": pod.port, "cost": pod.cost}
             json.dump(state, open(STATE, "w"), indent=1)
@@ -81,6 +88,9 @@ def main():
             if ok:
                 todo.remove(j); state["downloaded"].append(j["slug"]); json.dump(state, open(STATE, "w"), indent=1)
                 log("скачано %s за %.0f с, осталось %d" % (j["slug"], time.time() - t0, len(todo)))
+                if B2:
+                    rc2, o2 = pod.ssh("cd /root/fb && $(cat /root/.b2py) scripts/pitch_auto/b2.py put videos/%s.mp4 videos/%s.mp4 2>&1 | tail -1" % (j["slug"], j["slug"]), timeout=3600, raise_dead=False)
+                    log("%s в хранилище: %s" % (j["slug"], o2.strip()[-60:]))
                 blocked_here = 0
             elif blocked:
                 blocked_here += 1; log("%s: YouTube блокирует адрес (%d подряд)" % (j["slug"], blocked_here))
