@@ -222,7 +222,7 @@ for tm in (0, 1):
                                              "unidentified_time_s": sum(r["time_on_pitch_s"] for r in anon)}
     lines.append("%s:" % names.get(tm, tm))
     for r in numbered:
-        extra = ("  пробег %4d м  макс. %4.1f км/ч" % (r["distance_m"], r["top_speed_kmh"] or 0)) if met_path else ""
+        extra = ("  пробег %4d м  макс. %4.1f км/ч" % (r["distance_m"], r["top_speed_kmh"] or 0)) if met_path and r["distance_m"] is not None else ""
         lines.append("  %-10s на поле %4d с  касаний %3d  у мяча %5.1f с  передач %2d%s" % (
             r["player"], r["time_on_pitch_s"], r["touches"], r["possession_s"], r["passes"], extra))
     lines.append("  без номера: %d с суммарно" % out["teams"][names.get(tm, str(tm))]["unidentified_time_s"])
