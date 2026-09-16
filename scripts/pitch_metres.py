@@ -8,7 +8,7 @@ stats.json и stats.txt с пробегом и максимальной скор
 """
 import json, os, sys, subprocess, statistics
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(HERE)
-PY = "/private/tmp/claude-501/-Users-doni-Documents-football/7f0d34e7-ac71-4fb5-9950-2123175b3367/scratchpad/venv/bin/python"
+PY = sys.executable
 slug, track = sys.argv[1], sys.argv[2]
 opt = lambda k, d=None: sys.argv[sys.argv.index(k) + 1] if k in sys.argv else d
 OUT_SUB, WIN = opt("--out-sub", ""), opt("--win")

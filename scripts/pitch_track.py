@@ -18,7 +18,7 @@ import numpy as np, cv2
 video, calib_path, out_path = sys.argv[1], sys.argv[2], sys.argv[3]
 def opt(n, d): return type(d)(sys.argv[sys.argv.index(n) + 1]) if n in sys.argv else d
 STEP = opt("--step", 2); REF_SEC = opt("--ref-sec", 2.0)
-SCALE = 0.5; REANCHOR = 15; MIN_INL = 60; MIN_ORB = 80
+REANCHOR = 15; MIN_INL = 60; MIN_ORB = 80
 
 cal = json.load(open(calib_path))
 _PW, _PL = float(cal["plan"]["width"]), float(cal["plan"]["length"])
@@ -30,6 +30,9 @@ H_ref2plan = load_H(cal)
 
 cap = cv2.VideoCapture(video)
 FPS = cap.get(cv2.CAP_PROP_FPS); N = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+# рабочая ширина кадра не зависит от разрешения видео: кадры держатся в памяти, и 1080p
+# при прежнем SCALE=0.5 занимало бы ~18 ГБ на 40 минут записи (мак мини — 16 ГБ)
+SCALE = opt("--work-width", 640.0) / max(1.0, cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 S_ = np.diag([SCALE, SCALE, 1.0]); Si = np.linalg.inv(S_)
 
 frames_idx = list(range(0, N, STEP))

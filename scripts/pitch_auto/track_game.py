@@ -11,6 +11,11 @@ if not os.path.exists(video): video = os.path.join(ROOT, "videos", slug + ".mp4"
 job = next(j for j in json.load(open(os.path.join(ROOT, "results/pitch/jobs.json"))) if j["slug"] == slug)
 good = [f for f in sorted(glob.glob(os.path.join(D, "auto", "frame_t*.json"))) if (json.load(open(f)).get("ok") and json.load(open(f)).get("H_img2plan"))]
 if len(good) < 6: sys.exit("мало принятых опор: %d" % len(good))
+# --holdout k: каждая k-я принятая опора не участвует в привязке, по ним потом меряется ошибка
+HOLD = int(opt("--holdout", 0)); held = []
+if HOLD > 1:
+    held = good[1::HOLD]; good = [f for f in good if f not in held]
+    json.dump([json.load(open(f))["frame_sec"] for f in held], open(os.path.join(D, "heldout.json"), "w"))
 cap = cv2.VideoCapture(video); fps = cap.get(5); n = cap.get(7); w = cap.get(3); cap.release()
 step = int(opt("--step", max(1, round(fps / job["pos_fps"])))); ascale = w / 1920.0
 secs = sorted(json.load(open(f))["frame_sec"] for f in good); ref = good[len(good) // 2]; ref_sec = json.load(open(ref))["frame_sec"]
