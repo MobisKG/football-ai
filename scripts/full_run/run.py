@@ -44,6 +44,9 @@ core.LOG_PATH = os.path.join(OUT, "run.log")
 PLAN = os.path.join(OUT, "plan.json")
 RELAY = os.path.join(OUT, "relay_key")
 st = State(os.path.join(OUT, "state.json"))
+# метка этого прогона в именах машин: fb-<метка>-dl, fb-<метка>-w3. По ней в конце
+# находятся все свои машины, включая те, что не успели записаться в состояние.
+RUN_ID = "".join(c for c in os.path.basename(OUT).replace("run_", "").replace("-", "") if c.isalnum())[:12]
 
 def pubkeys():
     """Ключи, которые кладутся на арендованные машины: ключ управляющего узла
@@ -66,7 +69,7 @@ def spent():
 def budget_left(msg=""):
     if spent() >= MAX_USD:
         log("!!! предел бюджета %.1f $ достигнут (%s), машины прогона удаляются" % (MAX_USD, msg))
-        delete_run_pods(st); return False
+        delete_run_pods(st, name_prefix="fb-%s-" % RUN_ID); return False
     return True
 
 # ---------------- 1. план ----------------
@@ -132,7 +135,7 @@ def stage_download(plan):
     if not todo: log("все видео уже на качалке"); return st.d.get("downloader")
     while todo and replacements <= 4 and budget_left("качалка"):
         if pod is None:
-            pod = Pod("dl", st, gpu=False, disk=DL_DISK, pubkeys=pubkeys())
+            pod = Pod("dl", st, gpu=False, disk=DL_DISK, pubkeys=pubkeys(), run_id=RUN_ID)
             if not pod.create(): log("!!! качалку создать не удалось"); return None
             rc, out = pod.ssh(DL_SETUP, timeout=900, raise_dead=False)
             if "yt-dlp" not in out and rc != 0:
@@ -199,7 +202,7 @@ def stage_fanout(plan, dl):
     log("раздача: %d машин по %d игр" % (len(groups), PER_POD))
     workers = []; errors = []
     def one(i, group):
-        pod = Pod("w%d" % i, st, gpu=True, disk=60, pubkeys=pubkeys())
+        pod = Pod("w%d" % i, st, gpu=True, disk=60, pubkeys=pubkeys(), run_id=RUN_ID)
         try:
             if not pod.create(): errors.append("w%d: машина не создалась" % i); return
             setup_worker(pod, group, dl)
@@ -295,7 +298,7 @@ def stage_collect(plan, workers, limit_h=6):
         if alive: time.sleep(120)
     if alive: log("предел времени сбора, удаляю оставшиеся машины")
     for pod, _ in alive: pod.delete()
-    delete_run_pods(st)                 # только свои: чужие задачи на этом счету не трогаем
+    delete_run_pods(st, name_prefix="fb-%s-" % RUN_ID)   # только свои: чужие задачи на счету не трогаем
 
 # ---------------- отчёт ----------------
 def report(plan):
@@ -333,7 +336,7 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        log("остановлено вручную: удаляю машины прогона"); delete_run_pods(st); raise
+        log("остановлено вручную: удаляю машины прогона"); delete_run_pods(st, name_prefix="fb-%s-" % RUN_ID); raise
     except Exception:
         import traceback
-        log("СБОЙ управляющего скрипта:", traceback.format_exc()[-700:]); delete_run_pods(st); raise
+        log("СБОЙ управляющего скрипта:", traceback.format_exc()[-700:]); delete_run_pods(st, name_prefix="fb-%s-" % RUN_ID); raise

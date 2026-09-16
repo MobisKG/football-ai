@@ -84,7 +84,7 @@ def list_pods():
     if isinstance(r, dict): return r.get("pods") or []
     return []
 
-def delete_run_pods(state, tags=None):
+def delete_run_pods(state, tags=None, name_prefix=None):
     """Удалить ТОЛЬКО машины этого прогона (их id записаны в состоянии).
 
     Раньше здесь был сплошной снос всех машин аккаунта — 16.09 он убил чужую
@@ -98,8 +98,14 @@ def delete_run_pods(state, tags=None):
         r = rp("DELETE", "/pods/" + rec["id"])
         rec["t1"] = time.time(); rec["deleted"] = r.get("error") or "ok"
     state.save()
-    alive = [p.get("id") for p in list_pods()
-             if isinstance(p, dict) and p.get("id") in {m["id"] for m in mine}]
+    if name_prefix:                     # свои машины, не попавшие в состояние
+        for p in list_pods():
+            if isinstance(p, dict) and str(p.get("name", "")).startswith(name_prefix):
+                log("удаляю машину прогона по имени", p["id"], p.get("name"))
+                rp("DELETE", "/pods/" + p["id"])
+    ids = {m["id"] for m in mine}
+    alive = [p.get("id") for p in list_pods() if isinstance(p, dict)
+             and (p.get("id") in ids or (name_prefix and str(p.get("name", "")).startswith(name_prefix)))]
     log("машин прогона осталось:", alive if alive else "нет")
     return alive
 
@@ -124,14 +130,17 @@ class PodDead(Exception): pass
 
 class Pod:
     """Машина RunPod. Один и тот же класс для качалки (без видеокарты) и рабочих."""
-    def __init__(self, tag, state=None, gpu=True, disk=60, image=None, pubkeys=""):
+    def __init__(self, tag, state=None, gpu=True, disk=60, image=None, pubkeys="", run_id=""):
         self.tag = tag; self.state = state; self.want_gpu = gpu; self.disk = disk
+        # имя с меткой прогона: по нему в конце находятся и свои машины, которые
+        # не успели попасть в state.json (создались и упали до записи)
+        self.run_id = run_id; self.name = "fb-%s-%s" % (run_id, tag) if run_id else "fb-" + tag
         self.image = image or (IMAGE_GPU if gpu else IMAGE_CPU); self.pubkeys = pubkeys
         self.id = self.ip = self.port = self.gpu = None; self.cost = 0.0; self.t0 = None; self.ready = False
 
     # --- создание ---
     def _body(self, gpus=None, flavor=None):
-        b = {"name": "fb-%s" % self.tag, "imageName": self.image, "containerDiskInGb": self.disk,
+        b = {"name": self.name, "imageName": self.image, "containerDiskInGb": self.disk,
              "volumeInGb": 0, "ports": ["22/tcp"], "cloudType": "SECURE", "env": {"PUBLIC_KEY": self.pubkeys}}
         if flavor: b.update({"cpuFlavorIds": [flavor], "vcpuCount": 4})
         else: b.update({"gpuTypeIds": gpus or GPUS, "gpuCount": 1})
