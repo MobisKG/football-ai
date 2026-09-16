@@ -19,7 +19,7 @@ IMAGE_CPU = os.environ.get("FB_IMAGE_CPU", "runpod/base:0.6.3-cpu")
 GPUS = ["NVIDIA A40", "NVIDIA RTX A6000", "NVIDIA GeForce RTX 4090", "NVIDIA L40S", "NVIDIA RTX A5000", "NVIDIA L40"]
 # Процессорные машины RunPod: от дешёвых к дорогим. Если ни одна не создаётся,
 # качалка берёт самую дешёвую машину с видеокартой (см. Pod.create).
-CPU_FLAVORS = ["cpu3c-2-4", "cpu3c-4-8", "cpu5c-2-4", "cpu5c-4-8"]
+CPU_FLAVORS = ["cpu3c-4", "cpu3c-8", "cpu5c-4", "cpu5c-8"]
 
 def env_key(name, *files):
     v = os.environ.get(name)
@@ -142,7 +142,11 @@ class Pod:
     def _body(self, gpus=None, flavor=None):
         b = {"name": self.name, "imageName": self.image, "containerDiskInGb": self.disk,
              "volumeInGb": 0, "ports": ["22/tcp"], "cloudType": "SECURE", "env": {"PUBLIC_KEY": self.pubkeys}}
-        if flavor: b.update({"cpuFlavorIds": [flavor], "vcpuCount": 4})
+        # процессорная машина: REST v1 требует computeType=CPU и краткий виде flavor (cpu3c, cpu5c);
+        # без computeType запрос отклоняется схемой (проверено 16.09)
+        if flavor:
+            fl, _, vcpu = flavor.partition("-")
+            b.update({"computeType": "CPU", "cpuFlavorIds": [fl], "vcpuCount": int(vcpu.split("-")[0]) if vcpu else 4})
         else: b.update({"gpuTypeIds": gpus or GPUS, "gpuCount": 1})
         return b
 

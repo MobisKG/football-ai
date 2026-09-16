@@ -19,23 +19,24 @@ def video_ok(f):
         return bool(last) and last[-1] >= d - 10
     except Exception as e:
         log("ffprobe:", e); return False
-jobs = json.load(open(os.path.join(ROOT, "results/pitch/jobs.json")))
-only = sys.argv[1].split(",") if len(sys.argv) > 1 else None
-manual = {os.path.basename(os.path.dirname(os.path.dirname(f))) for f in glob.glob(os.path.join(ROOT, "results/pitch/*/manual/frame_t*.json"))}
-todo = [j for j in jobs if not only or j["slug"] in only]
-todo.sort(key=lambda j: (j["slug"] not in manual, j["slug"]))
-for j in todo:
-    f = os.path.join(OUT, j["slug"] + ".mp4")
-    if video_ok(f): log(j["slug"], "уже есть"); continue
-    for attempt in range(6):
-        for fmt in ("298", "bv[height<=720][ext=mp4][vcodec^=avc1]", "bv[height<=720][ext=mp4]"):
-            if os.path.exists(f): os.remove(f)
-            r = subprocess.run([PY, "-m", "yt_dlp", "-q", "--no-warnings", "--socket-timeout", "30", "-f", fmt, "--no-part", "-o", f, "https://www.youtube.com/watch?v=" + j["yt"]], capture_output=True, text=True)
-            if r.returncode == 0 and video_ok(f): break
-            log(j["slug"], "формат", fmt, "не вышло:", (r.stderr or r.stdout).strip()[-160:])
+if __name__ == "__main__":
+    jobs = json.load(open(os.path.join(ROOT, "results/pitch/jobs.json")))
+    only = sys.argv[1].split(",") if len(sys.argv) > 1 else None
+    manual = {os.path.basename(os.path.dirname(os.path.dirname(f))) for f in glob.glob(os.path.join(ROOT, "results/pitch/*/manual/frame_t*.json"))}
+    todo = [j for j in jobs if not only or j["slug"] in only]
+    todo.sort(key=lambda j: (j["slug"] not in manual, j["slug"]))
+    for j in todo:
+        f = os.path.join(OUT, j["slug"] + ".mp4")
+        if video_ok(f): log(j["slug"], "уже есть"); continue
+        for attempt in range(6):
+            for fmt in ("298", "bv[height<=720][ext=mp4][vcodec^=avc1]", "bv[height<=720][ext=mp4]"):
+                if os.path.exists(f): os.remove(f)
+                r = subprocess.run([PY, "-m", "yt_dlp", "-q", "--no-warnings", "--socket-timeout", "30", "--retries", "10", "--fragment-retries", "10", "-f", fmt, "--no-part", "-o", f, "https://www.youtube.com/watch?v=" + j["yt"]], capture_output=True, text=True)
+                if r.returncode == 0 and video_ok(f): break
+                log(j["slug"], "формат", fmt, "не вышло:", (r.stderr or r.stdout).strip()[-160:])
+            else:
+                log(j["slug"], "попытка", attempt + 1, "не удалась, пауза 60 с"); time.sleep(60); continue
+            log(j["slug"], "скачано %.0f МБ" % (os.path.getsize(f) / 1e6)); break
         else:
-            log(j["slug"], "попытка", attempt + 1, "не удалась, пауза 60 с"); time.sleep(60); continue
-        log(j["slug"], "скачано %.0f МБ" % (os.path.getsize(f) / 1e6)); break
-    else:
-        log(j["slug"], "!!! не скачалось")
-log("готово")
+            log(j["slug"], "!!! не скачалось")
+    log("готово")
