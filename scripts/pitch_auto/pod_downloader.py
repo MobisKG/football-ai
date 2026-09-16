@@ -89,7 +89,7 @@ def main():
                 todo.remove(j); state["downloaded"].append(j["slug"]); json.dump(state, open(STATE, "w"), indent=1)
                 log("скачано %s за %.0f с, осталось %d" % (j["slug"], time.time() - t0, len(todo)))
                 if B2:
-                    rc2, o2 = pod.ssh("cd /root/fb && $(cat /root/.b2py) scripts/pitch_auto/b2.py put videos/%s.mp4 videos/%s.mp4 2>&1 | tail -1" % (j["slug"], j["slug"]), timeout=3600, raise_dead=False)
+                    rc2, o2 = pod.ssh("cd /root/fb && $(cat /root/.b2py) scripts/pitch_auto/b2.py put videos/%s.mp4 source/%s.mp4 2>&1 | tail -1" % (j["slug"], j["slug"]), timeout=3600, raise_dead=False)
                     log("%s в хранилище: %s" % (j["slug"], o2.strip()[-60:]))
                 blocked_here = 0
             elif blocked:
