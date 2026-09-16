@@ -1,0 +1,22 @@
+# Ставится на сервер рядом с sportbox. Ничего чужого не трогает: свой контейнер,
+# свои папки, без портов наружу.
+#   cd /opt/football-runner && docker compose up -d --build
+services:
+  football-runner:
+    build:
+      context: ./repo
+      dockerfile: server/Dockerfile
+    image: football-runner:1
+    container_name: football-runner
+    restart: unless-stopped
+    env_file: ./env
+    environment:
+      TZ: Asia/Bishkek
+    volumes:
+      - ./repo:/app:ro                 # код только на чтение: меняется через git pull на хосте
+      - ./results:/app/results         # состояние прогонов, отчёты, логи
+      - ./ssh:/app/ssh:ro              # ключ, которым управляющий узел ходит на машины RunPod
+      - ./cache:/root/.cache           # токен сайта и кэш yt-dlp
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "5" }

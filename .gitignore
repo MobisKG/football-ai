@@ -34,3 +34,5 @@ results/pitch/*/track_*.json
 results/pitch/*/speeds_*/pos_metres.json
 results/pitch/*/frames_*_full/
 results/pitch/*/check_track_*/
+results/run_*/relay_key
+results/run_*/relay_key.pub
