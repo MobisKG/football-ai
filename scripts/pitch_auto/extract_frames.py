@@ -3,7 +3,9 @@
 import os, sys, cv2
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(os.path.dirname(HERE))
 slug = sys.argv[1]; every = float(sys.argv[sys.argv.index("--every") + 1]) if "--every" in sys.argv else 15.0
-v = os.path.join(ROOT, "results/pitch/videos", slug + ".mp4"); o = os.path.join(ROOT, "results/pitch", slug, "frames_%s_full" % slug); os.makedirs(o, exist_ok=True)
+v = next((x for x in (os.path.join(ROOT, "results/pitch/videos", slug + ".mp4"), os.path.join(ROOT, "videos", slug + ".mp4")) if os.path.exists(x)), None)
+if not v: sys.exit("нет видео для " + slug)
+o = os.path.join(ROOT, "results/pitch", slug, "frames_%s_full" % slug); os.makedirs(o, exist_ok=True)
 c = cv2.VideoCapture(v); f = c.get(5); n = c.get(7); t = 0.0; k = 0
 while t < n / f:
     c.set(cv2.CAP_PROP_POS_MSEC, t * 1000); ok, fr = c.read()
