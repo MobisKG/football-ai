@@ -38,6 +38,8 @@ DL_DISK = int(opt("--dl-disk", 40)); MAX_USD = float(opt("--max-usd", 30))
 ONLY = set(opt("--only", "").split(",")) - {""}
 STAGE = opt("--stage", "all"); DRY = "--dry-run" in sys.argv
 VIDEO_LIMIT_S = float(opt("--video-limit-h", 3.5)) * 3600
+SOURCE = opt("--source", "youtube")      # b2: видео берутся из хранилища, качалка не нужна
+B2_READ_ENV = opt("--b2-env", "")        # файл с KEY_ID/APPLICATION_KEY ключа только на чтение
 
 os.makedirs(OUT, exist_ok=True)
 core.LOG_PATH = os.path.join(OUT, "run.log")
@@ -178,7 +180,11 @@ def setup_worker(pod, group, dl):
     pod.scp(files, pod.remote("/root/fb/"))
     pod.scp([os.path.join(HERE, f) for f in ("pod_cpu_steps.py", "pod_job.sh")], pod.remote("/root/fb/full_run/"))
     pod.scp(os.path.join(ROOT, "weights/best_7matches.pt"), pod.remote("/root/fb/weights/"))
-    pod.scp([PLAN, os.path.join(OUT, "matches.json")], pod.remote("/root/fb/"))
+    pod.scp([PLAN, os.path.join(OUT, "matches.json")] + ([os.path.join(OUT, "rosters.json")] if os.path.exists(os.path.join(OUT, "rosters.json")) else []), pod.remote("/root/fb/"))
+    if SOURCE == "b2":  # B2 до установки: оттуда же OSNet (Google Drive срывается)
+        # видео из хранилища B2 (ключ только на чтение): YouTube машинам RunPod не отдаёт
+        pod.scp([os.path.join(SCRIPTS, "pitch_auto", "b2.py"), B2_READ_ENV], pod.remote("/root/"))
+        pod.ssh("mv /root/%s /root/.b2env && chmod 600 /root/.b2env && pip install -q --root-user-action=ignore b2sdk 2>&1 | tail -0" % os.path.basename(B2_READ_ENV), timeout=900, raise_dead=False)
     rc, out = pod.ssh("cd /root/fb && chmod +x *.sh full_run/*.sh && ./pod_setup.sh > setup.log 2>&1; tail -3 setup.log", timeout=2400)
     if "SETUP_OK" not in out: raise RuntimeError("установка не удалась: " + out[-300:])
     pod.put_relay_key(RELAY)
@@ -186,7 +192,13 @@ def setup_worker(pod, group, dl):
     pod.ssh("echo '%s' > /root/.runpod_key; cd /root/fb && touch heartbeat && "
             "(nohup ./pod_watchdog.sh 9000 >/dev/null 2>&1 &); true" % core.RUNPOD_KEY, raise_dead=False)
     got = []
+    if SOURCE == "b2":
+        for v in group:
+            rc, out = pod.ssh("cd /root/fb && python /root/b2.py get source/%s.mp4 out/%s.mp4 >/dev/null 2>&1; ls -la out/%s.mp4 | awk '{print $5}'" % (v["slug"], v["slug"], v["slug"]), timeout=1800, raise_dead=False)
+            log(pod.tag, v["slug"], "видео из B2:", out.strip()[-20:] + " байт")
+            got.append(v["slug"])
     for v in group:
+        if SOURCE == "b2": break
         if dl is not None:
             ok, out = pod.pull_from(dl, "/root/fb/out/%s.mp4" % v["slug"], "/root/fb/out")
             if ok: got.append(v["slug"]); continue

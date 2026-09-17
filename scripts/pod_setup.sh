@@ -28,7 +28,7 @@ echo ">>> roboflow/sports и torchreid (из клона, через PYTHONPATH)"
 [ -d /root/deep-person-reid ] || git clone -q https://github.com/KaiyangZhou/deep-person-reid.git /root/deep-person-reid
 
 echo ">>> веса OSNet"
-[ -s osnet_x1_0_msmt17.pt ] || python -m gdown 112EMUfBPYeYg70w-syK6V6Mx8-Qb9Q1M -O osnet_x1_0_msmt17.pt -q
+[ -s osnet_x1_0_msmt17.pt ] || { [ -s /root/.b2env ] && python /root/b2.py get deps/osnet_x1_0_msmt17.pt osnet_x1_0_msmt17.pt >/dev/null; }; [ -s osnet_x1_0_msmt17.pt ] || python -m gdown 112EMUfBPYeYg70w-syK6V6Mx8-Qb9Q1M -O osnet_x1_0_msmt17.pt -q
 ls -la osnet_x1_0_msmt17.pt
 
 echo ">>> модель Qwen2.5-VL-7B (кэш HF), чтобы первое видео не ждало"

@@ -260,11 +260,12 @@
   "pos_fps": 14.858,
   "frames": 43481,
   "posdir": "kazarman_giperstroi",
-  "uploaded": false,
-  "home_colour": null,
+  "uploaded": true,
+  "home_colour": "тёмные",
   "scoreboard": false,
   "home_is_top": false,
-  "merged_into": null
+  "merged_into": null,
+  "home_source": "лист форм: на тёмно-синих надпись ГИПЕРСТРОЙ; статистика без табло (_fixed), без скоростей; загружено 17.09"
  },
  {
   "slug": "shalta",
@@ -337,5 +338,14 @@
   "scoreboard": true,
   "home_is_top": false,
   "merged_into": null
+ },
+ {
+  "slug": "gz_real91",
+  "yt": "OgaBHKt_U5g",
+  "match_guid": "30c70066-bab2-c1fd-932e-6b6ae2f73efa",
+  "field": "Полей №2",
+  "uploaded": false,
+  "home_colour": null,
+  "scoreboard": false
  }
 ]
