@@ -35,6 +35,7 @@ top = [w for w, _ in first_words.most_common(2)]
 # у нормальных игр ночи 15.09 не больше 2,8). Тогда деление по форме ломается,
 # и оставляем исходные команды кластеризации analyze_match.py.
 _fw = first_words.most_common(2)
+KIT_MAP = sys.argv[sys.argv.index("--kit-map") + 1] if "--kit-map" in sys.argv else None
 DOMINANT = (len(_fw) == 2 and _fw[0][1] >= 4 * _fw[1][1] and not KIT_MAP) or "--use-clusters" in sys.argv
 # --use-clusters: принудительно команды кластеризации — когда слова формы смешивают
 # команды («Казарман vs Гипер Строй»: тёмно-синие ГИПЕРСТРОЙ и голубые оба бывали «синий»)
@@ -47,7 +48,6 @@ B_WORDS = (top[1],)          # команда 1
 # («Казарман vs Гипер Строй»: голубые футболки читались то «голубой», то «синий»,
 # а тёмно-синие с надписью ГИПЕРСТРОЙ — «чёрный»; два самых частых слова оказались
 # одной командой). Формат: --kit-map "голу,сини:голубые;черн:тёмные"
-KIT_MAP = sys.argv[sys.argv.index("--kit-map") + 1] if "--kit-map" in sys.argv else None
 MANUAL_NAMES = None
 if KIT_MAP:
     parts = [x.split(":") for x in KIT_MAP.split(";")]

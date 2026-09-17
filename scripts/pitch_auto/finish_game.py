@@ -31,6 +31,13 @@ anch = json.load(open(os.path.join(D, "auto", "summary.json"))) if os.path.exist
 pl["anchors"] = anch.get("accepted"); pl["frames"] = anch.get("frames")
 json.dump(pl, open(os.path.join(sp, "plausibility.json"), "w"), ensure_ascii=False, indent=1)
 log(slug, "правдоподобие:", json.dumps(pl, ensure_ascii=False))
+# точность разметки поля (отложенные кадры разметки каждого кадра): медиана ≤ 0,7 м, p90 ≤ 1,5 м
+res_p = os.path.join(os.path.dirname(os.path.abspath(track)), "perframe_full", "result.json")
+if os.path.exists(res_p):
+    ho = json.load(open(res_p)).get("holdout") or {}
+    if ho.get("median_m") is None or ho["median_m"] > 0.7 or (ho.get("p90_m") or 99) > 1.5:
+        pl["ok"] = False; pl["reason"] = (pl["reason"] + "; " if pl["reason"] else "") + "точность разметки: медиана %s м, p90 %s м" % (ho.get("median_m"), ho.get("p90_m"))
+        log(slug, "не прошла точность разметки:", ho)
 if "--upload" not in sys.argv or not pl["ok"]: sys.exit(0)
 if not job.get("home_colour") or not job.get("match_guid") or job.get("merged_into"):
     log(slug, "без загрузки: нет цвета хозяев, match_guid или сдвоенная игра"); sys.exit(0)
