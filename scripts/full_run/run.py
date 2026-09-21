@@ -256,7 +256,7 @@ def upload_game(v, d):
            "--video-url", "https://www.youtube.com/watch?v=" + v["yt"]]
     if home.get("home_is_top") is not None and os.path.exists(os.path.join(d, "scoreboard.json")):
         cmd += ["--scoreboard", "scoreboard.json"] + (["--home-is-top"] if home.get("home_is_top") else [])
-    env = dict(os.environ, SPORTX_TOKEN=site.token())
+    env = dict(os.environ, SPORTX_TOKEN=site.token(refresh=True))   # токен из .env протухает
     p = subprocess.run(cmd, cwd=d, capture_output=True, text=True, timeout=600, env=env)
     open(os.path.join(d, "upload.log"), "w").write(" ".join(cmd) + "\n" + p.stdout + p.stderr)
     if p.returncode != 0:
