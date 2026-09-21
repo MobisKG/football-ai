@@ -33,10 +33,14 @@ def get(name, path):
     os.makedirs(os.path.dirname(os.path.abspath(path)) or ".", exist_ok=True)
     bucket().download_file_by_name(name).save_to(path)
     return path
+def size(name):
+    """размер файла в хранилище или None; ls b2sdk принимает папку, а не имя файла"""
+    folder = name.rsplit("/", 1)[0] if "/" in name else ""
+    for f, _ in bucket().ls(folder, recursive=False):
+        if f.file_name == name: return f.size
+    return None
 def have(name):
-    try:
-        next(bucket().ls(name, recursive=False)); return True
-    except StopIteration: return False
+    try: return size(name) is not None
     except Exception: return False
 def ls(prefix=""):
     return [(f.file_name, f.size) for f, _ in bucket().ls(prefix, recursive=True)]
@@ -45,5 +49,6 @@ if __name__ == "__main__":
     if cmd == "put": print(put(sys.argv[2], sys.argv[3] if len(sys.argv) > 3 else None))
     elif cmd == "get": print(get(sys.argv[2], sys.argv[3]))
     elif cmd == "have": sys.exit(0 if have(sys.argv[2]) else 1)
+    elif cmd == "size": print(size(sys.argv[2]) or "")
     elif cmd == "ls":
         for k, sz in ls(sys.argv[2] if len(sys.argv) > 2 else ""): print("%9.0f МБ  %s" % (sz / 1e6, k))
