@@ -14,7 +14,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 FB = os.environ.get("FB_DIR", "/root/fb")
 opt = lambda k, d=None: sys.argv[sys.argv.index(k) + 1] if k in sys.argv else d
 slug = sys.argv[1]
-MATCHES = opt("--matches", os.path.join(FB, "matches.json"))
+MATCHES = os.path.abspath(opt("--matches", os.path.join(FB, "matches.json")))   # home_side запускается из другой папки
 TITLE = opt("--title", slug)
 D = os.path.join(FB, "out", slug)
 PY = sys.executable

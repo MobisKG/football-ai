@@ -194,6 +194,14 @@ def setup_worker(pod, group, dl):
     got = []
     if SOURCE == "b2":
         for v in group:
+            if v.get("parts"):
+                # игра выложена по таймам: скачать части и склеить без перекодирования
+                cmd = "cd /root/fb && " + " && ".join("python /root/b2.py get source/%s.mp4 out/%s.mp4 >/dev/null 2>&1" % (p_, p_) for p_ in v["parts"])
+                cmd += " && (%s) > out/%s.parts.txt && ffmpeg -v error -y -f concat -safe 0 -i out/%s.parts.txt -c copy out/%s.mp4 && rm -f %s; ls -la out/%s.mp4 | awk '{print $5}'" % (
+                    "; ".join("echo file /root/fb/out/%s.mp4" % p_ for p_ in v["parts"]), v["slug"], v["slug"], v["slug"],
+                    " ".join("out/%s.mp4" % p_ for p_ in v["parts"]), v["slug"])
+                rc, out = pod.ssh(cmd, timeout=2400, raise_dead=False)
+                log(pod.tag, v["slug"], "таймы склеены:", out.strip()[-20:] + " байт"); got.append(v["slug"]); continue
             rc, out = pod.ssh("cd /root/fb && python /root/b2.py get source/%s.mp4 out/%s.mp4 >/dev/null 2>&1; ls -la out/%s.mp4 | awk '{print $5}'" % (v["slug"], v["slug"], v["slug"]), timeout=1800, raise_dead=False)
             log(pod.tag, v["slug"], "видео из B2:", out.strip()[-20:] + " байт")
             got.append(v["slug"])
