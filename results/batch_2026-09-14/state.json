@@ -1057,7 +1057,111 @@
    "tag": "m3",
    "t1": 1789431143.192395,
    "spent": 0.566
+  },
+  {
+   "id": "7ffmbv11eujwoa",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789436173.056275,
+   "tag": "p1",
+   "t1": 1789439860.167116,
+   "spent": 0.758
+  },
+  {
+   "id": "ollyju6lb1qkkv",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789451466.456311,
+   "tag": "p2",
+   "t1": 1789453255.5484061,
+   "spent": 0.368
+  },
+  {
+   "id": "el7fggev4n9k4t",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789453261.7746189,
+   "tag": "p3",
+   "t1": 1789464495.433254,
+   "spent": 2.309
+  },
+  {
+   "id": "rax6lznpyx7z7o",
+   "gpu": "NVIDIA A40",
+   "cost": 0.49,
+   "t0": 1789481118.2555141,
+   "tag": "p4",
+   "t1": 1789481197.809957,
+   "spent": 0.011
+  },
+  {
+   "id": "to56ij2r5mun5w",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789526098.9503748,
+   "tag": "sp1",
+   "t1": 1789526533.1129658,
+   "spent": 0.089
+  },
+  {
+   "id": "o2xrici7lzifjn",
+   "gpu": "NVIDIA A40",
+   "cost": 0.49,
+   "t0": 1789526419.912024,
+   "tag": "sp2"
+  },
+  {
+   "id": "wmswmkm9gf97ro",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789534907.066062,
+   "tag": "sp3"
+  },
+  {
+   "id": "2id2lr9urgea1v",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789535615.328935,
+   "tag": "sp4",
+   "t1": 1789536250.7398348,
+   "spent": 0.131
+  },
+  {
+   "id": "qdsinr8xd1b80j",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789536259.765834,
+   "tag": "sp5",
+   "t1": 1789536370.977962,
+   "spent": 0.023
+  },
+  {
+   "id": "5idm1fkebdm0uf",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789536380.272714,
+   "tag": "sp6",
+   "t1": 1789536503.313401,
+   "spent": 0.025
+  },
+  {
+   "id": "7559pnxwzvvxvh",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789536508.438528,
+   "tag": "sp7",
+   "t1": 1789536575.2620459,
+   "spent": 0.014
+  },
+  {
+   "id": "xu2e4n50dqbz6k",
+   "gpu": "NVIDIA GeForce RTX 4090",
+   "cost": 0.74,
+   "t0": 1789536604.53183,
+   "tag": "sp8",
+   "t1": 1789536722.291171,
+   "spent": 0.024
   }
  ],
- "spent_usd": 20.839
+ "spent_usd": 24.618
 }

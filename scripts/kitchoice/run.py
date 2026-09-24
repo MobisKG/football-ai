@@ -1,0 +1,29 @@
+"""Одна машина: выбор формы для игр из games.tsv. python -m kitchoice.run (из scripts/)"""
+import os, sys, time, glob
+HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, os.path.dirname(HERE))
+from full_run import core
+from full_run.core import Pod, log
+import full_run.run as R
+st = core.State(os.path.join(HERE, "state.json"))
+pod = Pod("kc", st, gpu=True, disk=80, pubkeys=R.pubkeys(), run_id="kc")
+try:
+    if not pod.create(): sys.exit("машина не создалась")
+    pod.ssh("mkdir -p /root/kc", raise_dead=False)
+    files = [os.path.join(HERE, f) for f in ("kit_choice.py", "pod_kitchoice.sh", "extract_crops2.py", "games.tsv")] + glob.glob(os.path.join(HERE, "*.pos.json"))
+    pod.scp(files, pod.remote("/root/kc/"))
+    pod.scp([os.path.join(HERE, "..", "pitch_auto", "b2.py")], pod.remote("/root/"))
+    pod.scp("/tmp/b2read.env", pod.remote("/root/.b2env"))
+    pod.ssh("echo '%s' > /root/.runpod_key" % core.RUNPOD_KEY, raise_dead=False)
+    pod.ssh("cd /root/kc && (nohup bash pod_kitchoice.sh > job.log 2>&1 &); true", raise_dead=False)
+    t0 = time.time()
+    while time.time() - t0 < 2.5 * 3600:
+        time.sleep(90)
+        rc, o = pod.ssh("cd /root/kc; ls ALL_DONE 2>/dev/null; tail -2 job.log; tail -qn1 *.choice.log 2>/dev/null | tail -1", raise_dead=False)
+        log("kc", o.strip().replace("\n", " | ")[-200:])
+        if "ALL_DONE" in o: break
+    for f in glob.glob(os.path.join(HERE, "*.pos.json")):
+        s = os.path.basename(f).replace(".pos.json", "")
+        try: pod.scp(pod.remote("/root/kc/%s.choice.json" % s), HERE + "/")
+        except Exception as e: log("kc", s, "не забрал", e)
+finally:
+    pod.delete()

@@ -4,6 +4,12 @@
 # машина удаляет себя через API, чтобы не крутиться и не жечь деньги.
 # Ключ API в /root/.runpod_key, id машины — в переменной RUNPOD_POD_ID.
 LIMIT=${1:-2700}
+# один сторож на машине: старый с прежним порогом убиваем по PID-файлу, иначе он
+# продолжает жить со своим лимитом и удаляет машину, пока новый ждёт (так пропала машина 16.09)
+PIDF=/root/fb/watchdog.pid
+if [ -f "$PIDF" ] && kill -0 "$(cat $PIDF)" 2>/dev/null; then kill "$(cat $PIDF)"; sleep 1; fi
+echo $$ > "$PIDF"
+echo "$(date) сторож $$ порог $LIMIT с" >> /root/fb/watchdog.log
 touch /root/fb/heartbeat
 while true; do
   sleep 60

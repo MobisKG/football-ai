@@ -452,3 +452,99 @@ scp: Connection closed
 [15.09 06:32:10] список машин после очистки: []
 [15.09 06:32:12] shiko загружено, проверено чтением
 [15.09 06:32:12] готово. потрачено 20.84 $
+[15.09 07:36:13] p1 под 7ffmbv11eujwoa NVIDIA GeForce RTX 4090 0.74 $/ч
+[15.09 07:36:24] p1 адрес 157.157.221.29 32181
+[15.09 07:36:29] p1 CUDA: NVIDIA GeForce RTX 4090
+[15.09 08:37:40] p1 под 7ffmbv11eujwoa удалён (ok), 0.76 $ за 61 мин
+[15.09 11:51:06] p2 под ollyju6lb1qkkv NVIDIA GeForce RTX 4090 0.74 $/ч
+[15.09 11:51:40] p2 адрес 213.181.111.2 27345
+[15.09 11:51:53] p2 CUDA: NVIDIA GeForce RTX 4090
+[15.09 12:20:55] p2 под ollyju6lb1qkkv удалён (ok), 0.37 $ за 30 мин
+[15.09 12:21:01] p3 под el7fggev4n9k4t NVIDIA GeForce RTX 4090 0.74 $/ч
+[15.09 12:21:22] p3 адрес 103.196.86.68 35240
+[15.09 12:21:30] p3 CUDA: NVIDIA GeForce RTX 4090
+[15.09 14:50:32] p3 scp не удалось (), попытка 1/3: frames_all.tar
+[15.09 15:05:45] p3 scp не удалось (Read from remote host 103.196.86.68: Connection reset by peer
+scp: Connection closed), попытка 1/3: frames_rest.tar
+[15.09 15:05:45] p3 scp не удалось (Read from remote host 103.196.86.68: Connection reset by peer
+scp: Connection closed), попытка 2/3: frames_all.tar
+[15.09 15:06:25] p3 scp не удалось (scp: Connection closed), попытка 2/3: frames_rest.tar
+[15.09 15:06:25] p3 scp не удалось (scp: Connection closed), попытка 3/3: frames_all.tar
+[15.09 15:09:41] p3 scp не удалось (), попытка 3/3: frames_rest.tar
+[15.09 15:10:24] p3 scp не удалось (scp: Connection closed), попытка 1/3: fr_amigo_dosluk.tar
+[15.09 15:10:48] p3 scp не удалось (scp: Connection closed), попытка 2/3: fr_amigo_dosluk.tar
+[15.09 15:11:13] p3 scp не удалось (scp: Connection closed), попытка 3/3: fr_amigo_dosluk.tar
+[15.09 15:14:45] p3 scp не удалось (Read from remote host 103.196.86.68: Connection reset by peer
+scp: Connection closed), попытка 1/3: fr_atscargo_ruor.tar
+[15.09 15:14:46] p3 scp не удалось (Read from remote host 103.196.86.68: Connection reset by peer
+scp: Connection closed), попытка 1/3: frames_rest.tar
+[15.09 15:14:46] p3 scp не удалось (Read from remote host 103.196.86.68: Connection reset by peer
+scp: Connection closed), попытка 1/3: frames_all.tar
+[15.09 15:17:25] p3 scp не удалось (Read from remote host 103.196.86.68: Connection reset by peer
+scp: Connection closed), попытка 2/3: fr_atscargo_ruor.tar
+[15.09 15:17:30] p3 scp не удалось (Read from remote host 103.196.86.68: Connection reset by peer
+scp: Connection closed), попытка 2/3: frames_all.tar
+[15.09 15:17:32] p3 scp не удалось (Read from remote host 103.196.86.68: Connection reset by peer
+scp: Connection closed), попытка 2/3: frames_rest.tar
+[15.09 15:20:12] p3 scp не удалось (scp: Connection closed), попытка 1/3: fr_birimdik_abai.tar
+[15.09 15:20:12] p3 scp не удалось (scp: Connection closed), попытка 3/3: frames_rest.tar
+[15.09 15:20:12] p3 scp не удалось (scp: Connection closed), попытка 3/3: frames_all.tar
+[15.09 15:28:15] p3 под el7fggev4n9k4t удалён (ok), 2.31 $ за 187 мин
+[15.09 15:28:15] p3 scp не удалось (Connection to 103.196.86.68 closed by remote host.
+scp: Connection closed), попытка 1/3: frames_all.tar
+[15.09 15:28:55] p3 scp не удалось (scp: Connection closed), попытка 2/3: frames_all.tar
+[15.09 15:29:35] p3 scp не удалось (scp: Connection closed), попытка 3/3: frames_all.tar
+[15.09 15:30:45] p3 scp не удалось (scp: Connection closed), попытка 1/3: frames_all.tar
+[15.09 15:31:25] p3 scp не удалось (scp: Connection closed), попытка 2/3: frames_all.tar
+[15.09 15:32:06] p3 scp не удалось (scp: Connection closed), попытка 3/3: frames_all.tar
+[15.09 15:33:16] p3 scp не удалось (scp: Connection closed), попытка 1/3: frames_all.tar
+[15.09 15:33:56] p3 scp не удалось (scp: Connection closed), попытка 2/3: frames_all.tar
+[15.09 15:34:36] p3 scp не удалось (scp: Connection closed), попытка 3/3: frames_all.tar
+[15.09 20:05:18] p4 под rax6lznpyx7z7o NVIDIA A40 0.49 $/ч
+[15.09 20:05:51] p4 адрес 64.247.206.145 19444
+[15.09 20:05:56] p4 CUDA: NVIDIA A40
+[15.09 20:06:37] p4 под rax6lznpyx7z7o удалён (ok), 0.01 $ за 1 мин
+[16.09 08:34:58] sp1 под to56ij2r5mun5w NVIDIA GeForce RTX 4090 0.74 $/ч
+[16.09 08:35:32] sp1 адрес 47.47.180.52 19796
+[16.09 08:35:37] sp1 CUDA: NVIDIA GeForce RTX 4090
+[16.09 08:40:19] sp2 под o2xrici7lzifjn NVIDIA A40 0.49 $/ч
+[16.09 08:40:42] sp2 адрес 69.30.85.116 22146
+[16.09 08:40:46] sp2 CUDA: NVIDIA A40
+[16.09 08:42:13] sp1 под to56ij2r5mun5w удалён (ok), 0.09 $ за 7 мин
+[16.09 11:01:47] sp3 под wmswmkm9gf97ro NVIDIA GeForce RTX 4090 0.74 $/ч
+[16.09 11:02:26] sp3 адрес 149.36.0.126 44973
+[16.09 11:02:30] sp3 CUDA: NVIDIA GeForce RTX 4090
+[16.09 11:13:35] sp4 под 2id2lr9urgea1v NVIDIA GeForce RTX 4090 0.74 $/ч
+[16.09 11:14:08] sp4 адрес 47.47.180.28 26499
+[16.09 11:14:17] sp4 CUDA: NVIDIA GeForce RTX 4090
+[16.09 11:24:10] sp4 под 2id2lr9urgea1v удалён (ok), 0.13 $ за 11 мин
+[16.09 11:24:19] sp5 под qdsinr8xd1b80j NVIDIA GeForce RTX 4090 0.74 $/ч
+[16.09 11:24:28] sp5 адрес 47.47.180.28 12407
+[16.09 11:24:42] sp5 CUDA: NVIDIA GeForce RTX 4090
+[16.09 11:26:10] sp5 под qdsinr8xd1b80j удалён (ok), 0.02 $ за 2 мин
+[16.09 11:26:20] sp6 под 5idm1fkebdm0uf NVIDIA GeForce RTX 4090 0.74 $/ч
+[16.09 11:27:04] sp6 адрес 47.47.180.28 14598
+[16.09 11:27:15] sp6 CUDA: NVIDIA GeForce RTX 4090
+[16.09 11:28:23] sp6 под 5idm1fkebdm0uf удалён (ok), 0.03 $ за 2 мин
+[16.09 11:28:28] sp7 под 7559pnxwzvvxvh NVIDIA GeForce RTX 4090 0.74 $/ч
+[16.09 11:28:45] sp7 адрес 103.196.86.110 21045
+[16.09 11:28:52] sp7 CUDA: NVIDIA GeForce RTX 4090
+[16.09 11:29:35] sp7 под 7559pnxwzvvxvh удалён (ok), 0.01 $ за 1 мин
+[16.09 11:30:04] sp8 под xu2e4n50dqbz6k NVIDIA GeForce RTX 4090 0.74 $/ч
+[16.09 11:30:27] sp8 адрес 47.47.180.28 25917
+[16.09 11:30:32] sp8 CUDA: NVIDIA GeForce RTX 4090
+[16.09 11:32:02] sp8 под xu2e4n50dqbz6k удалён (ok), 0.02 $ за 2 мин
+[16.09 11:33:32] dl_euro1 адрес 213.173.98.228 32772
+[16.09 11:33:42] dl_euro1 CUDA: NVIDIA GeForce RTX 4090
+[16.09 11:35:14] dl_euse1 адрес 194.68.245.79 22001
+[16.09 11:35:22] dl_euse1 CUDA: NVIDIA A40
+[16.09 11:35:45] dl_euse1 под y4zer604bdszio удалён (ok), 0.01 $ за 1 мин
+[16.09 11:36:22] dl_euris1 адрес 157.157.221.29 30607
+[16.09 11:36:27] dl_euris1 CUDA: NVIDIA GeForce RTX 4090
+[16.09 11:36:30] dl_euris1 под ounfzzjjqhtb4w удалён (ok), 0.01 $ за 1 мин
+[16.09 11:36:54] dl_camtl1 адрес 69.30.85.214 22188
+[16.09 11:36:58] dl_camtl1 CUDA: NVIDIA A40
+[16.09 11:37:02] dl_camtl1 под cglylpnkwux34y удалён (ok), 0.00 $ за 1 мин
+[16.09 11:37:26] dl_usks2 адрес 216.81.151.15 12071
+[16.09 11:37:32] dl_usks2 CUDA: NVIDIA RTX A6000
+[16.09 11:37:36] dl_usks2 под 4o9gh3mpxgp8gd удалён (ok), 0.00 $ за 1 мин
