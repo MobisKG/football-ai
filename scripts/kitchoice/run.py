@@ -4,12 +4,13 @@ HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, os.path.di
 from full_run import core
 from full_run.core import Pod, log
 import full_run.run as R
-st = core.State(os.path.join(HERE, "state.json"))
+DATA = os.path.join(os.path.dirname(os.path.dirname(HERE)), "results", "kitchoice"); os.makedirs(DATA, exist_ok=True)
+st = core.State(os.path.join(DATA, "state.json"))
 pod = Pod("kc", st, gpu=True, disk=80, pubkeys=R.pubkeys(), run_id="kc")
 try:
     if not pod.create(): sys.exit("машина не создалась")
     pod.ssh("mkdir -p /root/kc", raise_dead=False)
-    files = [os.path.join(HERE, f) for f in ("kit_choice.py", "pod_kitchoice.sh", "extract_crops2.py", "games.tsv", "sheet.py", "sheets.txt")] + glob.glob(os.path.join(HERE, "*.pos.json"))
+    files = [os.path.join(HERE, f) for f in ("kit_choice.py", "pod_kitchoice.sh", "extract_crops2.py", "sheet.py")] + [os.path.join(DATA, f) for f in ("games.tsv", "sheets.txt")] + glob.glob(os.path.join(DATA, "*.pos.json"))
     pod.scp(files, pod.remote("/root/kc/"))
     pod.scp([os.path.join(HERE, "..", "pitch_auto", "b2.py")], pod.remote("/root/"))
     pod.scp(os.path.expanduser("~/.config/fb/b2read.env"), pod.remote("/root/.b2env"))
@@ -21,10 +22,10 @@ try:
         rc, o = pod.ssh("cd /root/kc; ls ALL_DONE 2>/dev/null; tail -2 job.log; tail -qn1 *.choice.log 2>/dev/null | tail -1", raise_dead=False)
         log("kc", o.strip().replace("\n", " | ")[-200:])
         if "ALL_DONE" in o: break
-    for f in glob.glob(os.path.join(HERE, "*.pos.json")):
+    for f in glob.glob(os.path.join(DATA, "*.pos.json")):
         s = os.path.basename(f).replace(".pos.json", "")
         for ext in ("choice.json", "sheet.jpg"):
-            try: pod.scp(pod.remote("/root/kc/%s.%s" % (s, ext)), HERE + "/")
+            try: pod.scp(pod.remote("/root/kc/%s.%s" % (s, ext)), DATA + "/")
             except Exception: pass
 finally:
     pod.delete()

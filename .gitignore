@@ -36,3 +36,10 @@ results/pitch/*/frames_*_full/
 results/pitch/*/check_track_*/
 results/run_*/relay_key
 results/run_*/relay_key.pub
+
+# данные выбора формы (kitchoice) лежат в results/kitchoice/, не в коде
+scripts/kitchoice/*.json
+scripts/kitchoice/*.jpg
+scripts/kitchoice/*.log
+scripts/kitchoice/*.tsv
+scripts/kitchoice/*.txt

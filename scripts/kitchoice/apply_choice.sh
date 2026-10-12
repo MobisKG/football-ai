@@ -7,7 +7,7 @@ RUN=${4:-run_2026-09-21}; R=/Users/doni/Documents/sport/football/results/$RUN
 D=$R/kitfix/$1; mkdir -p $R/kitfix
 [ -f $D/pos.json ] || tar xzf $R/$1.full.tar.gz -C $R/kitfix --exclude "*/crops/*"
 cd $D
-python3 - "$S/kitchoice/$1.choice.json" <<'PY'
+python3 - "/Users/doni/Documents/sport/football/results/kitchoice/$1.choice.json" <<'PY'
 import json,sys
 ch=json.load(open(sys.argv[1])); n=json.load(open("numbers.json")); a=b=u=0
 for t,v in n.items():
