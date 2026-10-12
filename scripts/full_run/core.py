@@ -13,7 +13,7 @@ SCRIPTS = os.path.dirname(HERE)
 ROOT = os.path.dirname(SCRIPTS)
 
 # Образ с CUDA для рабочих машин — тот же, что отработал ночью 14–15.09.
-IMAGE_GPU = os.environ.get("FB_IMAGE_GPU", "runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04")
+IMAGE_GPU = os.environ.get("FB_IMAGE_GPU", "ghcr.io/mobiskg/football-pod:latest")   # наш образ: библиотеки уже внутри (docker/pod.Dockerfile)
 # Качалке видеокарта не нужна, поэтому образ лёгкий: меньше тянуть и меньше диска.
 IMAGE_CPU = os.environ.get("FB_IMAGE_CPU", "runpod/base:0.6.3-cpu")
 # COMMUNITY — машины частных хозяев, RTX 4090 примерно вдвое дешевле SECURE; пропадают чуть чаще,
@@ -161,7 +161,9 @@ class Pod:
             plans += [("процессорная " + f, self._body(flavor=f)) for f in CPU_FLAVORS]
             plans += [("видеокарта (запасной вариант качалки)", self._body(gpus=["NVIDIA RTX A4000", "NVIDIA RTX A5000"] + GPUS))]
         else:
-            plans += [("видеокарта", self._body())]
+            # по одной видеокарте, от дешёвой к дорогой: со списком сразу RunPod берёт
+            # любую свободную из него (12.10 дал L40S за 0,79 $/ч вместо 4090 за 0,34)
+            plans += [("видеокарта " + g.replace("NVIDIA ", ""), self._body(gpus=[g])) for g in GPUS]
         for attempt in range(tries):
             for name, body in plans:
                 r = rp("POST", "/pods", body)
