@@ -24,7 +24,7 @@ $PIP ultralytics supervision opencv-python-headless umap-learn scikit-learn \
 $PIP 'transformers==4.49.0' 2>&1 | grep -v -iE 'notice|warning' || true
 
 echo ">>> roboflow/sports и torchreid (из клона, через PYTHONPATH)"
-[ -d sports ] || git clone -q https://github.com/roboflow/sports.git
+[ -d sports ] || { [ -d /opt/sports ] && ln -s /opt/sports sports; } || git clone -q https://github.com/roboflow/sports.git
 [ -d /root/deep-person-reid ] || git clone -q https://github.com/KaiyangZhou/deep-person-reid.git /root/deep-person-reid
 
 echo ">>> веса OSNet"
