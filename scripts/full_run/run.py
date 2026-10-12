@@ -32,12 +32,12 @@ opt = lambda k, d=None: sys.argv[sys.argv.index(k) + 1] if k in sys.argv else d
 # на сервере состояние лежит вне кода (/data/results): /app примонтирован только на чтение
 RESULTS = os.environ.get("FB_RESULTS", os.path.join(ROOT, "results"))
 OUT = os.path.abspath(opt("--outdir", os.path.join(RESULTS, "run_" + time.strftime("%Y-%m-%d"))))
-PER_POD = int(opt("--per-pod", 2)); LIMIT = int(opt("--limit", 60)); STEP = int(opt("--gpu-step", 4))
+PER_POD = int(opt("--per-pod", 4))   # 4 игры на машину: подготовка машины оплачивается реже; LIMIT = int(opt("--limit", 60)); STEP = int(opt("--gpu-step", 4))
 DAYS = int(opt("--days", 14))          # «новое» — за последние N дней; 0 — всё неразобранное
 DL_DISK = int(opt("--dl-disk", 40)); MAX_USD = float(opt("--max-usd", 30))
 ONLY = set(opt("--only", "").split(",")) - {""}
 STAGE = opt("--stage", "all"); DRY = "--dry-run" in sys.argv
-VIDEO_LIMIT_S = float(opt("--video-limit-h", 3.5)) * 3600
+VIDEO_LIMIT_S = float(opt("--video-limit-h", 6)) * 3600
 SOURCE = opt("--source", "youtube")      # b2: видео берутся из хранилища, качалка не нужна
 B2_READ_ENV = opt("--b2-env", "")        # файл с KEY_ID/APPLICATION_KEY ключа только на чтение
 
@@ -90,7 +90,7 @@ def stage_plan():
     npods = max(1, math.ceil(len(plan) / PER_POD))
     no_guid = [v["slug"] for v in plan if not v.get("match_guid")]
     log("машин будет: %d (по %d игры), оценка времени %.1f ч, оценка денег %.1f $"
-        % (npods, PER_POD, PER_POD * 1.0 + 0.4, npods * (PER_POD * 0.9 + 0.3) * 0.55))
+        % (npods, PER_POD, PER_POD * 1.0 + 0.4, npods * (PER_POD * 0.9 + 0.3) * float(os.environ.get("FB_PRICE", 0.36))))
     if no_guid: log("без match_guid (статистика посчитается, загрузка придержится):", ", ".join(no_guid))
     for v in plan: st.v(v["slug"]).setdefault("yt", v["yt"])
     st.save()

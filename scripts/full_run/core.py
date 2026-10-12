@@ -16,7 +16,11 @@ ROOT = os.path.dirname(SCRIPTS)
 IMAGE_GPU = os.environ.get("FB_IMAGE_GPU", "runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04")
 # Качалке видеокарта не нужна, поэтому образ лёгкий: меньше тянуть и меньше диска.
 IMAGE_CPU = os.environ.get("FB_IMAGE_CPU", "runpod/base:0.6.3-cpu")
-GPUS = ["NVIDIA A40", "NVIDIA RTX A6000", "NVIDIA GeForce RTX 4090", "NVIDIA L40S", "NVIDIA RTX A5000", "NVIDIA L40"]
+# COMMUNITY — машины частных хозяев, RTX 4090 примерно вдвое дешевле SECURE; пропадают чуть чаще,
+# но прогон это переживает (замена машины). FB_CLOUD=SECURE вернёт дата-центры.
+CLOUD = os.environ.get("FB_CLOUD", "COMMUNITY")
+GPUS = ["NVIDIA GeForce RTX 4090", "NVIDIA GeForce RTX 3090", "NVIDIA RTX A6000", "NVIDIA A40", "NVIDIA RTX A5000", "NVIDIA L40S", "NVIDIA L40"]
+# порядок — по цене за игру в COMMUNITY (10.2026): 4090 ~0,34 $/ч, 3090 ~0,22 $/ч, A5000 ~0,16 $/ч; модели нужно ≥ 24 ГБ
 # Процессорные машины RunPod: от дешёвых к дорогим. Если ни одна не создаётся,
 # качалка берёт самую дешёвую машину с видеокартой (см. Pod.create).
 CPU_FLAVORS = ["cpu3c-4", "cpu3c-8", "cpu5c-4", "cpu5c-8"]
@@ -141,7 +145,7 @@ class Pod:
     # --- создание ---
     def _body(self, gpus=None, flavor=None):
         b = {"name": self.name, "imageName": self.image, "containerDiskInGb": self.disk,
-             "volumeInGb": 0, "ports": ["22/tcp"], "cloudType": "SECURE", "env": {"PUBLIC_KEY": self.pubkeys}}
+             "volumeInGb": 0, "ports": ["22/tcp"], "cloudType": CLOUD, "env": {"PUBLIC_KEY": self.pubkeys}}
         # процессорная машина: REST v1 требует computeType=CPU и краткий виде flavor (cpu3c, cpu5c);
         # без computeType запрос отклоняется схемой (проверено 16.09)
         if flavor:
