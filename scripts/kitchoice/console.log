@@ -1,25 +1,31 @@
-[21.09 17:07:14] kc машина l6r1ymyzgric1q видеокарта 0.74 $/ч
-[21.09 17:07:36] kc адрес 69.145.85.94 11809
-[21.09 17:07:39] kc готова: GPU 0: NVIDIA GeForce RTX 4090 (UUID: GPU-a3f38659-fd5b-37e8
-[21.09 17:12:54] kc SETUP_OK | >>> w2_ak_bulut_vs_knu
-[21.09 17:14:28] kc SETUP_OK | >>> w2_ak_bulut_vs_knu
-[21.09 17:16:01] kc SETUP_OK | >>> w2_ak_bulut_vs_knu | 16/7199 снимков, осталось ~13 мин
-[21.09 17:17:34] kc SETUP_OK | >>> w2_ak_bulut_vs_knu | 1616/7199 снимков, осталось ~5 мин
-[21.09 17:19:07] kc SETUP_OK | >>> w2_ak_bulut_vs_knu | 3216/7199 снимков, осталось ~4 мин
-[21.09 17:20:40] kc SETUP_OK | >>> w2_ak_bulut_vs_knu | 4816/7199 снимков, осталось ~2 мин
-[21.09 17:22:13] kc SETUP_OK | >>> w2_ak_bulut_vs_knu | 6736/7199 снимков, осталось ~0 мин
-[21.09 17:23:47] kc готово: 1765 треков | >>> w2_baldariki_vs_avtoreys_1st_division | готово: 1765 треков
-[21.09 17:25:21] kc готово: 1765 треков | >>> w2_baldariki_vs_avtoreys_1st_division | 656/2846 снимков, осталось ~2 мин
-[21.09 17:26:54] kc готово: 1765 треков | >>> w2_baldariki_vs_avtoreys_1st_division | 2256/2846 снимков, осталось ~1 мин
-[21.09 17:28:27] kc готово: 694 треков | >>> w2_uch_tontoss_vs_yntymak | готово: 694 треков
-[21.09 17:30:00] kc готово: 694 треков | >>> w2_uch_tontoss_vs_yntymak | готово: 694 треков
-[21.09 17:31:33] kc готово: 694 треков | >>> w2_uch_tontoss_vs_yntymak | 976/4879 снимков, осталось ~4 мин
-[21.09 17:33:07] kc готово: 694 треков | >>> w2_uch_tontoss_vs_yntymak | 2576/4879 снимков, осталось ~2 мин
-[21.09 17:34:40] kc готово: 694 треков | >>> w2_uch_tontoss_vs_yntymak | 4176/4879 снимков, осталось ~1 мин
-[21.09 17:36:13] kc готово: 1157 треков | >>> w2_dostuk88vsdolon | готово: 1157 треков
-[21.09 17:37:47] kc готово: 1157 треков | >>> w2_dostuk88vsdolon | готово: 1157 треков
-[21.09 17:39:20] kc готово: 1157 треков | >>> w2_dostuk88vsdolon | готово: 1157 треков
-[21.09 17:40:53] kc готово: 1157 треков | >>> w2_dostuk88vsdolon | готово: 1157 треков
-[21.09 17:42:26] kc готово: 1157 треков | >>> w2_dostuk88vsdolon | готово: 1157 треков
-[21.09 17:43:59] kc ALL_DONE | >>> w2_dostuk88vsdolon | готово: 1104 треков | готово: 1157 треков
-[21.09 17:44:25] kc машина l6r1ymyzgric1q удалена (ok), 0.46 $ за 37 мин
+[01.10 14:46:44] kc машина nb52i9jr52sj71 видеокарта 0.74 $/ч
+[01.10 14:46:55] kc адрес 47.47.180.126 15708
+[01.10 14:46:58] kc готова: GPU 0: NVIDIA GeForce RTX 4090 (UUID: GPU-c7dff3d6-1967-6a1a
+[01.10 14:50:16] kc SETUP_OK | >>> w4_yntymak_90_vs_yntymak
+[01.10 14:51:49] kc SETUP_OK | >>> w4_yntymak_90_vs_yntymak | 656/6041 снимков, осталось ~5 мин
+[01.10 14:53:22] kc SETUP_OK | >>> w4_yntymak_90_vs_yntymak | 2256/6041 снимков, осталось ~4 мин
+[01.10 14:54:59] kc SETUP_OK | >>> w4_yntymak_90_vs_yntymak | 3856/6041 снимков, осталось ~2 мин
+Python(48422) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+[01.10 14:56:35] kc SETUP_OK | >>> w4_yntymak_90_vs_yntymak | 5776/6041 снимков, осталось ~0 мин
+Python(48842) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+[01.10 14:58:10] kc готово: 1629 треков | >>> w4_boo_terek_vs_knu | готово: 1629 треков
+Python(49230) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+[01.10 14:59:44] kc готово: 1629 треков | >>> w4_boo_terek_vs_knu | готово: 1629 треков
+Python(49578) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+[01.10 15:01:17] kc готово: 1629 треков | >>> w4_boo_terek_vs_knu | готово: 1629 треков
+Python(49919) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+[01.10 15:02:50] kc готово: 1629 треков | >>> w4_boo_terek_vs_knu | готово: 1629 треков
+Python(50302) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+[01.10 15:04:23] kc готово: 1629 треков | >>> w4_boo_terek_vs_knu | готово: 1629 треков
+Python(50672) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+[01.10 15:05:56] kc готово: 1629 треков | >>> w4_boo_terek_vs_knu | готово: 1629 треков
+Python(51086) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+[01.10 15:07:30] kc готово: 1629 треков | >>> w4_boo_terek_vs_knu | готово: 1629 треков
+Python(51434) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+[01.10 15:09:03] kc готово: 1629 треков | >>> w4_boo_terek_vs_knu | готово: 1629 треков
+Python(51781) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+[01.10 15:10:36] kc готово: 1194 треков | >>> w5_baykut_noutshop | готово: 1629 треков
+Python(52118) MallocStackLogging: can't turn off malloc stack logging because it was not enabled.
+[01.10 15:12:09] kc готово: 1194 треков | >>> w5_baykut_noutshop | 16/4302 снимков, осталось ~8 мин
+[01.10 15:27:54] kc всё забрано
+[01.10 15:27:55] kc машина nb52i9jr52sj71 удалена (ok), 0.53 $ за 43 мин

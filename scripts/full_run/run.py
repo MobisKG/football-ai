@@ -32,7 +32,8 @@ opt = lambda k, d=None: sys.argv[sys.argv.index(k) + 1] if k in sys.argv else d
 # на сервере состояние лежит вне кода (/data/results): /app примонтирован только на чтение
 RESULTS = os.environ.get("FB_RESULTS", os.path.join(ROOT, "results"))
 OUT = os.path.abspath(opt("--outdir", os.path.join(RESULTS, "run_" + time.strftime("%Y-%m-%d"))))
-PER_POD = int(opt("--per-pod", 4))   # 4 игры на машину: подготовка машины оплачивается реже; LIMIT = int(opt("--limit", 60)); STEP = int(opt("--gpu-step", 4))
+# 4 игры на машину: подготовка машины оплачивается реже
+PER_POD = int(opt("--per-pod", 4)); LIMIT = int(opt("--limit", 60)); STEP = int(opt("--gpu-step", 4))
 DAYS = int(opt("--days", 14))          # «новое» — за последние N дней; 0 — всё неразобранное
 DL_DISK = int(opt("--dl-disk", 40)); MAX_USD = float(opt("--max-usd", 30))
 ONLY = set(opt("--only", "").split(",")) - {""}

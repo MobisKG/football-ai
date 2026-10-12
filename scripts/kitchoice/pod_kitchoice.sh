@@ -12,4 +12,11 @@ while IFS=$'\t' read -r SLUG A B; do
   python kit_choice.py crops_$SLUG $SLUG.choice.json "$A" "$B" > $SLUG.choice.log 2>&1
   tail -1 $SLUG.choice.log; rm -f $SLUG.mp4
 done < games.tsv
+while read -r SLUG; do
+  [ -n "$SLUG" ] || continue
+  echo ">>> лист $SLUG"
+  python /root/b2.py get source/$SLUG.mp4 $SLUG.mp4 >/dev/null
+  python extract_crops2.py $SLUG.pos.json $SLUG.mp4 crops_$SLUG > $SLUG.crops.log 2>&1
+  python sheet.py crops_$SLUG $SLUG.sheet.jpg; rm -f $SLUG.mp4
+done < sheets.txt
 touch ALL_DONE
