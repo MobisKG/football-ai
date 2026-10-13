@@ -19,7 +19,7 @@ IMAGE_CPU = os.environ.get("FB_IMAGE_CPU", "runpod/base:0.6.3-cpu")
 # COMMUNITY — машины частных хозяев, RTX 4090 примерно вдвое дешевле SECURE; пропадают чуть чаще,
 # но прогон это переживает (замена машины). FB_CLOUD=SECURE вернёт дата-центры.
 CLOUD = os.environ.get("FB_CLOUD", "COMMUNITY")
-GPUS = ["NVIDIA GeForce RTX 4090", "NVIDIA GeForce RTX 3090", "NVIDIA RTX A6000", "NVIDIA A40", "NVIDIA RTX A5000", "NVIDIA L40S", "NVIDIA L40"]
+GPUS = ["NVIDIA GeForce RTX 4090", "NVIDIA GeForce RTX 3090", "NVIDIA RTX A6000", "NVIDIA A40", "NVIDIA RTX A5000"]
 # порядок — по цене за игру в COMMUNITY (10.2026): 4090 ~0,34 $/ч, 3090 ~0,22 $/ч, A5000 ~0,16 $/ч; модели нужно ≥ 24 ГБ
 # Процессорные машины RunPod: от дешёвых к дорогим. Если ни одна не создаётся,
 # качалка берёт самую дешёвую машину с видеокартой (см. Pod.create).
