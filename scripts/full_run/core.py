@@ -151,7 +151,11 @@ class Pod:
         if flavor:
             fl, _, vcpu = flavor.partition("-")
             b.update({"computeType": "CPU", "cpuFlavorIds": [fl], "vcpuCount": int(vcpu.split("-")[0]) if vcpu else 4})
-        else: b.update({"gpuTypeIds": gpus or GPUS, "gpuCount": 1})
+        else:
+            # образ собран на CUDA 12.4: на хостах Community со старым драйвером падает «CUDA unknown error»
+            # (13.10 — три машины из семи); просим только хосты с драйвером не ниже 12.4
+            b.update({"gpuTypeIds": gpus or GPUS, "gpuCount": 1,
+                      "allowedCudaVersions": ["12.4", "12.5", "12.6", "12.7", "12.8", "12.9"]})
         return b
 
     def create(self, tries=6):
