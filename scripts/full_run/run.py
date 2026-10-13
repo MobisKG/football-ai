@@ -219,6 +219,7 @@ def setup_worker(pod, group, dl):
     return got
 
 def stage_fanout(plan, dl):
+    ensure_relay_key()   # при запуске сразу с этапа fanout ключа ещё нет
     groups = assign(plan)
     log("раздача: %d машин по %d игр" % (len(groups), PER_POD))
     workers = []; errors = []
