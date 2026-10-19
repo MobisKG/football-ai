@@ -13,6 +13,8 @@ LIST=${1:?список видео json}
 PY=~/.cache/fb-ytdlp/venv/bin/python
 TMP=${TMPDIR:-/tmp}/fb_ingest; mkdir -p "$TMP"
 LOG=results/ingest.log
+# YT_COOKIES=файл cookies (если YouTube просит подтвердить, что не бот)
+COOK=(); [ -n "${YT_COOKIES:-}" ] && COOK=(--cookies "$YT_COOKIES")
 FMT='bv*[height<=1080][vcodec^=avc1]+ba[ext=m4a]/bv*[height<=1080]+ba/b[height<=1080]'
 log() { echo "[$(date '+%d.%m %H:%M:%S')] $*" | tee -a "$LOG"; }
 
@@ -35,7 +37,7 @@ while read -r SLUG YT DUR; do
   for try in 1 2 3; do
     [ $ok = 1 ] && break
     log "$SLUG: скачиваю ($YT, попытка $try)"
-    $PY -m yt_dlp -q --no-warnings --socket-timeout 30 --retries 10 -f "$FMT" --merge-output-format mp4 \
+    $PY -m yt_dlp -q --no-warnings --socket-timeout 30 --retries 10 -f "$FMT" --merge-output-format mp4 ${COOK[@]+"${COOK[@]}"} \
         -o "$F" "https://www.youtube.com/watch?v=$YT" </dev/null >>"$LOG" 2>&1
     D=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$F" 2>/dev/null)
     # целое видео: длительность не меньше 95 % заявленной каналом
