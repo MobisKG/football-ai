@@ -341,7 +341,8 @@ def main():
     plan = stage_plan()
     if DRY or STAGE == "plan": log("остановка после плана (--dry-run)"); return
     dl = None
-    if STAGE in ("all", "download"): st.set_stage("download"); dl = stage_download(plan)
+    # из B2 видео машины берут сами: качалка только ушла бы на YouTube и упёрлась в блокировки
+    if STAGE in ("all", "download") and SOURCE != "b2": st.set_stage("download"); dl = stage_download(plan)
     if STAGE == "download": return
     workers = []
     if STAGE in ("all", "fanout"):
