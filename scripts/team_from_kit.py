@@ -135,6 +135,9 @@ for tid in old:
         changed += 1
 
 pos["team_of"] = {str(k): v for k, v in new.items()}
+# названия кластеризации (или kit_colour_split.py) — до того, как их перезапишут слова формы:
+# раньше DOMINANT читал уже перезаписанные, и 22.10 белые ЭлКат вышли «чёрными»
+orig_names = {str(k): v for k, v in (pos.get("team_names") or {}).items()}
 NAMES = {"син": "синие", "сини": "синие", "голу": "голубые", "крас": "красные", "бел": "белые", "белы": "белые", "черн": "чёрные",
          "жёлт": "жёлтые", "желт": "жёлтые", "зелё": "зелёные", "зеле": "зелёные", "оран": "оранжевые", "фиол": "фиолетовые",
          "серы": "серые", "розо": "розовые", "бord": "бордовые", "борд": "бордовые"}
@@ -143,7 +146,7 @@ if MANUAL_NAMES:
     pos["team_names"] = {"0": MANUAL_NAMES[0], "1": MANUAL_NAMES[1]}
 if DOMINANT:
     # названия — по цвету футболок из кластеризации (analyze_match.py), и они должны различаться
-    tn = {str(k): v for k, v in (pos.get("team_names") or {}).items()}
+    tn = orig_names
     if tn.get("0") and tn.get("1") and tn["0"] != tn["1"]:
         pos["team_names"] = {"0": tn["0"], "1": tn["1"]}
     else:
