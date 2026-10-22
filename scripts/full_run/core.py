@@ -5,7 +5,7 @@
 на прогон, ожидания всегда с пределом времени и проверкой сети. Управлять
 прогоном может и ноутбук, и сервер: путей, привязанных к маку, здесь нет.
 """
-import json, os, subprocess, sys, threading, time, urllib.error, urllib.request
+import json, os, re, subprocess, sys, threading, time, urllib.error, urllib.request
 from datetime import datetime
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -154,8 +154,10 @@ class Pod:
         else:
             # образ на CUDA 12.1 (docker/pod.Dockerfile): хостам со старым драйвером он не подходит,
             # там «CUDA unknown error» (13.10 на образе 12.4 упали 5 машин из 7)
-            b.update({"gpuTypeIds": gpus or GPUS, "gpuCount": 1,
-                      "allowedCudaVersions": ["12.1", "12.2", "12.3", "12.4", "12.5", "12.6", "12.7", "12.8", "12.9"]})
+            # фильтр allowedCudaVersions не ставим: RunPod знает в нём версии только до 12.9 и
+            # отсекает новые хосты (22.10 в SECURE все A40/4090 стояли на CUDA 13.2, наш образ там
+            # работает). Старые драйверы отсеивает wait_ready по nvidia-smi.
+            b.update({"gpuTypeIds": gpus or GPUS, "gpuCount": 1})
         return b
 
     def create(self, tries=6):
@@ -195,8 +197,14 @@ class Pod:
             return False
         log(self.tag, "адрес", self.ip, self.port)
         for _ in range(ssh_tries):                      # ~4 минуты на ssh
-            rc, out = self.ssh("echo READY; nvidia-smi -L 2>/dev/null | head -1", timeout=40, raise_dead=False)
+            rc, out = self.ssh("echo READY; nvidia-smi -L 2>/dev/null | head -1; nvidia-smi 2>/dev/null | grep -o 'CUDA Version: [0-9.]*'",
+                               timeout=40, raise_dead=False)
             if rc == 0 and "READY" in out:
+                m = re.search(r"CUDA Version: (\d+)\.(\d+)", out)
+                if self.want_gpu and m and (int(m.group(1)), int(m.group(2))) < (12, 1):
+                    # образ на CUDA 12.1: на старом драйвере падает с «CUDA unknown error»
+                    log(self.tag, "драйвер с CUDA %s.%s старше 12.1, машина не подходит" % m.groups()); return False
+                out = re.sub(r"CUDA Version: [0-9.]*", "", out)
                 log(self.tag, "готова:", (out.replace("READY", "").strip() or "без видеокарты")[:60]); return True
             time.sleep(15)
         return False
