@@ -165,7 +165,10 @@ def stage_download(plan):
 # ---------------- 3. раздача и запуск ----------------
 def assign(plan):
     """Кому какие игры: длинные и короткие вперемешку, чтобы машины освободились примерно вместе."""
+    # разобранные раньше игры повторно не раздаются (иначе повтор fanout в режиме b2 гонит их заново)
+    plan = [v for v in plan if st.v(v["slug"]).get("status") != "done"]
     vids = [v for v in plan if st.v(v["slug"]).get("downloaded") == True] or plan
+    if not vids: return []
     vids = sorted(vids, key=lambda v: -v.get("duration_s", 0))
     n = max(1, math.ceil(len(vids) / PER_POD))
     groups = [[] for _ in range(n)]
