@@ -204,6 +204,13 @@ class Pod:
                 if self.want_gpu and m and (int(m.group(1)), int(m.group(2))) < (12, 1):
                     # образ на CUDA 12.1: на старом драйвере падает с «CUDA unknown error»
                     log(self.tag, "драйвер с CUDA %s.%s старше 12.1, машина не подходит" % m.groups()); return False
+                if self.want_gpu:
+                    # «CUDA unknown error» бывает и при свежем драйвере (27.10 так упали 4 машины из 14
+                    # на подготовке, и их игры остались без машины): пробуем видеокарту сразу
+                    rc2, o2 = self.ssh("python -c 'import torch;torch.zeros(1).cuda();print(\"CUDA_OK\")' 2>&1 | tail -1",
+                                       timeout=180, raise_dead=False)
+                    if "CUDA_OK" not in o2:
+                        log(self.tag, "видеокарта не отвечает (%s), машина не подходит" % o2.strip()[-80:]); return False
                 out = re.sub(r"CUDA Version: [0-9.]*", "", out)
                 log(self.tag, "готова:", (out.replace("READY", "").strip() or "без видеокарты")[:60]); return True
             time.sleep(15)
