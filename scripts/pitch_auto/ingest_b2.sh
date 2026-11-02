@@ -15,6 +15,8 @@ TMP=${TMPDIR:-/tmp}/fb_ingest; mkdir -p "$TMP"
 LOG=results/ingest.log
 # YT_COOKIES=файл cookies (если YouTube просит подтвердить, что не бот)
 COOK=(); [ -n "${YT_COOKIES:-}" ] && COOK=(--cookies "$YT_COOKIES")
+# с cookies YouTube отдаёт видео только после решения n-задачи на JS (без него — одни картинки)
+command -v node >/dev/null && COOK+=(--js-runtimes node)
 FMT='bv*[height<=1080][vcodec^=avc1]+ba[ext=m4a]/bv*[height<=1080]+ba/b[height<=1080]'
 log() { echo "[$(date '+%d.%m %H:%M:%S')] $*" | tee -a "$LOG"; }
 
