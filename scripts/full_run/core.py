@@ -69,7 +69,62 @@ class State:
         self.d["stage"] = name; self.save(); log("=== этап:", name)
 
 # ---------------- RunPod ----------------
+# 17.11 адрес rest.runpod.io пропал из DNS (NXDOMAIN), api.runpod.io/graphql работает.
+# Поэтому по умолчанию те же вызовы REST переводятся в GraphQL; FB_RUNPOD_API=rest вернёт старый путь.
+RUNPOD_API = os.environ.get("FB_RUNPOD_API", "graphql")
+
+def _gql(query, variables=None, timeout=60):
+    req = urllib.request.Request(
+        "https://api.runpod.io/graphql", data=json.dumps({"query": query, "variables": variables or {}}).encode(),
+        headers={"Authorization": "Bearer " + (RUNPOD_KEY or ""), "Content-Type": "application/json",
+                 "User-Agent": "curl/8.4.0"})
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            d = json.loads(r.read().decode())
+    except urllib.error.HTTPError as e:
+        return None, "HTTP %d %s" % (e.code, e.read().decode()[:300])
+    except Exception as e:
+        return None, str(e)[:300]
+    if d.get("errors"): return None, "; ".join(x.get("message", "") for x in d["errors"])[:300]
+    return d.get("data") or {}, None
+
+_POD_FIELDS = "id name desiredStatus costPerHr machine { gpuDisplayName } runtime { ports { ip isIpPublic privatePort publicPort } }"
+
+def _pod_rest_view(p):
+    """Ответ GraphQL в том виде, который ждёт код REST: publicIp и portMappings."""
+    out = {"id": p.get("id"), "name": p.get("name"), "desiredStatus": p.get("desiredStatus"),
+           "costPerHr": p.get("costPerHr"), "machine": {"gpuTypeId": (p.get("machine") or {}).get("gpuDisplayName")}}
+    for port in ((p.get("runtime") or {}).get("ports") or []):
+        if port.get("isIpPublic") and port.get("privatePort") == 22:
+            out["publicIp"] = port.get("ip"); out["portMappings"] = {"22": port.get("publicPort")}
+    return out
+
+def _rp_graphql(method, path, body=None, timeout=60):
+    pid = path[len("/pods/"):] if path.startswith("/pods/") else None
+    if method == "GET" and path == "/pods":
+        d, err = _gql("{ myself { pods { %s } } }" % _POD_FIELDS, timeout=timeout)
+        return {"error": err} if err else [_pod_rest_view(p) for p in (d.get("myself") or {}).get("pods") or []]
+    if method == "GET" and pid:
+        d, err = _gql("query($id: String!) { pod(input: {podId: $id}) { %s } }" % _POD_FIELDS, {"id": pid}, timeout)
+        return {"error": err} if err else _pod_rest_view(d.get("pod") or {})
+    if method == "DELETE" and pid:
+        d, err = _gql("mutation($id: String!) { podTerminate(input: {podId: $id}) }", {"id": pid}, timeout)
+        return {"error": err} if err else {}
+    if method == "POST" and path == "/pods":
+        if body.get("computeType") == "CPU":
+            return {"error": "процессорные машины через GraphQL не создаются"}   # качалка возьмёт видеокарту
+        inp = {"name": body["name"], "imageName": body["imageName"], "cloudType": body.get("cloudType", CLOUD),
+               "gpuCount": body.get("gpuCount", 1), "gpuTypeId": body["gpuTypeIds"][0],
+               "containerDiskInGb": body.get("containerDiskInGb", 20), "volumeInGb": body.get("volumeInGb", 0),
+               "ports": ",".join(body.get("ports") or ["22/tcp"]), "startSsh": True,
+               "env": [{"key": k, "value": v} for k, v in (body.get("env") or {}).items()]}
+        d, err = _gql("mutation($i: PodFindAndDeployOnDemandInput) { podFindAndDeployOnDemand(input: $i) { %s } }"
+                      % _POD_FIELDS, {"i": inp}, timeout)
+        return {"error": err} if err else _pod_rest_view(d.get("podFindAndDeployOnDemand") or {})
+    return {"error": "неизвестный вызов %s %s" % (method, path)}
+
 def rp(method, path, body=None, timeout=60):
+    if RUNPOD_API == "graphql": return _rp_graphql(method, path, body, timeout)
     req = urllib.request.Request(
         "https://rest.runpod.io/v1" + path,
         data=json.dumps(body).encode() if body is not None else None, method=method,
