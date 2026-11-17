@@ -67,7 +67,13 @@ def ensure_relay_key():
         log("ключ для передачи видео между машинами создан")
 
 def spent():
-    return st.d.get("spent_usd", 0.0)
+    """Потрачено вместе с работающими машинами. spent_usd растёт только при удалении машины,
+    поэтому без них предел не срабатывал: 17.11 при пределе 12 $ вышло 13,16 $, последний
+    заход на одной A100 шёл бы до конца при любом пределе."""
+    now = time.time()
+    running = sum(float(p.get("cost") or 0) * (now - p["t0"]) / 3600
+                  for p in st.d.get("pods", []) if not p.get("t1") and p.get("t0"))
+    return st.d.get("spent_usd", 0.0) + running
 
 def budget_left(msg=""):
     if spent() >= MAX_USD:
