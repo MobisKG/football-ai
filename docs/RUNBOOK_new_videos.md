@@ -148,6 +148,27 @@ ssh ... "docker exec -d -w /app football-runner sh -c 'python -m full_run.run --
 `sweep_pods()` делай только после вопроса пользователю: на счету бывают
 машины других задач.
 
+### Запуск с Mac mini (вместо сервера)
+
+Mac mini стоит в одной сети с ноутбуком: `ssh doni@daniiars-mac-mini.local`
+(Tailscale `100.88.214.98` бывает офлайн). Что там есть:
+- проект в `~/Documents/sport/football`, клон с GitHub;
+- ключи там же, где на ноутбуке:
+  - `~/Documents/sport/.env` — B2 на запись и логин сайта;
+  - `football/.env` — RunPod;
+  - `~/Documents/sport/b2read.env` — B2 только на чтение, для машин;
+- Python: `~/.cache/fb-ytdlp/venv/bin/python`;
+- SSH-доступ к серверу.
+
+```bash
+cd ~/Documents/sport/football && git pull
+cd scripts && ~/.cache/fb-ytdlp/venv/bin/python -m full_run.run --outdir ~/fb_runs/<D> \
+  --source b2 --b2-env ~/Documents/sport/b2read.env --per-pod 2 --max-usd N
+```
+
+Запускай под `caffeinate -dimsu` в `nohup` или `tmux`, чтобы прогон пережил
+закрытый SSH. В `--outdir` заранее положи `plan.json` и `rosters.json`.
+
 ## 5. После прогона
 
 - В `REPORT.md` смотри, какие игры загружены, а какие нет и почему.
